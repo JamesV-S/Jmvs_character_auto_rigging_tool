@@ -24,7 +24,7 @@ class QtSampler(QWidget):
         super(QtSampler,self).__init__(*args, **kwargs)
         self.setParent(mayaMainWindow)
         self.setWindowFlags(Qt.Window)
-        self.setWindowTitle("Jmvs Charcater Auto Rigger")
+        self.setWindowTitle("Jmvs Char Auto Rigger")
         self.initUI()
         
         # self.update_d
