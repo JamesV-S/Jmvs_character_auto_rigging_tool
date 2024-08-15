@@ -31,6 +31,10 @@ class QtSampler(QWidget):
         self.initUI()
         
         # self.update_d
+        self.update_dropdown() # add available modules to the ddbox on ui
+        self.module_created = 0
+        self.created_guides = []
+
 
         ''' A method to get the icon Directory!
         tool_file = __file__
@@ -56,7 +60,8 @@ class QtSampler(QWidget):
         parent_widget = self.ui.findChild(QtWidgets.QWidget, "tab_rig")
         if parent_widget:
             print("found parent widget")
-            self.blueprints_toolbtn = parent_widget.findChild(QtWidgets.QToolButton, "blueprints_menu_toolbtn")
+            self.blueprints_toolbtn = parent_widget.findChild(QtWidgets.QToolButton, 
+                                                              "blueprints_menu_toolbtn")
         else:
             print("couldn't find parent widget")
         # set the popup mode for blueprints_toolbtn
@@ -68,6 +73,9 @@ class QtSampler(QWidget):
             print(f"could not find blueprints_menu_toolbtn in the ui")
         
         self.ui.blueprints_menu_toolbtn.clicked.connect(self.blueprints_menu_func)
+        self.ui.image_lbl.setPixmap(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
+                                                 "interface","logo_cog.jpeg"))
+        
         
         # Tab 2 - SKINNING
 
@@ -98,7 +106,7 @@ class QtSampler(QWidget):
         self.ui = loader.load(file, parentWidget=self)
         file.close()
     #--------------------------------------------------------------------------     
-    
+
     def create_popup_menu(self):
         # Create a QMenu
         menu = QMenu(self)
@@ -130,6 +138,25 @@ class QtSampler(QWidget):
         # Define the functionality for Quad basic button here
         print("Quad basic button clicked")
 
+    def update_dropdown(self):
+        #  function updates the dropdown box named "module_picker_ddbox" in the user interface.
+        # get the module path: the list comprehension splits each filename at the dots, 
+        # removes the extension(last part after the dot) and rejoins the remaining parts.
+        # Generating a list of module names without their extensions. 
+        files = [".".join(f.split(".")[:-1]) for f in os.listdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), "systems", "modules"))]
+        try: files.remove("")
+        except ValueError: pass
+        print(files)
+        files.remove("__init__")
+        # Adds the list of modules names to the dopdown menu 
+        self.ui.module_picker_ddbox.addItems(files)
+        #try: files.remove("")
+        #except ValueError: pass
+        
+        # set default selected item in the dropdown. 
+        index = files.index("root_basic")
+        self.ui.module_picker_ddbox.setCurrentIndex(index)
+        
     def temp_hand_func(self):
         print("button hand!!!!!!!!!")
 def main():
