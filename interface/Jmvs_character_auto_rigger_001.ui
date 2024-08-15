@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>310</width>
+    <width>308</width>
     <height>556</height>
    </rect>
   </property>
@@ -47,9 +47,9 @@
      <property name="font">
       <font>
        <family>MS Shell Dlg 2</family>
-       <weight>75</weight>
+       <weight>50</weight>
        <italic>false</italic>
-       <bold>true</bold>
+       <bold>false</bold>
        <underline>false</underline>
        <strikeout>false</strikeout>
        <kerning>false</kerning>
@@ -76,8 +76,8 @@
            <widget class="QLabel" name="finger_lbl">
             <property name="font">
              <font>
-              <weight>50</weight>
-              <bold>false</bold>
+              <weight>75</weight>
+              <bold>true</bold>
              </font>
             </property>
             <property name="text">
@@ -85,17 +85,24 @@
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="QSpinBox" name="finger_number_ddbox">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-           </widget>
-          </item>
          </layout>
+        </item>
+        <item row="2" column="1">
+         <widget class="QSpinBox" name="finger_number_ddbox">
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QCheckBox" name="checkBox">
+          <property name="text">
+           <string>Locator Spawn</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
@@ -379,7 +386,7 @@
     <widget class="QWidget" name="gridLayoutWidget_11">
      <property name="geometry">
       <rect>
-       <x>60</x>
+       <x>70</x>
        <y>0</y>
        <width>171</width>
        <height>36</height>
@@ -544,11 +551,6 @@
             <item>
              <property name="text">
               <string>yzx</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>zxy</string>
              </property>
             </item>
            </widget>

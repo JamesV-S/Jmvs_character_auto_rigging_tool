@@ -35,6 +35,8 @@ if axis_orientation == "yzx":
     system_rot = system_rot_yzx
     print[f"yzx orientation"]
 
-number_of_finger = []
+# For the seperate modules i would like to have the option for them to spawn 
+# somewhere in space with a locator that loads in from selecting someting on my ui
+number_of_finger = [] # This the option to add as many pibed fingers you want
 side = "_l"
 available_rig_types = ["FK", "IK", "IKFK"]

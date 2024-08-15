@@ -55,6 +55,9 @@ class QtSampler(QWidget):
         '''
         #self.ui.hand_module_btn.clicked.connect(self.temp_hand_func)
         # Tab 1 - RIG
+        # if biped_finger is the chosen then enable the finger number ddbox
+        self.ui.finger_number_ddbox.setDisabled(True)
+        self.ui.finger_lbl.setDisabled(True)
         
         # Access the blueprints_toolbtn
         parent_widget = self.ui.findChild(QtWidgets.QWidget, "tab_rig")
@@ -106,6 +109,9 @@ class QtSampler(QWidget):
         self.ui = loader.load(file, parentWidget=self)
         file.close()
     #--------------------------------------------------------------------------     
+
+    # For the seperate modules i would like to have the option for them to spawn 
+    # somewhere in space with a locator that loads in from selecting checkbox on my ui
 
     def create_popup_menu(self):
         # Create a QMenu
@@ -159,6 +165,7 @@ class QtSampler(QWidget):
         
     def temp_hand_func(self):
         print("button hand!!!!!!!!!")
+        
 def main():
     ui = QtSampler()
     ui.show()
