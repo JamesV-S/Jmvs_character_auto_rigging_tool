@@ -43,4 +43,24 @@ def set_transformations(translation_dict, rotation_dict):
         cmds.setAttr(f"{obj}.rotate", *rotation_dict[obj])
         print(f"Set the trans & rot values for '{obj}' ")
 
-set_transformations(system_pos, system_rot)
+# set_transformations(system_pos, system_rot)
+
+def guide_curve_connector(first_jnt, second_jnt):
+    fst_point_loc = cmds.xform(first_jnt ,q=1, ws=1, rp=1)
+    scnd_point_loc =  cmds.xform(second_jnt ,q=1, ws=1, rp=1)
+    cmds.curve(d=1, p=[fst_point_loc, scnd_point_loc], n=f"guide_curve_{first_jnt}")
+    cluster_1 = cmds.cluster(f"guide_curve_{first_jnt}.cv[0]", n=f"cluster_curve_{first_jnt}_cv0")
+    cluster_2 = cmds.cluster(f"guide_curve_{first_jnt}.cv[1]", n=f"cluster_curve_{second_jnt}_cv0")
+    cmds.parent(cluster_1, first_jnt)
+    cmds.parent(cluster_2, second_jnt)
+    for x in range(type="cluster"):
+        cmds.hide(x+"Handle")
+    cmds.setAttr(f"guide_curve_{first_jnt}.tempalte", 1)
+    curve = f"guide_curve_{first_jnt}"
+
+    return curve
+
+def find_substring_in_life(string, substrings):
+    for substring in substrings:
+        if substring in string:
+            return substring
