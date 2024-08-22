@@ -49,7 +49,7 @@ available_rig_types = ["FK", "IK", "IKFK"] # Add ribbon in future!
 default_ctrl_shape = {
     "fk_wrist": "circle", 
     "ik_wrist": "cube"
-} # Have fk as circle, ik as cube & ribbon as octogan. 
+} # Have fk as circle, ik as cube & ribbon as octagon. 
 
 '''
 module files do not use defined functions because blueprint guides 

@@ -158,8 +158,11 @@ class QtSampler(QWidget):
                                      "systems", "modules"))
         module_path = importlib.import_module(module) # you are calling the import_module function from the importlib module
         importlib.reload(module_path)
-        offset = [self.ui.offset_Xaxes.value(), self.ui.offset_Yaxes.value(), 
-                  self.ui.offset_Zaxes.value()]
+        offset = [self.ui.offset_Xaxes_spinbx.valueChanged(), 
+                  self.ui.offset_Yaxes_spinbx.valueChanged(), 
+                  self.ui.offset_Zaxes_spinbx.valueChanged()
+                  ]
+        guides = [] # create_guides.py is needed! > in the systems folder!
     
     def temp_hand_func(self):
         print("button hand!!!!!!!!!")
