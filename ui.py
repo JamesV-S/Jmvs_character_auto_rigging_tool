@@ -35,24 +35,6 @@ class QtSampler(QWidget):
         self.module_created = 0
         self.created_guides = []
 
-
-        ''' A method to get the icon Directory!
-        tool_file = __file__
-        tool_file = tool_file.replace( '\\', '/')
-
-        if '_tool.py' in tool_file:
-            product = os.path.basename( tool_file ).split( '_tool.py' )[0]
-        else:
-            product = os.path.basename( tool_file ).split( '.py' )[0]
-
-        product_fullName = 'UltimateAdjustableCarRig'
-        tool_folder = os.path.dirname( tool_file ) + '/'
-        rig_folder = tool_folder + 'rigs/'
-        tool_fileName = os.path.basename( tool_file ).split( '.py' )[0]
-
-        abrev = 'UACR'
-        iconDir = tool_folder + 'icons/'
-        '''
         #self.ui.hand_module_btn.clicked.connect(self.temp_hand_func)
         # Tab 1 - RIG
         # if biped_finger is the chosen then enable the finger number ddbox
@@ -67,7 +49,8 @@ class QtSampler(QWidget):
                                                               "blueprints_menu_toolbtn")
         else:
             print("couldn't find parent widget")
-        # set the popup mode for blueprints_toolbtn
+        # set the popup mode for blueprints_toolbtn which is to addd whole 
+        # character presets. 
         if self.blueprints_toolbtn:
             print(f"Found blueprints_menu_toolbtn in the ui")
             self.blueprints_toolbtn.setPopupMode(QtWidgets.QToolButton.MenuButtonPopup)
@@ -78,6 +61,8 @@ class QtSampler(QWidget):
         self.ui.blueprints_menu_toolbtn.clicked.connect(self.blueprints_menu_func)
         self.ui.image_lbl.setPixmap(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
                                                  "interface","logo_cog.jpeg"))
+        
+        self.ui.add_mdl_btn.clicked.connect(self.add_module)
         
         
         # Tab 2 - SKINNING
@@ -149,10 +134,13 @@ class QtSampler(QWidget):
         # get the module path: the list comprehension splits each filename at the dots, 
         # removes the extension(last part after the dot) and rejoins the remaining parts.
         # Generating a list of module names without their extensions. 
-        files = [".".join(f.split(".")[:-1]) for f in os.listdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), "systems", "modules"))]
-        try: files.remove("")
-        except ValueError: pass
-        print(files)
+        files = [".".join(f.split(".")[:-1]) for f in os.listdir(os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "systems", "modules"))]
+        try: 
+            files.remove("")
+        except ValueError: 
+            pass
+        print(f"Update dropdown files: '{files}'")
         files.remove("__init__")
         # Adds the list of modules names to the dopdown menu 
         self.ui.module_picker_ddbox.addItems(files)
@@ -163,6 +151,16 @@ class QtSampler(QWidget):
         index = files.index("root_basic")
         self.ui.module_picker_ddbox.setCurrentIndex(index)
         
+    def add_module(self):
+        # function imports the selected module dynamically during runtim!
+        module = self.ui.module_picker_ddbox.currentText()
+        sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
+                                     "systems", "modules"))
+        module_path = importlib.import_module(module) # you are calling the import_module function from the importlib module
+        importlib.reload(module_path)
+        offset = [self.ui.offset_Xaxes.value(), self.ui.offset_Yaxes.value(), 
+                  self.ui.offset_Zaxes.value()]
+    
     def temp_hand_func(self):
         print("button hand!!!!!!!!!")
         
