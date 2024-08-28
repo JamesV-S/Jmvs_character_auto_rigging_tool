@@ -23,6 +23,7 @@ system_rot_yzx = {'hip': [-0.43670082003745525, 0.0, -176.43419733389047],
                    'ball': [89.99999999999993, 1.8636062586700292e-16, -180.0], 
                    'toe': [89.99999999999996, -1.2424041724466862e-17, -180.0]}
 
+''' Because how I'm writing it in the create_guides.py I won't need this:
 axis_orientation = "xyz"
 if axis_orientation == "xyz":
     system_pos = system_pos_xyz
@@ -32,6 +33,7 @@ if axis_orientation == "yzx":
     system_pos = system_pos_yzx
     system_rot = system_rot_yzx
     print[f"yzx orientation"]
+'''
 
 ik_joints = {
     "start_joint": "hip",
