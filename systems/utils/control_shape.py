@@ -3,7 +3,7 @@ import maya.cmds as cmds
 
 class controlShapeList():
     def __init__(self):
-        # predefined ist od controls
+        # predefined list of controls
         self.ctrl_shape_list = ["circle", "cube", "octagon", "locator"]
 
     def return_filtered_list(self, type, object):
