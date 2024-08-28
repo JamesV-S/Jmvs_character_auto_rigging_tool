@@ -1,5 +1,60 @@
 import maya.cmds as cmds 
 
+
+def add_float_attrib(ctrl, flt, val, limited):
+    MinVal = val[0]
+    MaxVal = val[1]
+    
+    for target in [ctrl]:
+        for attr in flt:
+            if not cmds.attributeQuery(attr, node=target, exists=True):
+                if limited:                            
+                    cmds.addAttr(target, longName=attr, at='double', dv=MinVal, 
+                                min= MinVal, max = MaxVal)
+                    cmds.setAttr(f"{target}.{attr}", e=1, k=1 )
+                else:
+                    cmds.addAttr(target, longName=attr, at='double', dv=0, 
+                                )
+                    cmds.setAttr(f"{target}.{attr}", e=1, k=1 )
+            else:
+                print(f"Attribute {attr} already exists on {target}")
+
+def add_locked_attrib(ctrl, en):
+    dividerNN = "------------" 
+    atrrType = "enum"
+    
+    for attr in en:
+        # Generate the long name for the attribute
+        ln = f"{attr.lower()}_dvdr"
+
+        #check if the attribute already exists
+        if not cmds.attributeQuery(ln, node=ctrl, exists=True):
+            try:
+                # add the attributes
+                cmds.addAttr(ctrl, longName=ln, niceName=dividerNN, 
+                            attributeType=atrrType, enumName=attr, k=True
+                            )
+                
+                cmds.setAttr(f"{ctrl}.{ln}", lock=True, keyable=False, 
+                            channelBox=True
+                            )
+                print(f"Added locked attr {attr} on {ctrl}")
+            except Exception as e:
+                print(f"Failed to add locked attr {attr} on {ctrl}: {e}")
+        else:
+            print(f"Attribute {attr} already exists on {ctrl}")
+
+def add_multile_enum_attribute(ctrl, enum_long_name, enum_name_options):
+    # ctrl = cmds.ls(sl=1, type="transform")
+    if not cmds.attributeQuery(enum_long_name, node=ctrl, exists=True):
+        try:
+            cmds.addAttr(longName=enum_long_name, at="enum", enumName=enum_name_options)
+            cmds.setAttr(f"{ctrl}.{enum_long_name}", e=1, k=1)
+        except Exception as e:
+            print(f"Failed to add multiple_choice enum attr {enum_long_name} on {ctrl}: {e}" )
+    else: 
+        print(f"Attribute {enum_long_name} a;ready exists on {ctrl}")
+
 def get_selection_trans_rots_dictionary():
     selection = cmds.ls(sl=1, type="transform")
     
@@ -64,3 +119,58 @@ def find_substring_in_life(string, substrings):
     for substring in substrings:
         if substring in string:
             return substring
+        
+def colour_custom_guide_shape(custom_crv):
+    
+    # Firstly, from the 'custom_crv' select all shapes in it & set their overrideEnabled!
+    shape_list = cmds.listRelatives(custom_crv, shapes=1)
+    for shape in shape_list:
+        cmds.setAttr(f"{shape}.overrideEnabled", 1)
+        
+    # Create lists for shapes with specific patterns in their names!
+    yellow_shape = [shape for shape in shape_list if custom_crv in shape]
+    for shape in yellow_shape:
+        cmds.setAttr(f"{shape}.overrideColor", 17)
+
+    red_shape = [shape for shape in shape_list if "X" in shape]
+    for shape in red_shape:
+        cmds.setAttr(f"{shape}.overrideColor", 13)
+
+    green_shape = [shape for shape in shape_list if "Y" in shape]
+    for shape in green_shape:
+        cmds.setAttr(f"{shape}.overrideColor", 14)
+
+    blue_shape = [shape for shape in shape_list if "Z" in shape]
+    for shape in blue_shape:
+        cmds.setAttr(f"{shape}.overrideColor", 6)
+
+# colour_custom_guide_shape("crv_custom_guide")
+
+def colour_COG_control(custom_crv):
+    
+    # Firstly, from the 'custom_crv' select all shapes in it & set their overrideEnabled!
+    shape_list = cmds.listRelatives(custom_crv, shapes=1)
+    for shape in shape_list:
+        cmds.setAttr(f"{shape}.overrideEnabled", 1)
+        cmds.setAttr(f"{shape}.overrideColor", 18)
+        
+    # Create lists for shapes with specific patterns in their names!
+    grey_shape = [shape for shape in shape_list if "kite" in shape]
+    for shape in grey_shape:
+        cmds.setAttr(f"{shape}.overrideColor", 3)
+# colour_COG_control("ctrl_COG")
+
+def colour_root_control(custom_crv):
+    
+    # Firstly, from the 'custom_crv' select all shapes in it & set their overrideEnabled!
+    shape_list = cmds.listRelatives(custom_crv, shapes=1)
+    for shape in shape_list:
+        cmds.setAttr(f"{shape}.overrideEnabled", 1)
+        cmds.setAttr(f"{shape}.overrideColor", 17)
+        
+    # Create lists for shapes with specific patterns in their names!
+    white_shape = [shape for shape in shape_list if "white" in shape]
+    for shape in white_shape:
+        cmds.setAttr(f"{shape}.overrideColor", 16)
+# colour_root_control("ctrl_root")
+
