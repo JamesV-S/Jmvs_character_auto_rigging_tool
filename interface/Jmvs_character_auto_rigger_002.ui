@@ -252,7 +252,10 @@
       </item>
      </layout>
     </widget>
-    <widget class="QGroupBox" name="groupBox_2">
+    <widget class="QGroupBox" name="base_skeleton_box">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>10</x>
