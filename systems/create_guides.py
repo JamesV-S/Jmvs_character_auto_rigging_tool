@@ -10,15 +10,47 @@ importlib.reload(control_shape)
 
 scale = 1
 
+class JMVS_TEST():
+    def __init__(self, accessed_module):
+        self.module = importlib.import_module(f"systems.modules.{accessed_module}")
+        # [if] statement for "self.create_guide" variable {if == "hand"}
+        # else:
+        print("If you are seeing this, its is coming from 'create_guides.Guides_class, innit def!'")
+        #self.create_guide = self.The_guides(accessed_module, offset, side, use_existing_attr, orientation)
+        self.collect_guides()
+    def collect_guides(self):
+        print("AND the fucntion within the class is being called: 'collect_guides'")
 
-class Guides():
+class Guides_class():
     def __init__(self, accessed_module, offset, side, to_connect_to, use_existing_attr, orientation):
         self.module = importlib.import_module(f"systems.modules.{accessed_module}")
         # [if] statement for "self.create_guide" variable {if == "hand"}
         # else:
-        self.create_guide = self.guides
+        print("If you are seeing this, its is coming from 'create_guides.Guides_class, innit def!'")
+        self.create_guide = self.The_guides(accessed_module, offset, side, use_existing_attr, orientation)
+    
     def collect_guides(self):
-        pass
+        return self.create_guide
+
+    def The_guides(self, accessed_module, offset, side, use_existing_attr, orientation):
+        guide_connector_list = []
+        self.system_to_connect = []
+        selection = cmds.ls(sl=1)
+        if selection:
+            if "master" in selection[0]:
+                cmds.warning("unable to attatch a new module to a master control, please SELECT a guide!")
+            elif "master" not in selection[0]:
+                guide = self.creation(accessed_module, offset, side, guide_connector_list, use_existing_attr, orientation)
+                master_guide = ["master_guide"]
+                guide_connector = connect_modules.attach(master_guide, selection)
+                guide_connector_list.append(guide_connector[1])
+                
+                # Calling ".prep_attach_jnts" is designed to prepare and organize 
+                # joint relationships in the context of creating blueprint guides.
+                self.system_to_connect = connect_modules.prep_attach_jnts(master_guide, selection, need_child=True)
+
+                guide.update({"system_to_connect": self.system_to_connect})
+                return guide
 
     def creation(self, accessed_module, offset, side, guide_connector_list, use_existing_attr, orientation):
         # 1) Setup & initialisation
@@ -229,3 +261,6 @@ class Guides():
             for attr_name, attr_details in guide_custom_attributes.items():
                 add_new_attr(attr_name, attr_details)
             add_proxy(system[:-1], skip_attr=[], proxy_item=system[-1], add_missing=False)
+
+
+Guides_class()
