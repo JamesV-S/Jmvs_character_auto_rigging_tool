@@ -18,6 +18,14 @@ import sys
 import subprocess
 import platform
 
+from systems import (
+    create_guides
+)
+
+from systems.utils import (
+    connect_modules, 
+    utils
+)
 
 mayaMainWindowPtr = omui.MQtUtil.mainWindow()
 mayaMainWindow = wrapInstance(int(mayaMainWindowPtr), QWidget)
@@ -34,13 +42,15 @@ class QtSampler(QWidget):
         self.update_dropdown() # add available modules to the ddbox on ui
         self.module_created = 0
         self.created_guides = []
+        self.systems_to_be_made = {}
 
         #self.ui.hand_module_btn.clicked.connect(self.temp_hand_func)
         # Tab 1 - RIG
         # if biped_finger is the chosen then enable the finger number ddbox
         self.ui.finger_number_ddbox.setDisabled(True)
         self.ui.finger_lbl.setDisabled(True)
-        
+        self.ui.base_skeleton_box.setDisabled(True)
+
         # Access the blueprints_toolbtn
         parent_widget = self.ui.findChild(QtWidgets.QWidget, "tab_rig")
         if parent_widget:
@@ -64,7 +74,6 @@ class QtSampler(QWidget):
         
         self.ui.add_mdl_btn.clicked.connect(self.add_module)
         
-        
         # Tab 2 - SKINNING
 
         # Tab 3 - CURVE HELPER
@@ -74,7 +83,7 @@ class QtSampler(QWidget):
     # functions, connected to above commands   
     def initUI(self):
         loader = QUiLoader()
-        UI_VERSION = "001"
+        UI_VERSION = "002"
         # Constructing the UI File Path
         UI_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
                                "interface", f"Jmvs_character_auto_rigger_{UI_VERSION}.ui")
@@ -158,11 +167,58 @@ class QtSampler(QWidget):
                                      "systems", "modules"))
         module_path = importlib.import_module(module) # you are calling the import_module function from the importlib module
         importlib.reload(module_path)
-        offset = [self.ui.offset_Xaxes_spinbx.valueChanged(), 
-                  self.ui.offset_Yaxes_spinbx.valueChanged(), 
-                  self.ui.offset_Zaxes_spinbx.valueChanged()
+        offset = [self.ui.offset_Xaxes_spinbx.value(), 
+                  self.ui.offset_Yaxes_spinbx.value(), 
+                  self.ui.offset_Zaxes_spinbx.value()
                   ]
-        guides = [] # create_guides.py is needed! > in the systems folder!
+        
+
+        create_guides.JMVS_TEST(module)
+
+        # create_guides.py is needed! > in the systems folder!
+        guides = create_guides.Guides_class(module, offset, module_path.side, to_connect_to=[], use_existing_attr=[], orientation=[])
+        guide = guides.collect_guides()
+        
+        # If guides are succesfully created, this extracts important elements like these:
+        if guide:
+            master_guide = guide["master_guide"]
+            guide_connector_list = guide["guide_connector_list"]
+            systems_to_connect = guide["systems_to_connect"]
+            guide_list = guide["ui_guide_list"]
+            
+            # you would have if statement if rev_locators in guide  make a vairable for it, otherwise rev_locators = [] 
+            
+            # Append the 'master_guide' to a list of created guides 
+            self.created_guides.append(master_guide)
+            # Enable the skeleton creation box
+            self.ui.base_skeleton_box.setDisabled(False)
+            
+            # create a temp dict to store details abt the module and its guides... 
+            temp_dictionary = {
+                "module": module, 
+                "master_guide": master_guide, 
+                "guide_list": guide_connector_list, 
+                "scale": module_path.guide_scale, 
+                "joints": [], 
+                "side": module_path.side, 
+                "guide_connectors": guide_connector_list, 
+                "systems_to_connect": systems_to_connect, 
+                
+            } # When it comes to joint creation I need to add ik/fk ctrl & 
+            # joint list as well as rev_lovcators
+            
+            # add the temp dict to systems to be made, to manage all systems that eed to be constructed. 
+            self.systems_to_be_made[master_guide] = temp_dictionary
+
+            # if statement id add_hand.isChecked() on the ui later on. 
+        
+        # Reset the offset spin boxes to 0 to prepare for the necxt module adition
+        self.ui.offset_Xaxes_spinbx.setValue(0)
+        self.ui.offset_Yaxes_spinbx.setValue(0)
+        self.ui.offset_Zaxes_spinbx.setValue(0)
+        
+        # clear the selection
+        cmds.select(cl=1)
     
     def temp_hand_func(self):
         print("button hand!!!!!!!!!")
