@@ -27,6 +27,11 @@ from systems.utils import (
     utils
 )
 
+# Reload Modules
+importlib.reload(create_guides)
+importlib.reload(connect_modules)
+importlib.reload(utils)
+
 mayaMainWindowPtr = omui.MQtUtil.mainWindow()
 mayaMainWindow = wrapInstance(int(mayaMainWindowPtr), QWidget)
 
@@ -167,18 +172,18 @@ class QtSampler(QWidget):
                                      "systems", "modules"))
         module_path = importlib.import_module(module) # you are calling the import_module function from the importlib module
         importlib.reload(module_path)
+        
+        print("module_path: ", module_path, "print from ui in add_module()" )
+        
         offset = [self.ui.offset_Xaxes_spinbx.value(), 
                   self.ui.offset_Yaxes_spinbx.value(), 
                   self.ui.offset_Zaxes_spinbx.value()
                   ]
-        
-
-        create_guides.JMVS_TEST(module)
-
+    
         # create_guides.py is needed! > in the systems folder!
         guides = create_guides.Guides_class(module, offset, module_path.side, to_connect_to=[], use_existing_attr=[], orientation=[])
         guide = guides.collect_guides()
-        
+        print(guide)
         # If guides are succesfully created, this extracts important elements like these:
         if guide:
             master_guide = guide["master_guide"]
