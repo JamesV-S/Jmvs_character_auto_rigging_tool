@@ -78,8 +78,12 @@ class QtSampler(QWidget):
                                                  "interface","logo_cog.jpeg"))
         
         self.ui.add_mdl_btn.clicked.connect(self.add_module)
+        self.ui.remove_mdl_btn.clicked.connect(self.remove_module)
+        self.ui.orientation_ddbox.currentIndexChanged.connect(self.orientation_func)
         
         # Tab 2 - SKINNING
+        self.ui.skinning_image_lbl.setPixmap(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
+                                                 "interface","skinning_symbol.png")) # 
 
         # Tab 3 - CURVE HELPER
 
@@ -142,6 +146,15 @@ class QtSampler(QWidget):
     def load_quad_basic_blueprint(self):
         # Define the functionality for Quad basic button here
         print("Quad basic button clicked")
+       
+    def orientation_func(self):
+        clicked_orientation = self.ui.orientation_ddbox.currentText()
+        if clicked_orientation == 'xyz':
+            self.orientation = "XYZ"
+        elif clicked_orientation == 'yzx':
+            self.orientation = "YZX"
+        print("ORIENTATION CLICKED IS: ",  self.orientation)
+        return self.orientation
 
     def update_dropdown(self):
         #  function updates the dropdown box named "module_picker_ddbox" in the user interface.
@@ -167,6 +180,7 @@ class QtSampler(QWidget):
         
     def add_module(self):
         # function imports the selected module dynamically during runtim!
+        self.ui.base_skeleton_box.setDisabled(False)
         module = self.ui.module_picker_ddbox.currentText()
         sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
                                      "systems", "modules"))
@@ -181,14 +195,14 @@ class QtSampler(QWidget):
                   ]
     
         # create_guides.py is needed! > in the systems folder!
-        guides = create_guides.Guides_class(module, offset, module_path.side, to_connect_to=[], use_existing_attr=[], orientation=[])
+        guides = create_guides.Guides_class(module, offset, module_path.side, to_connect_to=[], use_existing_attr=[], orientation=self.orientation_func())
         guide = guides.collect_guides()
         print(guide)
         # If guides are succesfully created, this extracts important elements like these:
         if guide:
             master_guide = guide["master_guide"]
             guide_connector_list = guide["guide_connector_list"]
-            systems_to_connect = guide["systems_to_connect"]
+            systems_to_connect = guide["system_to_connect"]
             guide_list = guide["ui_guide_list"]
             
             # you would have if statement if rev_locators in guide  make a vairable for it, otherwise rev_locators = [] 
@@ -225,6 +239,14 @@ class QtSampler(QWidget):
         # clear the selection
         cmds.select(cl=1)
     
+    def remove_module(self):
+        module = cmds.ls(sl=1)
+        for key in list(self.systems_to_be_made.values()):
+            if module[0] in key['master_guide']:
+                self.systems_to_be_made.pop(module[0])
+                self.created_guides.remove(module[0])
+                cmds.delete(module[0], key['guide_connectors'])
+
     def temp_hand_func(self):
         print("button hand!!!!!!!!!")
         
