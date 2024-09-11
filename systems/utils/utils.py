@@ -103,24 +103,36 @@ def set_transformations(translation_dict, rotation_dict):
 def guide_curve_connector(first_jnt, second_jnt):
     fst_point_loc = cmds.xform(first_jnt ,q=1, ws=1, rp=1)
     scnd_point_loc =  cmds.xform(second_jnt ,q=1, ws=1, rp=1)
-    cmds.curve(d=1, p=[fst_point_loc, scnd_point_loc], n=f"guide_curve_{first_jnt}")
-    cluster_1 = cmds.cluster(f"guide_curve_{first_jnt}.cv[0]", n=f"cluster_curve_{first_jnt}_cv0")
-    cluster_2 = cmds.cluster(f"guide_curve_{first_jnt}.cv[1]", n=f"cluster_curve_{second_jnt}_cv0")
+
+    curve_name = f"crv_{first_jnt}"
+    cmds.curve(d=1, p=[fst_point_loc, scnd_point_loc], n=curve_name)
+
+    cluster_1 = cmds.cluster(f"{curve_name}.cv[0]", n=f"cluster_crv_{first_jnt}_cv0")
+    cluster_2 = cmds.cluster(f" {curve_name}.cv[1]", n=f"cluster_crv_{second_jnt}_cv0")
+
     cmds.parent(cluster_1, first_jnt)
     cmds.parent(cluster_2, second_jnt)
-    for x in range(type="cluster"):
-        cmds.hide(x+"Handle")
-    cmds.setAttr(f"guide_curve_{first_jnt}.tempalte", 1)
-    curve = f"guide_curve_{first_jnt}"
-
-    return curve
+    print("Going to hid clusters & template the connector")
+    
+    # Hide the cluster hnadles: 
+    cluster_1_handle = f"{cluster_1[0]}Handle"
+    cluster_2_handle = f"{cluster_2[0]}Handle"
+    print(f"Hiding handle: {cluster_1}")
+    print(f"Hiding handle: {cluster_1}")
+    cmds.hide(cluster_1_handle)
+    cmds.hide(cluster_2_handle)
+    
+            
+    cmds.setAttr(f"{curve_name}.template", 1)
+    
+    return curve_name
 
 def find_substring_in_life(string, substrings):
     for substring in substrings:
         if substring in string:
             return substring
         
-def colour_custom_guide_shape(custom_crv):
+def colour_guide_custom_shape(custom_crv):
     
     # Firstly, from the 'custom_crv' select all shapes in it & set their overrideEnabled!
     shape_list = cmds.listRelatives(custom_crv, shapes=1)
@@ -144,7 +156,7 @@ def colour_custom_guide_shape(custom_crv):
     for shape in blue_shape:
         cmds.setAttr(f"{shape}.overrideColor", 6)
 
-# colour_custom_guide_shape("crv_custom_guide")
+# colour_custom_shape("crv_custom_guide")
 
 def colour_COG_control(custom_crv):
     
