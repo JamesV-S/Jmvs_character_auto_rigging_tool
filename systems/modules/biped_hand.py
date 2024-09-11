@@ -108,6 +108,7 @@ palm_system_rot_xyz =   {'palm_metacarpal_3': [5.9521613310303705, -31.083474503
 palm_system_pos_yzx =  {'palm_metacarpal_3': [77.80952453613284, 155.97293090820312, 21.030971527099616]}
 palm_system_rot_yzx =  {'palm_metacarpal_3': [-99.8735478280026, -121.61941489302606, -45.138588607126266]}
 
+'''
 axis_orientation = "xyz"
 if axis_orientation == "xyz":
     thumb_system_pos = thumb_system_pos_xyz
@@ -148,6 +149,6 @@ if axis_orientation == "yzx":
     palm_system_pos = palm_system_pos_yzx
     palm_system_rot = palm_system_rot_yzx
     print[f"yzx orientation"]
-
+'''
 side = "_l"
 available_rig_types = ["FK", "IK", "IKFK"]

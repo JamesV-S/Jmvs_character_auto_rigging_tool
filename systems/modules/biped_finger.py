@@ -23,19 +23,11 @@ system_rot_yzx = {'biped_phal_proximal': (50.95891725101831, -56.98582204849474,
 
 # You are able to change the number of fingers you want. But not the number of 
 # phalanges because it's a biped finger. 
-''' Because how I'm writing it in the create_guides.py I won't need this:
-axis_orientation = "xyz"
-if axis_orientation == "xyz":
-    system_pos = system_pos_xyz
-    system_rot = system_rot_xyz
-    print[f"xyz orientation"]
 
-if axis_orientation == "yzx":
-    system_pos = system_pos_yzx
-    system_rot = system_rot_yzx
-    print[f"yzx orientation"]
-'''
+has_orientation = "yes"
+
 # For the seperate modules i would like to have the option for them to spawn 
+
 # somewhere in space with a locator that loads in from selecting checkbox on my ui
 number_of_fingers = [] # This the option to add as many pibed fingers you want
 side = "_l"

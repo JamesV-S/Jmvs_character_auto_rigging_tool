@@ -19,24 +19,7 @@ system_rot_yzx = {'clavicle': [-101.01687892466632, -54.72478122395495, 5.507410
                    'elbow': [-98.6018889461081, -123.26924247955515, -41.749524068095575], 
                    'wrist': [-102.45027734434979, -122.01516904948454, -41.245246906475195]}
 
-''' Because how I'm writing it in the create_guides.py I won't need this:
-axis_orientation = "xyz"
-if axis_orientation == "xyz":
-    system_pos = system_pos_xyz
-    system_rot = system_rot_xyz
-    print[f"xyz orientation"]
-if axis_orientation == "yzx":
-    system_pos = system_pos_yzx
-    system_rot = system_rot_yzx
-    print[f"yzx orientation"]
-
-ik_joints = {
-    "start_joint": "shoulder",
-    "end_joint": "wrist",
-    "pv_joint": "elbow",
-    "world_orientation": False
-}
-'''
+has_orientation = "yes"
 
 twist_joint= {
     "start": "shoulder",
