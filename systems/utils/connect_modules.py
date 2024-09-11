@@ -7,6 +7,8 @@ modules_to_connect = {}
 jnts_to_parent = []
 
 def attach(master_guide, selection):
+    print(f"{master_guide} << master guide arg")
+    print(f"{selection} << master selection")
     guide_connector_list = utils.guide_curve_connector(master_guide, selection[0])
 
     if "grp_guideConnector_clusters" in cmds.ls("grp_guideConnector_clusters"):
