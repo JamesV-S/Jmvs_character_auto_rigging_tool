@@ -10,76 +10,84 @@ importlib.reload(control_shape)
 
 scale = 1
 
-class JMVS_TEST():
-    def __init__(self, accessed_module):
-        self.module = importlib.import_module(f"systems.modules.{accessed_module}")
-        # [if] statement for "self.create_guide" variable {if == "hand"}
-        # else:
-        print("If you are seeing this, its is coming from 'create_guides.Guides_class, innit def!'")
-        #self.create_guide = self.The_guides(accessed_module, offset, side, use_existing_attr, orientation)
-        self.collect_guides()
-    def collect_guides(self):
-        print("AND the fucntion within the class is being called: 'collect_guides'")
 
 class Guides_class():
     def __init__(self, accessed_module, offset, side, to_connect_to, use_existing_attr, orientation):
         self.module = importlib.import_module(f"systems.modules.{accessed_module}")
+        # Reload the module for any updates!
+        importlib.reload(self.module)
+
         # [if] statement for "self.create_guide" variable {if == "hand"}
         # else:
         print("If you are seeing this, its is coming from 'create_guides.Guides_class, innit def!'")
         self.create_guide = self.The_guides(accessed_module, offset, side, use_existing_attr, orientation)
     
     def collect_guides(self):
+        print("This print is from 'collect_guides() in class'")
         return self.create_guide
 
     def The_guides(self, accessed_module, offset, side, use_existing_attr, orientation):
+        print("This print is from 'The_guides() in class'")
         guide_connector_list = []
         self.system_to_connect = []
         selection = cmds.ls(sl=1)
-        if selection:
-            if "master" in selection[0]:
-                cmds.warning("unable to attatch a new module to a master control, please SELECT a guide!")
-            elif "master" not in selection[0]:
-                guide = self.creation(accessed_module, offset, side, guide_connector_list, use_existing_attr, orientation)
-                master_guide = ["master_guide"]
-                guide_connector = connect_modules.attach(master_guide, selection)
-                guide_connector_list.append(guide_connector[1])
-                
-                # Calling ".prep_attach_jnts" is designed to prepare and organize 
-                # joint relationships in the context of creating blueprint guides.
-                self.system_to_connect = connect_modules.prep_attach_jnts(master_guide, selection, need_child=True)
+          
+        if not "root_basic" in accessed_module:
+            if selection:
+                if "master" in selection[0]:
+                    cmds.warning("unable to attatch a new module to a master control, please SELECT a guide!")
+                elif "master" not in selection[0]:
+                    guide = self.creation(accessed_module, offset, side, guide_connector_list, use_existing_attr, orientation)
+                    master_guide = guide["master_guide"]
+                    guide_connector = connect_modules.attach(master_guide, selection)
+                    guide_connector_list.append(guide_connector[1])
+                    
+                    # Calling ".prep_attach_jnts" is designed to prepare and organize 
+                    # joint relationships in the context of creating blueprint guides.
+                    self.system_to_connect = connect_modules.prep_attach_jnts(master_guide, selection, need_child=True)
 
-                guide.update({"system_to_connect": self.system_to_connect})
-                return guide
-
+                    guide.update({"system_to_connect": self.system_to_connect})
+                    return guide
+           
+        else:
+            print(">> Recognised this module is root_basic!")
+            guide = self.creation(accessed_module, offset, side, guide_connector_list, use_existing_attr, orientation)
+            guide.update({"system_to_connect": []})
+            return guide
+        
     def creation(self, accessed_module, offset, side, guide_connector_list, use_existing_attr, orientation):
         # 1) Setup & initialisation
         # > Defining file paths & configurations > importing guide shape
         GUIDE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
                                 "imports","guide_shape.abc")
         ROOT_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
-                                 "imports", "ctrl_root_import.abc")
+                                 "imports", "ctrl_root_octagon_import.abc")
+       # print("down here")
+        #imported = cmds.file(ROOT_FILE, i=1, rnn=1)
+
         guide_list = []
         root_exists = False
-
+        guide_pref = "guide"
         # 2) Determine Side
-        if self.module_side == "None":
+        if self.module.side == "None":
             side = ""
         else:
-            side = self.module_side
+            side = self.module.side
 
-        
         # 3) Determine Orientation > I need to do this differently for the hands too!
-        if orientation == "xyz":
+        if self.module.orientation == "None": # root_basic & spine_basic
+            pos_dict = self.module.system_pos
+            rot_dict = self.module.system_rot
+        elif self.module.orientation == "xyz":
             pos_dict = self.module.system_pos_xyz
             rot_dict = self.module.system_rot_xyz
-        elif orientation == "yzx":
+        elif self.module.orientation == "yzx":
             pos_dict = self.module.system_pos_yzx
             rot_dict = self.module.system_rot_yzx
-        else:
-            raise ValueError("Invalid orientation specified")
-        
-        # 4) Create master guide for module
+        #else:
+         #   raise ValueError("Invalid orientation specified")
+
+        # 4) Create master guide for module by looking in each module's variable's
         if "root" in self.module.system:
             master_guide = "root"
         # set the master guides for the fingers on "biped_finger" module 
@@ -100,40 +108,50 @@ class Guides_class():
             master_guide = control_shape.controlTypes().create_cube(
                 f"master_{accessed_module}{side}_#", scale=[5, 5, 5])
         
-        # Position the new master guide with the given offset
-        pos = pos_dict[self.module.system[0]]
-        rot = rot_dict[self.module.system[0]]
-        cmds.xform(master_guide, ws=1, t=[pos[0]+offset[0], pos[1]+offset[1], 
-                                          pos[2]+offset[2]])
-        cmds.xform(master_guide, ws=1, ro=[rot[0], rot[1], rot[2]])
+            # Position the new master guide with the given offset
+            pos = pos_dict[self.module.system[0]]
+            rot = rot_dict[self.module.system[0]]
+            cmds.xform(master_guide, ws=1, t=[pos[0]+offset[0], pos[1]+offset[1], 
+                                            pos[2]+offset[2]])
+            cmds.xform(master_guide, ws=1, ro=[rot[0], rot[1], rot[2]])
         
         # 5) Guide creation loop
         for x in self.module.system:
-            try: 
-                if "root" in x: 
-                    imported = ROOT_FILE # was: cmds.circle(r=50, nr=[0, 1, 0])
-                    root_exists = True
-                    guide = cmds.rename(imported, f"{x}{side}")
-                else:
-                    imported = cmds.file(GUIDE_FILE, i=1, namespace="test", rnn=1)
-                    cmds.scale(self.module.guide_scale, self.module.guide_scale, 
-                               self.module.guide_scale, imported)
-                    guide = cmds.rename(imported[0], f"{x}{side}")
-                if "root" in x and root_exists is True:
-                    master_guide = guide
-                elif "biped_phal_proximal" in self.module.system:
-                    master_guide = guide
-                else:
-                    guide_list.append(guide)
-                for shape in imported[1:]:
-                    shape = shape.split("|")[-1]
-                    cmds.rename(shape, f"{guide}_shape_#")
-
+          #  try: 
+            if "root" in x:
+                imported = cmds.file(ROOT_FILE, i=1, rnn=1)
+                cmds.scale(self.module.guide_scale, self.module.guide_scale, 
+                            self.module.guide_scale, imported)
+                print(">>>>>>>>root print in creation()")
+                root_exists = True
+                
+                guide = cmds.rename(imported[0], f"{guide_pref}_root")
+                print(f"root guide: {guide}")
+                utils.colour_root_control(guide)
+            else:
+                imported = cmds.file(GUIDE_FILE, i=1, namespace="test_guide_shape_import", rnn=1)
+                cmds.scale(self.module.guide_scale+1, self.module.guide_scale+1, 
+                            self.module.guide_scale+1, imported)
+                guide = cmds.rename(imported[0], f"{guide_pref}_{x}{side}")
                 # Set the colour of the guide shape!
-                utils.colour_custom_guide_shape(GUIDE_FILE)
-            except RuntimeError:
-                print("Couldn't load guide shape file, using basic shapes instead")
-                cmds.spaceLocator(n=x)
+                utils.colour_guide_custom_shape(guide)
+            
+            if "root" in x and root_exists is True:
+                master_guide = guide
+            elif "biped_phal_proximal" in self.module.system:
+                master_guide = guide
+            else:
+                print("print else <<<<<")
+                guide_list.append(guide)
+            
+            '''
+            for shape in imported[1:]:
+                shape = shape.split("|")[-1]
+                cmds.rename(shape, f"{guide}_shape_#")
+            '''    
+            #except RuntimeError:
+             #   print("Couldn't load guide shape file, using basic shapes instead")
+              #  cmds.spaceLocator(n=x)
 
             # Use the selected dict'sto set location and rotation
             pos = pos_dict[x]
@@ -151,19 +169,22 @@ class Guides_class():
         guide_list.reverse()
         ui_guide_list = guide_list
         guide_list.append(master_guide)
+        print("1: ", guide_list)
+        print("2: ", len(guide_list))
         for i in range(len(guide_list)):
             try:
                 cmds.parent(guide_list[i], guide_list[i+1])
                 guide_connector = utils.guide_curve_connector(guide_list[i], guide_list[i+1])
                 guide_connector_list.append(guide_connector)
             except:
-                pass # This is the end of the list!
+                print("This is the end of the list of shapes to create a connector between!")
+                pass # This is the end of the list of shapes to create a connector between!
         
         # Guide connectors are grouped under this grp: 
         if "grp_guideConnector_clusters" in cmds.ls("grp_guideConnector_clusters"):
             cmds.parent(guide_connector_list, "grp_guideConnector_clusters")
         else: 
-            cmds.group(guide_connector_list, n="guide_connector_list", w=1)
+            cmds.group(guide_connector_list, n="grp_guideConnector_clusters", w=1)
         
         # 7) Add attributes
         
@@ -171,10 +192,10 @@ class Guides_class():
         # self.module.available_rig_types is the variable found within each module, arm, leg & so on. 
         # In this case it's getting the '["IK", "FK", "IKFK"]' varible for the custom attribiutes!
         
-        custom_attribute = self.add_custom_attr()
+        custom_attribute = self.add_custom_attr(guide_list, master_guide, use_existing_attr, accessed_module)
         # Add ones to the master guide & then proxy to the other guide shapes
         # such as:
-        '''If these attributes are simply locked enum attributes I'll use my utils functions'''
+        # If these attributes are simply locked enum attributes I'll use my utils functions
         cmds.addAttr(master_guide, ln="is_master", at="enum", en="True", k=0)
         cmds.addAttr(master_guide, ln="base_module", at="enum", en=accessed_module, k=0) # mdl_attr
         cmds.addAttr(master_guide, ln="module_side", at="enum", en=side, k=0)
@@ -208,7 +229,7 @@ class Guides_class():
                    "ui_guide_list": ui_guide_list
                    }
         return ui_dict
-    
+        
     def add_custom_attr(self, system, master_guide, use_existing_attr, accessed_module):
         guide_custom_attributes = {"module_dvdr":["enum", "------------", "MODULE", True],
                             "module_type":["enum", "Base_Module", accessed_module, True],
@@ -223,6 +244,9 @@ class Guides_class():
         
         # iterates through ^guide_custom_attributes^ & adds attributes to master_guide based on their type.
         def add_new_attr(attr_name, attr_details):
+            
+            print(f"Attrib details mate: >>//// {attr_details[2]}")
+
             if attr_details[0] == "enum": # for the enum attributes
                 cmds.addAttr(master_guide, k=1, ln=f"{system[-1]}_{attr_name}", nn=attr_details[1], at="enum", en=attr_details[2])
             elif attr_details[0] == "float": # for the float attributes
@@ -232,7 +256,8 @@ class Guides_class():
                 else:
                     cmds.addAttr(master_guide, k=1, ln=f"{system[-1]}_{attr_name}", 
                                  nn=attr_details[1], at="float", min=0)
-            if attr_details[3] is True: # if attribute marked as locked, it locks the attribute
+            if attr_details[2] == True: # if attribute marked as locked, it locks the attribute
+                print("JMVS")
                 cmds.setAttr(f"{master_guide}.{system[-1]}_{attr_name}", l=1)
         
         # Manage the adition of proxy attributes based on existing attribute's.
@@ -262,5 +287,3 @@ class Guides_class():
                 add_new_attr(attr_name, attr_details)
             add_proxy(system[:-1], skip_attr=[], proxy_item=system[-1], add_missing=False)
 
-
-Guides_class()
