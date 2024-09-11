@@ -7,6 +7,9 @@ class controlShapeList():
         self.ctrl_shape_list = ["circle", "cube", "octagon", "locator"]
 
     def return_filtered_list(self, type, object):
+        
+        print("CALLING 'return_filtered_list(type, object)'")
+        
         # arg 'type' is string reping the type of control shape 
         # arg 'object' is string reping name of obj whose attrribs r to be queried
         
@@ -27,22 +30,22 @@ class controlShapeList():
                     if default_ctrl_shape in self.ctrl_shape_list:
                         self.ctrl_shape_list.remove(default_ctrl_shape)
                         self.ctrl_shape_list.insert(0, default_ctrl_shape)
-            except AttributeError:
-                print("In Utils fldr > control_shape.py > return_filtered_list():")
-                print("AttributeError: module_path.default_ctrl_shape dict exists")
+            except AttributeError: 
+                print("catches if module doesnt have default_ctrl_shape dict")
+                pass
         except KeyError:
-            print("In Utils fldr > control_shape.py > return_filtered_list():")
-            print("KeyError: guide isn't in the default_ctrl_shape list")
+            print("catches the guide isn't in the default_ctrl_shape dict ")
+            pass
 
     def return_list(self):
-        return 
+        return self.ctrl_shape_list
     
 
 class controlTypes():
     def __init__(self, name, ctrl_type):
         self.ctrl_name = name
-        module = f"self.create_{ctrl_type}()"
-        eval(module)
+        #module = f"self.create_{ctrl_type}()"
+        #eval(module)
 
     def create_circle(self):
         self.ctrl_crv = cmds.curve(n=self.ctrl_name, r=1, nr=(1, 0, 0))[0]
@@ -61,7 +64,7 @@ class controlTypes():
         return self.ctrl_crv
     
     def create_octagon(self):
-        self.ctrl_crv = cmds.curve(n="octagon_test", d=1, 
+        self.ctrl_crv = cmds.curve(n=self.ctrl_name, d=1, 
                                 p=[(0.287207, 0, 0.676617),
                                     (0.677828, 0, 0.275354),
                                     (0.677828, 0, -0.287207),

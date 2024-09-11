@@ -121,10 +121,10 @@ def guide_curve_connector(first_jnt, second_jnt):
     print(f"Hiding handle: {cluster_1}")
     cmds.hide(cluster_1_handle)
     cmds.hide(cluster_2_handle)
-    
             
     cmds.setAttr(f"{curve_name}.template", 1)
-    
+    cmds.select(cl=1)
+
     return curve_name
 
 def find_substring_in_life(string, substrings):
