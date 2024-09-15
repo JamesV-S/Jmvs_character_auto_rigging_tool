@@ -103,9 +103,9 @@
         <item row="2" column="0">
          <layout class="QHBoxLayout" name="horizontalLayout_6">
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_8">
+           <layout class="QHBoxLayout" name="neck_jnts_horiz_Layout">
             <item>
-             <widget class="QPushButton" name="move_master_wld_btn">
+             <widget class="QLabel" name="label_8">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -113,38 +113,21 @@
                </font>
               </property>
               <property name="text">
-               <string>Move Master Wld</string>
+               <string>Neck Jnts</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="spinBox">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
               </property>
              </widget>
             </item>
            </layout>
-          </item>
-         </layout>
-        </item>
-        <item row="1" column="1">
-         <layout class="QHBoxLayout" name="neck_jnts_horiz_Layout">
-          <item>
-           <widget class="QLabel" name="label_8">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Neck Jnts</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSpinBox" name="spinBox">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-           </widget>
           </item>
          </layout>
         </item>

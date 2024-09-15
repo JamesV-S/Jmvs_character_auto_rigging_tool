@@ -35,9 +35,18 @@ importlib.reload(utils)
 mayaMainWindowPtr = omui.MQtUtil.mainWindow()
 mayaMainWindow = wrapInstance(int(mayaMainWindowPtr), QWidget)
 
+def delete_existing_ui(ui_name):
+    # Delete existing UI if it exists
+    if cmds.window(ui_name, exists=True):
+        cmds.deleteUI(ui_name, window=True)
+
 class QtSampler(QWidget):
     def __init__(self, *args, **kwargs):
         super(QtSampler,self).__init__(*args, **kwargs)
+        # Ensure any existing UI is removed
+        delete_existing_ui("JmvsCharAutoRiggerUI")
+        # Set a unique object name
+        self.setObjectName("JmvsCharAutoRiggerUI")
         self.setParent(mayaMainWindow)
         self.setWindowFlags(Qt.Window)
         self.setWindowTitle("Jmvs Char Auto Rigger")
@@ -54,8 +63,7 @@ class QtSampler(QWidget):
         # if biped_finger is the chosen then enable the finger number ddbox
         self.ui.finger_number_ddbox.setDisabled(True)
         self.ui.finger_lbl.setDisabled(True)
-        self.ui.base_skeleton_box.setDisabled(True)
-
+        
         # Access the blueprints_toolbtn
         parent_widget = self.ui.findChild(QtWidgets.QWidget, "tab_rig")
         if parent_widget:
@@ -80,6 +88,7 @@ class QtSampler(QWidget):
         self.ui.add_mdl_btn.clicked.connect(self.add_module)
         self.ui.remove_mdl_btn.clicked.connect(self.remove_module)
         self.ui.orientation_ddbox.currentIndexChanged.connect(self.orientation_func)
+        self.ui.build_skeleton_btn.clicked.connect(self.create_joints)
         
         # Tab 2 - SKINNING
         self.ui.skinning_image_lbl.setPixmap(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
@@ -180,7 +189,7 @@ class QtSampler(QWidget):
         
     def add_module(self):
         # function imports the selected module dynamically during runtim!
-        self.ui.base_skeleton_box.setDisabled(False)
+        
         module = self.ui.module_picker_ddbox.currentText()
         sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
                                      "systems", "modules"))
@@ -209,8 +218,6 @@ class QtSampler(QWidget):
             
             # Append the 'master_guide' to a list of created guides 
             self.created_guides.append(master_guide)
-            # Enable the skeleton creation box
-            self.ui.base_skeleton_box.setDisabled(False)
             
             # create a temp dict to store details abt the module and its guides... 
             temp_dictionary = {
@@ -249,7 +256,13 @@ class QtSampler(QWidget):
 
     def temp_hand_func(self):
         print("button hand!!!!!!!!!")
-        
+    
+
+    def create_joints(self):
+        # initialise in the outut the guide list
+        print(f"Here is the list of created guides in the scene: {self.created_guides}")
+        print("LILIROSE IS HOT")
+
 def main():
     ui = QtSampler()
     ui.show()

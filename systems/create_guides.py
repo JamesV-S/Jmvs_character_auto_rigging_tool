@@ -218,10 +218,10 @@ class Guides_class():
         cmds.addAttr(master_guide, ln="base_module", at="enum", en=accessed_module, k=0) # mdl_attr
         cmds.addAttr(master_guide, ln="module_side", at="enum", en=side, k=0)
         cmds.addAttr(master_guide, ln="master_guide", at="enum", en=master_guide, k=0)
-        cmds.addAttr(master_guide, ln="orientation", at="enum", en=orientation, k=0)
+        cmds.addAttr(master_guide, ln="module_orientation", at="enum", en=orientation, k=0)
         
         # Adding the proxy 
-        for item in ["is_master", "base_module", "module_side", "master_guide", "orientation"]:
+        for item in ["is_master", "base_module", "module_side", "master_guide", "module_orientation"]:
             cmds.addAttr(guide_list[:-1],ln=f"{item}", proxy=f"{guide_list[-1]}.{item}")
             for guide in guide_list[:-1]:
                 cmds.setAttr(f"{guide}.{item}",k=0)
@@ -229,6 +229,7 @@ class Guides_class():
         # 8) control shape attributes
         # for each guide it adds attributes for control shapes, associated with ik & fk systems. 
         for guide in ui_guide_list:
+            # Ignore the these:
             if "root" in guide or "COG" in guide or "master" in guide: pass
             else:
                 for ikfk in ["FK", "IK"]:
@@ -241,7 +242,7 @@ class Guides_class():
                     print("CONTROL SHAPE LIST >>>>>>>>>>>>>>>> ", type(control_shape_list))
                     
                     control_shape_en = ":".join(control_shape_list)
-                    cmds.addAttr(guide, ln=f"{guide}_{ikfk}_control_shape", 
+                    cmds.addAttr(guide, ln=f"{guide[6:]}_{ikfk}_control", 
                                  at="enum", en=control_shape_en, k=1)
         
         # 9) Return UI data
