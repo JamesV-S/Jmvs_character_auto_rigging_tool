@@ -38,7 +38,8 @@ def attach_jnts(system_to_be_made, system):
     # this list below contains the vals 
     to_parent = [key["systems_to_connect"] for key in system_to_be_made.values() if key["systems_to_connect"]]
     for x in to_parent:
-        cmds.parent(f"jnt_{system}_{x[0]}", f"jnt_{system}_{x[1]}")
+        cmds.parent(f"jnt_{system}_{x[0][6:]}", f"jnt_{system}_{x[1][6:]}")
+        
 
 def connect_to_ikfk_switch(p_object, constraint): 
     # Concerning the ik reverse of ikfk switch
