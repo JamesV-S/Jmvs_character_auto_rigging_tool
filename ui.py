@@ -19,18 +19,22 @@ import subprocess
 import platform
 
 from systems import (
-    create_guides
+    create_guides,
+    joints
 )
 
 from systems.utils import (
     connect_modules, 
-    utils
+    utils, 
+    mirror_rig
 )
 
 # Reload Modules
 importlib.reload(create_guides)
+importlib.reload(joints)
 importlib.reload(connect_modules)
 importlib.reload(utils)
+importlib.reload(mirror_rig)
 
 mayaMainWindowPtr = omui.MQtUtil.mainWindow()
 mayaMainWindow = wrapInstance(int(mayaMainWindowPtr), QWidget)
@@ -228,7 +232,11 @@ class QtSampler(QWidget):
                 "joints": [], 
                 "side": module_path.side, 
                 "guide_connectors": guide_connector_list, 
-                "systems_to_connect": systems_to_connect, 
+                "systems_to_connect": systems_to_connect,
+                "ik_ctrl_list": [],
+                "fk_ctrl_list": [],
+                "ik_joint_list": [],
+                "fk_joint_list": [] 
                 
             } # When it comes to joint creation I need to add ik/fk ctrl & 
             # joint list as well as rev_lovcators
@@ -260,8 +268,52 @@ class QtSampler(QWidget):
 
     def create_joints(self):
         # initialise in the outut the guide list
+        print("'Build Skeleton' button clicked!")
+
+        # Example is just root & biped arm guide!
         print(f"Here is the list of created guides in the scene: {self.created_guides}")
-        print("LILIROSE IS HOT")
+        # ['guide_root', 'master_biped_arm_l_1']
+
+        print(f"The systems to be made are:>> {self.systems_to_be_made}")
+        '''guide root:'''
+        # {'guide_root': {'module': 'root_basic', 'master_guide': 'guide_root', 
+        # 'guide_list': ['crv_guide_COG'], 
+        # 'scale': 1, 
+        # 'joints': [], 
+        # 'side': 'None', 
+        # 'guide_connectors': ['crv_guide_COG'], 
+        # 'systems_to_connect': [], 
+        # 'ik_ctrl_list': [], 
+        # 'fk_ctrl_list': [], 
+        # 'ik_joint_list': [], 
+        # 'fk_joint_list': []},
+        '''guide biped arm:'''
+        # 'master_biped_arm_l_1': {'module': 'biped_arm', 'master_guide': 'master_biped_arm_l_1', 
+        # 'guide_list': ['crv_guide_wrist_l', 'crv_guide_elbow_l', 'crv_guide_shoulder_l', 'crv_guide_clavicle_l', 'crv_master_biped_arm_l_1'], 
+        # 'scale': 1, 
+        # 'joints': [], 
+        # 'side': '_l', 
+        # 'guide_connectors': ['crv_guide_wrist_l', 'crv_guide_elbow_l', 'crv_guide_shoulder_l', 'crv_guide_clavicle_l', 'crv_master_biped_arm_l_1'], 
+        # 'systems_to_connect': ['guide_clavicle_l', 'guide_COG'], 
+        # 'ik_ctrl_list': [], 
+        # 'fk_ctrl_list': [], 
+        # 'ik_joint_list': [], 
+        # 'fk_joint_list': []}}
+        print(f"Orientation from UI <@@@> {self.ui.orientation_ddbox.currentText()}")
+        rig_jnt_list = joints.get_joint_list(self.ui.orientation_ddbox.currentText(),
+                                              self.created_guides, system="rig")
+        num = 0
+        for dict in self.systems_to_be_made.values():
+            dict["joints"] = rig_jnt_list[num]
+            num = num+1
+        
+        mirror_module = mirror_rig.mirror_data(self.systems_to_be_made)
+        self.systems_to_be_made = mirror_module.get_mirror_data()
+
+        connect_modules.attach_jnts(self.systems_to_be_made, system="rig")
+        
+        
+        #rig_jnt_list = 
 
 def main():
     ui = QtSampler()
