@@ -61,7 +61,9 @@ def joint(orientation, top_skeleton_joint, system):
         # create joint based off the location
         jnt_name = cmds.joint(n=f"{jnt_tag}{locator[6:]}",) # remove 'guide' from name!
         cmds.matchTransform(jnt_name, locator)
-        cmds.makeIdentity(jnt_name, a=1, t=0, r=1, s=0)
+        cmds.makeIdentity(jnt_name, a=1, t=0, r=1, s=1)
+        cmds.makeIdentity(jnt_name, a=1, t=0, )
+        #makeIdentity -apply true -t 0 -r 0 -s 1 -n 0 -pn 1
         jnt_names.append(jnt_name)
     
     # I'm matching the joint's to the guides instead ofg orientaing them!
