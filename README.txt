@@ -12,16 +12,16 @@ importlib.reload(main)
 main.run_ui()
 '''
 
+TO DO: > Understand why mirrored joints do not wotk with connect_modules.attatch_joints(). > The mirrored data doesn't contain the master_guide or guides to begin with, so need to mirror the guides too for necessary data. I should see the dictionary for the '_r' too!
 
-- for context this is being used within a class to create blueprint guides for a modular auto rigger within autodesk maya using python 
+
+- for context this is being used within a class to create joints on blueprint guides for a modular auto rigger within autodesk maya using python 
 
 
-> attributes on ctrl guides: 
-- Dividers need to be locked & unKeyable!
-- Attributes, especially on the dividers are not working correctly!
 
 
 -----------------------------
+WIP. 
 import maya.cmds as cmds
 
 def reposition_guide_shape():
