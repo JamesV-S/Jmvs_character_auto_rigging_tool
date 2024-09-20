@@ -32,14 +32,24 @@ def prep_attach_jnts(child_jnt, parent_jnt, need_child):
 
 def attach_jnts(system_to_be_made, system):
     # 'system_to_be_made' is a dict containing info abt rigging sytems, 
-    # including which jnts need to be connected. 
+    # including which jnts need to be connected: 'systems_to_connect': ['guide_clavicle_l', 'guide_COG'],
     # 'system' is the prefix of th joint system like rig_ or skn_
     
+    '''Fix:'''
+    for key in system_to_be_made.values():
+        print(f"Structure of each key:{key}") # Check the structure of each key.
+
     # this list below contains the vals 
     to_parent = [key["systems_to_connect"] for key in system_to_be_made.values() if key["systems_to_connect"]]
+    '''Error: string indices must be integers. 
+    This means the returned data: key["systems_to_connect"] 
+    is returning a string instead of a list'''
+
+    
+   
     for x in to_parent:
         cmds.parent(f"jnt_{system}_{x[0][6:]}", f"jnt_{system}_{x[1][6:]}")
-        
+   
 
 def connect_to_ikfk_switch(p_object, constraint): 
     # Concerning the ik reverse of ikfk switch
