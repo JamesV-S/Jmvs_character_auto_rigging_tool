@@ -1,4 +1,9 @@
 import maya.cmds as cmds
+import importlib
+import os
+
+from systems import joints
+from systems.utils import utils
 
 class mirror_data():
     def __init__(self, systems_to_be_made):
@@ -23,9 +28,26 @@ class mirror_data():
 
     def get_mirrored_system_to_connect(self):
         systems_to_connect = self.key["systems_to_connect"]
-        mirrored_systems_to_connect = [item.replace(f"{self.key['side']}_", self.simple_side) if f"{self.key['side']}_" in item else item for item in systems_to_connect]
+        # mirrored_systems_to_connect = [item.replace(f"{self.key['side']}_", self.simple_side) if f"{self.key['side']}_" in item else item for item in systems_to_connect]
+        
+        # Update: Changed the list comprehension into an if statement. 
+        # It's the same logic.
+        mirrored_systems_to_connect = [] 
+        for item in systems_to_connect:
+            if f"{self.key['side']}" in item:
+                mirrored_item = item.replace(f"{self.key['side']}", self.side, 1)
+            else:
+                mirrored_item = item
+        mirrored_systems_to_connect.append(mirrored_item)
+        
         return mirrored_systems_to_connect
     
+    def create_mirrored_guides(self): # I don't see reason to implment this yet. 
+        pass
+
+    def create_mirrored_master_guide(self):
+        pass
+
     def mirror_data(self):
         temp_systems_to_be_made = {}
         # For loop to iterate through the keys in 'self.data_to_be_made'
@@ -43,9 +65,9 @@ class mirror_data():
                 self.joint_list = self.mirror_joints()
                 self.get_mirrored_side()
                 self.mirrored_system_to_connect = self.get_mirrored_system_to_connect()
-                # self.create_mirrored_guides()
-                self.master_guide = [] # self.create_mirrored_master_guide()
-                # self.copy_mirrored_attrs()
+                #self.create_mirrored_guides()
+                self.master_guide = self.create_mirrored_master_guide()
+                # self.copy_mirrored_attrs() # to copy attributes across - to what tho, the joints? no probaly the mirrored guides
 
                 # create temp dict to store same module data as 'add_module() from ui.py'
                 temp_dictionary = {
@@ -66,7 +88,9 @@ class mirror_data():
                 # Assign the temp dict to 'temp_systems_to_be_made' w 'self.master_guide'
                 # as the key!
                 temp_systems_to_be_made[self.master_guide] = temp_dictionary
-        
+                
+                # set attribute on mirrored master guides! 
+
         # Update the 'data_to_be_made' dict with this new data
         self.data_to_be_checked.update(temp_systems_to_be_made)
 
