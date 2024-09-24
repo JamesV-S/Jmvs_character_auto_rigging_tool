@@ -2,13 +2,13 @@
 import maya.cmds as cmds
 from maya import OpenMayaUI as omui
 
-from PySide2.QtCore import *
-from PySide2.QtGui import *
-from PySide2.QtWidgets import QWidget
-from PySide2.QtWidgets import *
-from PySide2.QtUiTools import *
-from shiboken2 import wrapInstance
-from PySide2 import QtUiTools, QtWidgets, QtCore
+from PySide6.QtCore import *
+from PySide6.QtGui import *
+from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import *
+from PySide6.QtUiTools import *
+from shiboken6 import wrapInstance
+from PySide6 import QtUiTools, QtWidgets, QtCore
 from functools import partial # if you want to include args with UI method calls
 
 
@@ -86,18 +86,19 @@ class QtSampler(QWidget):
             print(f"could not find blueprints_menu_toolbtn in the ui")
         
         self.ui.blueprints_menu_toolbtn.clicked.connect(self.blueprints_menu_func)
-        self.ui.image_lbl.setPixmap(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
-                                                 "interface","logo_cog.jpeg"))
-        
+        tab1_image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                       "interface","logo_cog.jpeg")
+        self.ui.image_lbl.setPixmap(QPixmap(tab1_image_path))
+
         self.ui.add_mdl_btn.clicked.connect(self.add_module)
         self.ui.remove_mdl_btn.clicked.connect(self.remove_module)
         self.ui.orientation_ddbox.currentIndexChanged.connect(self.orientation_func)
         self.ui.build_skeleton_btn.clicked.connect(self.create_joints)
         
         # Tab 2 - SKINNING
-        self.ui.skinning_image_lbl.setPixmap(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
-                                                 "interface","skinning_symbol.png")) # 
-
+        tab2_image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                       "interface","skinning_symbol.png")
+        self.ui.skinning_image_lbl.setPixmap(QPixmap(tab2_image_path))
         # Tab 3 - CURVE HELPER
 
         # Tab 4 - OUTPUT OPTIONS(export)
@@ -300,13 +301,19 @@ class QtSampler(QWidget):
         # 'ik_joint_list': [], 
         # 'fk_joint_list': []}}
         print(f"Orientation from UI <@@@> {self.ui.orientation_ddbox.currentText()}")
+        
+        
         rig_jnt_list = joints.get_joint_list(self.ui.orientation_ddbox.currentText(),
                                               self.created_guides, system="rig")
+        
+
+        # Not too sure what this is doing, if i'd have to guess it's 
+        # adding the joint list to the dictionary...
         num = 0
         for dict in self.systems_to_be_made.values():
             dict["joints"] = rig_jnt_list[num]
             num = num+1
-        
+         
         mirror_module = mirror_rig.mirror_data(self.systems_to_be_made)
         self.systems_to_be_made = mirror_module.get_mirror_data()
 
@@ -314,6 +321,12 @@ class QtSampler(QWidget):
         
         
         #rig_jnt_list = 
+    
+    def create_rig(self):
+        pass
+
+    def polish_rig(self):
+        pass
 
 def main():
     ui = QtSampler()
