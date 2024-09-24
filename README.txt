@@ -10,7 +10,14 @@ from Jmvs_character_auto_rigging_tool import main
 
 importlib.reload(main)
 main.run_ui()
+
+# Delete the scene to start again: 
+cmds.select(all=True)
+cmds.delete() 
+
 '''
+
+
 
 TO DO: > Understand why mirrored joints do not wotk with connect_modules.attatch_joints(). > The mirrored data doesn't contain the master_guide or guides to begin with, so need to mirror the guides too for necessary data. I should see the dictionary for the '_r' too!
 
