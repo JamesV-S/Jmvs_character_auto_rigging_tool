@@ -133,7 +133,6 @@ def find_substring_in_life(string, substrings):
             return substring
         
 def colour_guide_custom_shape(custom_crv):
-    
     # Firstly, from the 'custom_crv' select all shapes in it & set their overrideEnabled!
     shape_list = cmds.listRelatives(custom_crv, shapes=1)
     for shape in shape_list:
