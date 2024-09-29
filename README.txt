@@ -1,3 +1,5 @@
+Auto batch test
+
 Readme: 
 
 have repo cloned to c\\docs\\maya\\scripts
