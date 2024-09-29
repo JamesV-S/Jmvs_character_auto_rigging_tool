@@ -170,7 +170,7 @@ class Guides_class():
                 pos = root_pos_dict[x]
                 rot = root_rot_dict[x]
             '''
-            # Use the selected dict'sto set location and rotation
+            # Use the selected dict's to set location and rotation
             pos = pos_dict[x]
             rot = rot_dict[x]
             cmds.xform(guide, ws=1, t=[pos[0]+offset[0], pos[1]+offset[1], pos[2]+offset[2]])
