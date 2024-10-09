@@ -114,13 +114,9 @@ def guide_curve_connector(first_jnt, second_jnt):
     cmds.parent(cluster_2, second_jnt)
     print("Going to hid clusters & template the connector")
     
-    # Hide the cluster hnadles: 
-    cluster_1_handle = f"{cluster_1[0]}Handle"
-    cluster_2_handle = f"{cluster_2[0]}Handle"
-    print(f"Hiding handle: {cluster_1}")
-    print(f"Hiding handle: {cluster_1}")
-    cmds.hide(cluster_1_handle)
-    cmds.hide(cluster_2_handle)
+    for x in cmds.ls(typ="cluster"):
+        cmds.hide(f"{x}Handle")
+        cmds.setAttr(f"{x}Handle.hiddenInOutliner", True)
             
     cmds.setAttr(f"{curve_name}.template", 1)
     cmds.select(cl=1)
@@ -141,7 +137,7 @@ def colour_guide_custom_shape(custom_crv):
     # Create lists for shapes with specific patterns in their names!
     yellow_shape = [shape for shape in shape_list if custom_crv in shape]
     for shape in yellow_shape:
-        cmds.setAttr(f"{shape}.overrideColor", 17)
+        cmds.setAttr(f"{shape}.overrideColor", 22) # 17
 
     red_shape = [shape for shape in shape_list if "X" in shape]
     for shape in red_shape:
@@ -154,6 +150,10 @@ def colour_guide_custom_shape(custom_crv):
     blue_shape = [shape for shape in shape_list if "Z" in shape]
     for shape in blue_shape:
         cmds.setAttr(f"{shape}.overrideColor", 6)
+
+    black_shape = [shape for shape in shape_list if "guidePivot" in shape]
+    for shape in black_shape:
+        cmds.setAttr(f"{shape}.overrideColor", 1)
 
 # colour_custom_shape("crv_custom_guide")
 
