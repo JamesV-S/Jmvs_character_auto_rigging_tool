@@ -34,22 +34,26 @@ def attach_jnts(system_to_be_made, system):
     # 'system_to_be_made' is a dict containing info abt rigging sytems, 
     # including which jnts need to be connected: 'systems_to_connect': ['guide_clavicle_l', 'guide_COG'],
     # 'system' is the prefix of th joint system like rig_ or skn_
-    
-    '''Fix:'''
     for key in system_to_be_made.values():
         print(f"Structure of each key:{key}") # Check the structure of each key.
 
     # this list below contains the vals 
     to_parent = [key["systems_to_connect"] for key in system_to_be_made.values() if key["systems_to_connect"]]
-    '''Error: string indices must be integers. 
-    This means the returned data: key["systems_to_connect"] 
-    is returning a string instead of a list'''
-
+    print(f"List of sublists to parent >>: {to_parent}")
+    # [['guide_clavicle_l', 'guide_COG'], ['guide_COG']]
+    # [['guide_spine_1', 'guide_COG'], ['guide_clavicle_l', 'guide_spine_4'], ['guide_spine_4']]
     
-   
+    # Parenting the systems_to_connect aka 'to_parent'
     for x in to_parent:
-        cmds.parent(f"jnt_{system}_{x[0][6:]}", f"jnt_{system}_{x[1][6:]}")
-   
+        if len(x) > 1: # Ignore any sublists with only 1 item in it
+            first_element = x[0].replace('guide_', '')
+            second_element = x[1].replace('guide_', '')
+            print(f"Double Sublist: jnt_{system}_{first_element}"," AND ", f"jnt_{system}_{second_element}")
+            cmds.parent(f"jnt_{system}_{first_element}", f"jnt_{system}_{second_element}")
+        else: 
+            first_element = x[0].replace('guide_', '')
+            print(f"Single Sublist: jnt_{system}_{first_element}")
+
 
 def connect_to_ikfk_switch(p_object, constraint): 
     # Concerning the ik reverse of ikfk switch

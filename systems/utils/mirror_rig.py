@@ -7,10 +7,8 @@ from systems.utils import utils
 
 class mirror_data():
     def __init__(self, systems_to_be_made):
-        self.data_to_be_checked = systems_to_be_made
-        print(f"Data for the mirror class{self.data_to_be_checked}")
+        self.data_to_be_checked = systems_to_be_made 
         self.mirror_data()
-        
     
     def mirror_joints(self):
         # self.key is the key from the provided dict containing data on the module! 
@@ -62,17 +60,24 @@ class mirror_data():
 
     def get_mirrored_system_to_connect(self):
         systems_to_connect = self.key["systems_to_connect"]
-        # mirrored_systems_to_connect = [item.replace(f"{self.key['side']}_", self.simple_side) if f"{self.key['side']}_" in item else item for item in systems_to_connect]
         
-        # Update: Changed the list comprehension into an if statement. 
-        # It's the same logic.
+        # I am looking for item with '_l' or '_r' & replace to opposite side
+        # if the item has no side then it is the item needed to be parented to, 
+        # so add it to the end of the 'mirrored_systems_to_connect' list.
+
         mirrored_systems_to_connect = [] 
         for item in systems_to_connect:
             if f"{self.key['side']}" in item:
+                print(f"IF YES {self.key['side']} in {item} = @-A-@")
                 mirrored_item = item.replace(f"{self.key['side']}", self.side, 1)
+                print(f"if 'side' in item: {mirrored_item}")
             else:
-                mirrored_item = item
+                print(f"IF NOT {self.key['side']} in {item} = @-B-@")
+                item_not_mirrored = item
+                print(f"else: {item_not_mirrored}")
         mirrored_systems_to_connect.append(mirrored_item)
+        mirrored_systems_to_connect.append(item_not_mirrored)
+        print(f"Mirrored system to connect: {mirrored_systems_to_connect}")
         
         return mirrored_systems_to_connect
     
@@ -109,7 +114,8 @@ class mirror_data():
             
             self.proxy_obj_list.append(master_guide)
         return master_guide
-    
+
+
     def copy_mirrored_attrs(self): # copy attrs across
         self.non_proxy_attr_list = []
         for attr in cmds.listAttr(self.key["master_guide"], r=1, ud=1):
@@ -128,6 +134,7 @@ class mirror_data():
                 except:
                     pass
         # replace side with opposite for the attr & guide names. 
+        # print(f"Within 'copy_mirrored_attrs' the key is: {self.key["guide_list"]}")
         for guide in self.key["guide_list"]:
             for attr in cmds.listAttr(guide, r=1, ud=1):
                 if "_control_shape" in attr:
@@ -136,10 +143,19 @@ class mirror_data():
                     enum_value = cmds.getAttr(f"{guide}.{attr}", asString=1)
                     # Then add the attr to mirrored guide!
                     cmds.addAttr(mirror_guide, ln=f"{new_attr_name}", at="enum", en=enum_value)
+        
+# Within 'copy_mirrored_attrs' the key is: 
+# {'module': 'biped_arm', 
+# 'master_guide': 'master_biped_arm_l_1', 
+# 'guide_list': ['crv_guide_wrist_l', 'crv_guide_elbow_l', 'crv_guide_shoulder_l', 'crv_guide_clavicle_l', 'crv_master_biped_arm_l_1'], 
+# 'scale': 1, 
+# 'joints': ['jnt_rig_clavicle_l', 'jnt_rig_shoulder_l', 'jnt_rig_elbow_l', 'jnt_rig_wrist_l'], 
+# 'side': '_l', 
+# 'guide_connectors': ['crv_guide_wrist_l', 'crv_guide_elbow_l', 'crv_guide_shoulder_l', 'crv_guide_clavicle_l', 'crv_master_biped_arm_l_1'], 'systems_to_connect': ['guide_clavicle_l', 'guide_COG'], 'ik_ctrl_list': [], 'fk_ctrl_list': [], 'ik_joint_list': [], 'fk_joint_list': []}
 
 
     def mirror_data(self):
-        temp_systems_to_be_made = {}
+        otherSide_systems_to_be_made = {}
         # For loop to iterate through the keys in 'self.data_to_be_made'
         for key in self.data_to_be_checked.values():
             self.locator_list = []
@@ -155,6 +171,8 @@ class mirror_data():
                 self.joint_list = self.mirror_joints()
                 self.get_mirrored_side()
                 self.mirrored_system_to_connect = self.get_mirrored_system_to_connect()
+                # 'systems_to_connect': ['guide_COG'] is wrong & should be ['guide_clavicle_r', 'guide_COG'] from ['guide_clavicle_l', 'guide_COG']
+
                 self.create_mirrored_guides()
                 self.master_guide = self.create_mirrored_master_guide()
                 self.copy_mirrored_attrs() # to copy attributes across - to what tho, the joints? no probaly the mirrored guides
@@ -168,22 +186,23 @@ class mirror_data():
                     "joints": self.joint_list,
                     "side": self.side,
                     "guide_connectors": [],
-                    "systems_to_connect": self.mirrored_system_to_connect,
+                    "systems_to_connect": self.mirrored_system_to_connect, 
                     "ik_ctrl_list": [],
                     "fk_ctrl_list": [],
                     "ik_joint_list": [],
                     "fk_joint_list": []
                 }
 
-                # Assign the temp dict to 'temp_systems_to_be_made' w 'self.master_guide'
+                # Assign the temp dict to 'otherSide_systems_to_be_made' w 'self.master_guide'
                 # as the key!
-                temp_systems_to_be_made[self.master_guide] = temp_dictionary
-                
+                otherSide_systems_to_be_made[self.master_guide] = temp_dictionary
+                print("***Data for the mirror class > ", otherSide_systems_to_be_made)
                 # set attribute on mirrored master guides! 
 
         # Update the 'data_to_be_made' dict with this new data
-        self.data_to_be_checked.update(temp_systems_to_be_made)
-
+        self.data_to_be_checked.update(otherSide_systems_to_be_made)
+        print(f"Data for the mirror class{self.data_to_be_checked}")
+        
     def get_mirror_data(self):
         return self.data_to_be_checked
 

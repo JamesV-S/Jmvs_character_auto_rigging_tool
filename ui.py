@@ -228,7 +228,7 @@ class QtSampler(QWidget):
             temp_dictionary = {
                 "module": module, 
                 "master_guide": master_guide, 
-                "guide_list": guide_connector_list, 
+                "guide_list": guide_list, 
                 "scale": module_path.guide_scale, 
                 "joints": [], 
                 "side": module_path.side, 
