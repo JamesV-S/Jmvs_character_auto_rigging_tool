@@ -66,10 +66,10 @@ class Guides_class():
                                  "imports", "ctrl_root_octagon_import.abc")
        # print("down here")
         #imported = cmds.file(ROOT_FILE, i=1, rnn=1)
-
+        number_id = "0"
         guide_list = []
         root_exists = False
-        guide_pref = "guide"
+        guide_pref = f"guide_{number_id}"
         
         # 2) Determine Side
         if self.module.side == "None":
@@ -96,7 +96,7 @@ class Guides_class():
                 pos_dict = self.module.system_pos_yzx
                 rot_dict = self.module.system_rot_yzx
         
-        number_id = "0"
+        
         tmp_list = []
         module_list = cmds.ls("data*")
         for obj in module_list:
@@ -161,14 +161,14 @@ class Guides_class():
                 print(">>>>>>>>root print in creation()")
                 root_exists = True
                 
-                guide = cmds.rename(imported[0], f"{guide_pref}_{number_id}_root") # f"{guide_pref}_root") f"{guide_pref}_{number_id}_root"
+                guide = cmds.rename(imported[0], f"{guide_pref}_root") # f"{guide_pref}_root") f"{guide_pref}_{number_id}_root"
                 print(f"root guide: {guide}")
                 utils.colour_root_control(guide)
             else:
                 imported = cmds.file(GUIDE_FILE, i=1, namespace="guide_shape_import", rnn=1)
                 cmds.scale(self.module.guide_scale+1, self.module.guide_scale+1, 
                             self.module.guide_scale+1, imported)
-                guide = cmds.rename(imported[0], f"{guide_pref}_{number_id}_{x}{side}") # f"{guide_pref}_{x}{side}"), f"{guide_pref}_{number_id}_{x}{side}"
+                guide = cmds.rename(imported[0], f"{guide_pref}_{x}{side}") # f"{guide_pref}_{x}{side}"), f"{guide_pref}_{number_id}_{x}{side}"
                 # Set the colour of the guide shape!
                 utils.colour_guide_custom_shape(guide)
             
@@ -276,8 +276,8 @@ class Guides_class():
                     print("CONTROL SHAPE LIST >>>>>>>>>>>>>>>> ", type(control_shape_list))
                     
                     control_shape_en = ":".join(control_shape_list)
-                    print("With guide_number too!: ", f"{guide[9:]}_{ikfk}_control", f"{guide}_{ikfk}_control")
-                    cmds.addAttr(guide, ln=f"{guide[9:]}_{ikfk}_control", 
+                    print("With guide_number too!: ", f"{guide[8:]}_{ikfk}_control")
+                    cmds.addAttr(guide, ln=f"{guide[8:]}_{ikfk}_control", 
                                  at="enum", en=control_shape_en, k=1)
         
         # 9) Return UI data
