@@ -347,9 +347,3 @@ def main():
     ui = QtSampler()
     ui.show()
     return ui
-
-'''
-if __name__ == '__main__':
-    main()
-'''  
-
