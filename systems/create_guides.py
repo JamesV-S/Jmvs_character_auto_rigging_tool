@@ -95,6 +95,30 @@ class Guides_class():
                 print("ORIENTATION IS 'yzx' ###")
                 pos_dict = self.module.system_pos_yzx
                 rot_dict = self.module.system_rot_yzx
+        
+        number_id = "0"
+        tmp_list = []
+        module_list = cmds.ls("data*")
+        for obj in module_list:
+            if "Shape" in obj:
+                pass
+            elif accessed_module in obj:
+                tmp_list.append(obj)
+            elif accessed_module == "root_basic" and "root" in obj:
+                tmp_list.append(obj)
+        
+        numbers_unfiltered = []
+        for data_guide in tmp_list:
+            if cmds.attributeQuery("guide_number", node=data_guide, exists=True):
+                numbers_unfiltered.append(cmds.getAttr(f"{data_guide}.guide_number"))
+            else:
+                cmds.warning(
+                    f"guide_number attr doesn't exist on this node '{data_guide}',guide seup might not work as sexpected to."
+                             )
+
+        if numbers_unfiltered:
+            numbers_unfiltered.sort()
+            number_id = numbers_unfiltered[-1]+1
 
         # 4) Create master guide for module by looking in each module's variable's
         if "root" in self.module.system:
@@ -115,12 +139,11 @@ class Guides_class():
             master_guide = "pinky_phal_proximal"
         else:
             master_guide = control_shape.controlTypes(
-                f"master_{accessed_module}{side}_#", [5, 5, 5]).create_octagon()
+                f"master_{number_id}_{accessed_module}{side}", [5, 5, 5]).create_octagon()
             cmds.setAttr(f"{master_guide}.overrideEnabled", 1)
             cmds.setAttr(f"{master_guide}.overrideColor", 9)
             cmds.scale(8, 8, 8, master_guide)
             
-        
             # Position the new master guide with the given offset
             pos = pos_dict[self.module.system[0]]
             rot = rot_dict[self.module.system[0]]
@@ -138,14 +161,14 @@ class Guides_class():
                 print(">>>>>>>>root print in creation()")
                 root_exists = True
                 
-                guide = cmds.rename(imported[0], f"{guide_pref}_root")
+                guide = cmds.rename(imported[0], f"{guide_pref}_{number_id}_root") # f"{guide_pref}_root") f"{guide_pref}_{number_id}_root"
                 print(f"root guide: {guide}")
                 utils.colour_root_control(guide)
             else:
                 imported = cmds.file(GUIDE_FILE, i=1, namespace="guide_shape_import", rnn=1)
                 cmds.scale(self.module.guide_scale+1, self.module.guide_scale+1, 
                             self.module.guide_scale+1, imported)
-                guide = cmds.rename(imported[0], f"{guide_pref}_{x}{side}")
+                guide = cmds.rename(imported[0], f"{guide_pref}_{number_id}_{x}{side}") # f"{guide_pref}_{x}{side}"), f"{guide_pref}_{number_id}_{x}{side}"
                 # Set the colour of the guide shape!
                 utils.colour_guide_custom_shape(guide)
             
@@ -203,6 +226,17 @@ class Guides_class():
         else: 
             cmds.group(guide_connector_list, n="grp_guideConnector_clusters", w=1)
         cmds.select(cl=1)
+        
+        #----------------------------------------------------------------------
+        # Create  data guide
+        if "root" in self.module.system: # or "proximal" in self.module.system:
+            data_guide_name = f"data_{master_guide}"
+        else:
+            data_guide_name = master_guide.replace("master_", "data_")
+        cmds.spaceLocator(n=data_guide_name)
+        cmds.matchTransform(data_guide_name, master_guide)
+        cmds.parent(data_guide_name, master_guide)
+        #----------------------------------------------------------------------
 
         # 7) Add attributes
         
@@ -242,16 +276,20 @@ class Guides_class():
                     print("CONTROL SHAPE LIST >>>>>>>>>>>>>>>> ", type(control_shape_list))
                     
                     control_shape_en = ":".join(control_shape_list)
-                    cmds.addAttr(guide, ln=f"{guide[6:]}_{ikfk}_control", 
+                    print("With guide_number too!: ", f"{guide[9:]}_{ikfk}_control", f"{guide}_{ikfk}_control")
+                    cmds.addAttr(guide, ln=f"{guide[9:]}_{ikfk}_control", 
                                  at="enum", en=control_shape_en, k=1)
         
         # 9) Return UI data
         # Return a dictionary containing master_guide, guide_connector_list & 
         # ui_guide_list for further use in the ui
-        ui_dict = {"master_guide":master_guide, 
-                   "guide_connector_list": guide_connector_list,
-                   "ui_guide_list": ui_guide_list
-                   }
+        ui_dict = {
+            "master_guide": master_guide, 
+            "guide_connector_list": guide_connector_list,
+            "ui_guide_list": ui_guide_list, 
+            "data_guide": data_guide_name,
+            "guide_number": number_id
+        }
         return ui_dict
         
     def add_custom_attr(self, system, master_guide, use_existing_attr, accessed_module):

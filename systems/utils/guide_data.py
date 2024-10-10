@@ -73,14 +73,31 @@ def setup(temp_dict, data_guide):
 # Potential fixes:
     # Make sure list types are correctly interpreted and split using attribute values
 def init_data():
-    pass
-    
-    '''
-    elif dict_var_types[attr] == "list":
-        value_list = cmds.attributeQuery(attr, node=guide, le=1)
-        if value_list:
-            value = value_list[0].split(":")
-            if value == ["empty"]:
-                value = []
-    '''
+    return_dict = {}
+    data_guides = cmds.ls("data_*", type="transform")
+    print(f"Data Guides found in scene: {data_guides}")
+    for guide in data_guides:
+        temp_dict = {}
+        attr_list = cmds.listAttr(guide, r=1, k=1)
+        for attr in attr_list:
+            if dict_var_types[attr] == "guide_number":
+                pass
+            elif dict_var_types[attr] == "list":
+                value_list = cmds.attributeQuery(attr, node=guide, le=1)
+                if value_list:
+                    value = value_list[0].split(":")
+                    if value == ["empty"]:
+                        value = []
+            elif dict_var_types[attr] == 'string':
+                value = cmds.getAttr(F"{guide}.{attr}", asString=1)
+            elif dict_var_types[attr] == 'float' or dict_var_types[attr] == "long":
+                value = cmds.getAttr(F"{guide}.{attr}")
+            
+
+            '''elif isinstance(value, list) and value[0] == "empty": 
+                value = []'''
+            temp_dict[attr] = value
+        return_dict[guide] = temp_dict
+    return return_dict
+            
 

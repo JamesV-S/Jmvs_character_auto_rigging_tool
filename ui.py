@@ -195,7 +195,7 @@ class QtSampler(QWidget):
         index = files.index("root_basic")
         self.ui.module_picker_ddbox.setCurrentIndex(index)
 
-    def init_exisiting_module(self):
+    def init_existing_module(self):
         temp_dict = guide_data.init_data()
         for dict in temp_dict.values():
             master_guide = dict["master_guide"]
@@ -222,7 +222,7 @@ class QtSampler(QWidget):
         # create_guides.py is needed! > in the systems folder!
         guides = create_guides.Guides_class(module, offset, module_path.side, to_connect_to=[], use_existing_attr=[], orientation=self.orientation_func())
         guide = guides.collect_guides()
-        print(guide)
+        print(f"GUIIDE RETURNED DICT: {guide}")
         # If guides are succesfully created, this extracts important elements like these:
         if guide:
             master_guide = guide["master_guide"]
@@ -255,7 +255,7 @@ class QtSampler(QWidget):
             
             # add the temp dict to systems to be made, to manage all systems that eed to be constructed. 
             self.systems_to_be_made[master_guide] = temp_dictionary
-            guide_data.setup(temp_dictionary, date_guide)
+            guide_data.setup(temp_dictionary, data_guide)
 
             # if statement id add_hand.isChecked() on the ui later on. 
         
