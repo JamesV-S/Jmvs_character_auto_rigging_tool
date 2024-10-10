@@ -26,7 +26,8 @@ from systems import (
 from systems.utils import (
     connect_modules, 
     utils, 
-    mirror_rig
+    mirror_rig,
+    guide_data
 )
 
 # Reload Modules
@@ -35,6 +36,7 @@ importlib.reload(joints)
 importlib.reload(connect_modules)
 importlib.reload(utils)
 importlib.reload(mirror_rig)
+importlib.reload(guide_data)
 
 mayaMainWindowPtr = omui.MQtUtil.mainWindow()
 mayaMainWindow = wrapInstance(int(mayaMainWindowPtr), QWidget)
@@ -61,6 +63,7 @@ class QtSampler(QWidget):
         self.module_created = 0
         self.created_guides = []
         self.systems_to_be_made = {}
+        self.init_existing_module()
 
         #self.ui.hand_module_btn.clicked.connect(self.temp_hand_func)
         # Tab 1 - RIG
@@ -191,14 +194,22 @@ class QtSampler(QWidget):
         # set default selected item in the dropdown. 
         index = files.index("root_basic")
         self.ui.module_picker_ddbox.setCurrentIndex(index)
-        
+
+    def init_exisiting_module(self):
+        temp_dict = guide_data.init_data()
+        for dict in temp_dict.values():
+            master_guide = dict["master_guide"]
+            self.created_guides.append(master_guide)
+            self.systems_to_be_made[master_guide] = dict
+
     def add_module(self):
         # function imports the selected module dynamically during runtim!
         
         module = self.ui.module_picker_ddbox.currentText()
         sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
                                      "systems", "modules"))
-        module_path = importlib.import_module(module) # you are calling the import_module function from the importlib module
+        # you are calling the import_module function from the importlib module
+        module_path = importlib.import_module(module) 
         importlib.reload(module_path)
         
         print("module_path: ", module_path, "print from ui in add_module()" )
@@ -218,7 +229,7 @@ class QtSampler(QWidget):
             guide_connector_list = guide["guide_connector_list"]
             systems_to_connect = guide["system_to_connect"]
             guide_list = guide["ui_guide_list"]
-            
+            data_guide = guide["data_guide"]
             # you would have if statement if rev_locators in guide  make a vairable for it, otherwise rev_locators = [] 
             
             # Append the 'master_guide' to a list of created guides 
@@ -244,6 +255,7 @@ class QtSampler(QWidget):
             
             # add the temp dict to systems to be made, to manage all systems that eed to be constructed. 
             self.systems_to_be_made[master_guide] = temp_dictionary
+            guide_data.setup(temp_dictionary, date_guide)
 
             # if statement id add_hand.isChecked() on the ui later on. 
         
@@ -316,7 +328,7 @@ class QtSampler(QWidget):
          
         mirror_module = mirror_rig.mirror_data(self.systems_to_be_made)
         self.systems_to_be_made = mirror_module.get_mirror_data()
-
+        
         connect_modules.attach_jnts(self.systems_to_be_made, system="rig")
         
         

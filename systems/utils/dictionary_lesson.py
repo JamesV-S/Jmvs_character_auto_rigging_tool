@@ -15,10 +15,12 @@ print(dictionary['Lilirose']) # output: ['Kent', '19', 'redhead', '5ft 7inch']
 print("----------------------------------")
 print(2)
 # Iterating over keys
-for key in dictionary:
-    print(f"key: {key}") # output: key: James
-                         #         key: Lilirose
-                         #         key: Thuki
+for key in dictionary.keys():
+    print(f"key: {key}")
+    # output: key: James
+            # key: Lilirose
+            # key: Thuki
+'''print(f"key: {dictionary[key]}") gives me the value sof the keys! '''
                          
 print("----------------------------------")
 print(3)
@@ -50,7 +52,7 @@ print(f"{name}: {details}")
 
 print("----------------------------------")
 print(6)
-'''
+
 # Using tuple unpacking in a loop
 for name, (last_name, age, hair_colour, height) in dictionary.items():
     print(f"{name} {last_name} is {age} years old, has {hair_colour} hair, and is {height} tall")
@@ -76,7 +78,7 @@ for name, details in dictionary.items():
 
 # Using get method to handle missing keys
 print(dictionary.get('Noneexistent', 'Key not found')) # output: Key not found
-'''
+
 print("FUNCTIONS: ----------------------------------")
 print(1)
 
