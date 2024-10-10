@@ -134,7 +134,7 @@ class mirror_data():
                 except:
                     pass
         # replace side with opposite for the attr & guide names. 
-        # print(f"Within 'copy_mirrored_attrs' the key is: {self.key["guide_list"]}")
+        print(f"Within 'copy_mirrored_attrs' the key is: ", self.key["guide_list"])
         for guide in self.key["guide_list"]:
             for attr in cmds.listAttr(guide, r=1, ud=1):
                 if "_control_shape" in attr:
@@ -144,17 +144,9 @@ class mirror_data():
                     # Then add the attr to mirrored guide!
                     cmds.addAttr(mirror_guide, ln=f"{new_attr_name}", at="enum", en=enum_value)
         
-# Within 'copy_mirrored_attrs' the key is: 
-# {'module': 'biped_arm', 
-# 'master_guide': 'master_biped_arm_l_1', 
-# 'guide_list': ['crv_guide_wrist_l', 'crv_guide_elbow_l', 'crv_guide_shoulder_l', 'crv_guide_clavicle_l', 'crv_master_biped_arm_l_1'], 
-# 'scale': 1, 
-# 'joints': ['jnt_rig_clavicle_l', 'jnt_rig_shoulder_l', 'jnt_rig_elbow_l', 'jnt_rig_wrist_l'], 
-# 'side': '_l', 
-# 'guide_connectors': ['crv_guide_wrist_l', 'crv_guide_elbow_l', 'crv_guide_shoulder_l', 'crv_guide_clavicle_l', 'crv_master_biped_arm_l_1'], 'systems_to_connect': ['guide_clavicle_l', 'guide_COG'], 'ik_ctrl_list': [], 'fk_ctrl_list': [], 'ik_joint_list': [], 'fk_joint_list': []}
-
-
+    
     def mirror_data(self):
+        # guide_pref = f"guide_{number_id}"
         otherSide_systems_to_be_made = {}
         # For loop to iterate through the keys in 'self.data_to_be_made'
         for key in self.data_to_be_checked.values():
@@ -182,7 +174,7 @@ class mirror_data():
                     "module": key["module"], 
                     "master_guide": self.master_guide,
                     "guide_list": self.locator_list,
-                    "scale": key["scale"],
+                    "guide_scale": key["guide_scale"],
                     "joints": self.joint_list,
                     "side": self.side,
                     "guide_connectors": [],

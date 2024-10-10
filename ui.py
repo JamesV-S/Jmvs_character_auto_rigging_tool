@@ -230,6 +230,7 @@ class QtSampler(QWidget):
             systems_to_connect = guide["system_to_connect"]
             guide_list = guide["ui_guide_list"]
             data_guide = guide["data_guide"]
+            guide_number = guide["guide_number"]
             # you would have if statement if rev_locators in guide  make a vairable for it, otherwise rev_locators = [] 
             
             # Append the 'master_guide' to a list of created guides 
@@ -240,7 +241,7 @@ class QtSampler(QWidget):
                 "module": module, 
                 "master_guide": master_guide, 
                 "guide_list": guide_list, 
-                "scale": module_path.guide_scale, 
+                "guide_scale": module_path.guide_scale, 
                 "joints": [], 
                 "side": module_path.side, 
                 "guide_connectors": guide_connector_list, 
@@ -248,13 +249,15 @@ class QtSampler(QWidget):
                 "ik_ctrl_list": [],
                 "fk_ctrl_list": [],
                 "ik_joint_list": [],
-                "fk_joint_list": [] 
+                "fk_joint_list": [], 
+                "guide_number": guide_number
                 
             } # When it comes to joint creation I need to add ik/fk ctrl & 
             # joint list as well as rev_lovcators
             
             # add the temp dict to systems to be made, to manage all systems that eed to be constructed. 
             self.systems_to_be_made[master_guide] = temp_dictionary
+            print(f"temp dict for setup: {temp_dictionary}")
             guide_data.setup(temp_dictionary, data_guide)
 
             # if statement id add_hand.isChecked() on the ui later on. 

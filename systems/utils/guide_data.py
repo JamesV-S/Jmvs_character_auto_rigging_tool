@@ -1,33 +1,6 @@
 
 import maya.cmds as cmds
 # Define the type of each attribute that can be stored. 
-
-'''
-Alpha keys: module
-
-Alpha keys: master_guide
-
-Alpha keys: guide_list
-
-Alpha keys: scale
-E int> Adding attribute to: data_guide_0_root, attribute name: scale
-Alpha keys: joints
-
-Alpha keys: side
-
-Alpha keys: guide_connectors
-s
-Alpha keys: systems_to_connect
-
-Alpha keys: ik_ctrl_list
-
-Alpha keys: fk_ctrl_list
-
-Alpha keys: ik_joint_list
-
-Alpha keys: fk_joint_list
-'''
-
 dict_var_types = {
                 "module": "string",
                 "master_guide": "string",
@@ -64,16 +37,17 @@ def setup(temp_dict, data_guide):
             # Add float type attr to data_guide
             cmds.addAttr(data_guide, ln=key, at="float", k=1)
             # The initial value of this attr is set using 'temp_dict[key]'(value of key)
-            cmds.setAttr(f"{data_guide}.{key}", temp_dict[key]) 
+            print("line 40, in setup", f"{data_guide}.{key}", "//", temp_dict[key])
+            cmds.setAttr(f"{data_guide}.{key}", float(temp_dict[key])) 
         
         elif isinstance(temp_dict[key], str):
-            print(f"B str> Adding attribute to: {data_guide}, attribute name: {key}")
+            #print(f"B str> Adding attribute to: {data_guide}, attribute name: {key}")
             # If value of the key is a 'string', an enum attr is added to data_guide. 
             cmds.addAttr(data_guide, ln=key, at="enum", en=temp_dict[key], k=1)
             '''try replace "enum" with "string"'''
         
         elif isinstance(temp_dict[key], list):
-            print(f"C list> Adding attribute to: {data_guide}, attribute name: {key}")
+            #print(f"C list> Adding attribute to: {data_guide}, attribute name: {key}")
             # if valueis a list, checks if list is empty. 
             if len(temp_dict[key]) == 0: 
                 enum_list = "empty"
@@ -86,7 +60,7 @@ def setup(temp_dict, data_guide):
         
         # if float or int, a float attr is added & value is set.
         elif isinstance(temp_dict[key], float):
-            print(f"D float> Adding attribute to: {data_guide}, attribute name: {key}")
+            #print(f"D float> Adding attribute to: {data_guide}, attribute name: {key}")
             cmds.addAttr(data_guide, ln=key, at="float",k=1)
             cmds.setAttr(f"{data_guide}.{key}", temp_dict[key])
         
@@ -95,7 +69,7 @@ def setup(temp_dict, data_guide):
            if not cmds.objExists(data_guide):
                 raise RuntimeError(f"{data_guide} does not exist in the scene.")
            #print()
-           #cmds.addAttr(data_guide, ln=key, at="float",k=1)
+           cmds.addAttr(data_guide, ln=key, at="float",k=1)
            #cmds.setAttr(f"{data_guide}.{key}", temp_dict[key])
         
         # Lock & hide the standard transform attrs in channel box. 
