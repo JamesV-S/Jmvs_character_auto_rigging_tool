@@ -207,7 +207,7 @@ class QtSampler(QWidget):
             # self.data_unique_number = dict["guide_number"]
 
     def add_module(self):
-        # function imports the selected module dynamically during runtim!
+        # Get the selected module from the UI
         module = self.ui.module_picker_ddbox.currentText()
         
         sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
@@ -222,7 +222,16 @@ class QtSampler(QWidget):
         print("existing MODULE", module," ///// ","module_path: ", module_path, "print from ui in add_module()" )
         
         # Search for existing modules of the same type in the scene
-        existing_guides = cmds.ls(f"master_*_{module}_*")
+
+        # if module has no side : f"master_*_{module}"
+        if "spine" in module:
+            existing_guides = cmds.ls(f"master_*_{module}")
+            print("WHOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+        else:
+            existing_guides = cmds.ls(f"master_*_{module}_*")
+            print("NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+            
+        #existing_guides = cmds.ls(f"master_*_{module}_*")
         existing_ids = []
         
         # Extract unique IDs from existing guides

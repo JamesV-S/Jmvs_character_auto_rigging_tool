@@ -154,7 +154,7 @@ class Guides_class():
                 cmds.scale(self.module.guide_scale+1, self.module.guide_scale+1, 
                             self.module.guide_scale+1, imported)
                 guide = cmds.rename(imported[0], f"guide_{self.unique_id}_{x}{side}")
-                #utils.colour_guide_custom_shape(guide)
+                utils.colour_guide_custom_shape(guide)
             
             if "root" in x and root_exists is True:
                 master_guide = guide
