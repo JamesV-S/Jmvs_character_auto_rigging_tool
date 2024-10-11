@@ -12,13 +12,16 @@ scale = 1
 
 
 class Guides_class():
-    def __init__(self, accessed_module, offset, side, to_connect_to, use_existing_attr, orientation):
+    def __init__(self, accessed_module, offset, side, to_connect_to, use_existing_attr, orientation, numb_id):
         self.module = importlib.import_module(f"systems.modules.{accessed_module}")
         # Reload the module for any updates!
         importlib.reload(self.module)
 
         # [if] statement for "self.create_guide" variable {if == "hand"}
         # else:
+
+        self.unique_id = numb_id
+
         print("If you are seeing this, its is coming from 'create_guides.Guides_class, innit def!'")
         self.create_guide = self.The_guides(accessed_module, offset, side, use_existing_attr, orientation)
     
@@ -91,8 +94,7 @@ class Guides_class():
                 print("ORIENTATION IS 'yzx' ###")
                 pos_dict = self.module.system_pos_yzx
                 rot_dict = self.module.system_rot_yzx
-        
-        number_id = "0"
+
         tmp_list = []
         module_list = cmds.ls("data*")
         for obj in module_list:
@@ -103,18 +105,6 @@ class Guides_class():
             elif accessed_module == "root_basic" and "root" in obj:
                 tmp_list.append(obj)
         
-        numbers_unfiltered = []
-        for data_guide in tmp_list:
-            if cmds.attributeQuery("guide_number", node=data_guide, exists=True):
-                numbers_unfiltered.append(cmds.getAttr(f"{data_guide}.guide_number"))
-            else:
-                cmds.warning(
-                    f"guide_number attr doesn't exist on this node '{data_guide}',guide seup might not work as sexpected to."
-                             )
-
-        if numbers_unfiltered:
-            numbers_unfiltered.sort()
-            number_id = numbers_unfiltered[-1]+1
 
         # 4) Create master guide for module by looking in each module's variable's
         if "root" in self.module.system:
@@ -122,7 +112,6 @@ class Guides_class():
         # set the master guides for the fingers on "biped_finger" module 
         elif "biped_phal_proximal" in self.module.system:
             master_guide = "biped_phal_proximal"
-        # set the master guides for the fingers on "biped_hand" module
         elif "thumb_phal_proximal" in self.module.system:
             master_guide = "thumb_phal_proximal"
         elif "index_phal_proximal" in self.module.system:
@@ -135,7 +124,7 @@ class Guides_class():
             master_guide = "pinky_phal_proximal"
         else:
             master_guide = control_shape.controlTypes(
-                f"master_{number_id}_{accessed_module}{side}", [5, 5, 5]).create_octagon() # f"master_{number_id}_{accessed_module}{side}"
+                f"master_{self.unique_id}_{accessed_module}{side}", [5, 5, 5]).create_octagon()
             cmds.setAttr(f"{master_guide}.overrideEnabled", 1)
             cmds.setAttr(f"{master_guide}.overrideColor", 9)
             cmds.scale(8, 8, 8, master_guide)
@@ -157,16 +146,15 @@ class Guides_class():
                 print(">>>>>>>>root print in creation()")
                 root_exists = True
                 
-                guide = cmds.rename(imported[0], f"guide_{number_id}_{x}") # f"guide_{number_id}_root" f"{guide_pref}_{number_id}_root"
+                guide = cmds.rename(imported[0], f"guide_{self.unique_id}_{x}")
                 print(f"root guide: {guide}")
                 utils.colour_root_control(guide)
             else:
                 imported = cmds.file(GUIDE_FILE, i=1, namespace="guide_shape_import", rnn=1)
                 cmds.scale(self.module.guide_scale+1, self.module.guide_scale+1, 
                             self.module.guide_scale+1, imported)
-                guide = cmds.rename(imported[0], f"guide_{number_id}_{x}{side}") # f"guide_{number_id}_{x}{side}", f"{guide_pref}_{number_id}_{x}{side}"
-                # Set the colour of the guide shape!
-                utils.colour_guide_custom_shape(guide)
+                guide = cmds.rename(imported[0], f"guide_{self.unique_id}_{x}{side}")
+                #utils.colour_guide_custom_shape(guide)
             
             if "root" in x and root_exists is True:
                 master_guide = guide
@@ -176,19 +164,7 @@ class Guides_class():
                 print("print else <<<<<")
                 guide_list.append(guide)
             
-            '''
-            for shape in imported[1:]:
-                shape = shape.split("|")[-1]
-                cmds.rename(shape, f"{guide}_shape_#")
-            '''    
-            #except RuntimeError:
-             #   print("Couldn't load guide shape file, using basic shapes instead")
-              #  cmds.spaceLocator(n=x)
-            '''
-            if "root" in x: # Ignore the orientation!
-                pos = root_pos_dict[x]
-                rot = root_rot_dict[x]
-            '''
+           
             # Use the selected dict's to set location and rotation
             pos = pos_dict[x]
             rot = rot_dict[x]
@@ -199,14 +175,12 @@ class Guides_class():
             cmds.addAttr(guide, ln="original_guide", at="enum", en=x, k=0)
 
         # 6) Parenting & connecting guides
-        
-        # Reverse the guides & parent together w/ visual connectors created 
-        # between them using the utility function!
         guide_list.reverse()
         ui_guide_list = guide_list
         guide_list.append(master_guide)
         #print("1: ", guide_list)
         #print("2: ", len(guide_list))
+        print(f"CONNECTING GUIDES create_guides: {guide_list}")
         for i in range(len(guide_list)):
             try:
                 cmds.parent(guide_list[i], guide_list[i+1])
@@ -227,22 +201,18 @@ class Guides_class():
         if "root" in self.module.system: # or "proximal" in self.module.system:
             data_guide_name = f"data_{master_guide}"
         else:
-            data_guide_name = master_guide.replace("master_", "data_")
+            data_guide_name = master_guide.replace("master_", f"data_")
         cmds.spaceLocator(n=data_guide_name)
         cmds.matchTransform(data_guide_name, master_guide)
         cmds.parent(data_guide_name, master_guide)
         #----------------------------------------------------------------------
 
         # 7) Add attributes
-        
         self.available_rig_modules_type = ":".join(self.module.available_rig_types) 
         # self.module.available_rig_types is the variable found within each module, arm, leg & so on. 
         # In this case it's getting the '["IK", "FK", "IKFK"]' varible for the custom attribiutes!
         
         custom_attribute = self.add_custom_attr(guide_list, master_guide, use_existing_attr, accessed_module)
-        # Add ones to the master guide & then proxy to the other guide shapes
-        # such as:
-        # If these attributes are simply locked enum attributes I'll use my utils functions
         cmds.addAttr(master_guide, ln="is_master", at="enum", en="True", k=0)
         cmds.addAttr(master_guide, ln="base_module", at="enum", en=accessed_module, k=0) # mdl_attr
         cmds.addAttr(master_guide, ln="module_side", at="enum", en=side, k=0)
@@ -281,7 +251,7 @@ class Guides_class():
             "guide_connector_list": guide_connector_list,
             "ui_guide_list": ui_guide_list, 
             "data_guide": data_guide_name,
-            "guide_number": number_id
+            "guide_number": self.unique_id
         }
         return ui_dict
         
@@ -343,3 +313,38 @@ class Guides_class():
                 add_new_attr(attr_name, attr_details)
             add_proxy(system[:-1], skip_attr=[], proxy_item=system[-1], add_missing=False)
 
+'''
+numbers_unfiltered = []
+for data_guide in tmp_list:
+    if cmds.attributeQuery("guide_number", node=data_guide, exists=True):
+        numbers_unfiltered.append(cmds.getAttr(f"{data_guide}.guide_number"))
+    else:
+        cmds.warning(
+            f"guide_number attr doesn't exist on this node '{data_guide}',guide seup might not work as sexpected to."
+                        )
+'''
+# Increment the counter
+# self.unique_id_counter += 1
+#print("Create_guides, number id:::: ", type(number_unique))
+#number_unique += 1 
+# number_id = str(number_unique) 
+'''
+if numbers_unfiltered:
+    numbers_unfiltered.sort()
+    number_id = numbers_unfiltered[-1]+1
+            '''
+
+'''
+for shape in imported[1:]:
+    shape = shape.split("|")[-1]
+    cmds.rename(shape, f"{guide}_shape_#")
+    '''
+   
+#except RuntimeError:
+    #   print("Couldn't load guide shape file, using basic shapes instead")
+    #  cmds.spaceLocator(n=x)
+'''
+if "root" in x: # Ignore the orientation!
+    pos = root_pos_dict[x]
+    rot = root_rot_dict[x]
+'''

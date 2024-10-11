@@ -26,7 +26,8 @@ class mirror_data():
 
     def create_mirrored_guides(self): # create locators to act as guides for the mirrored side!
         GUIDE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
-                                "imports","guide_shape.abc")
+                                  "..", "imports","guide_shape.abc")
+        print(f"GUIDE SHAPE FILE : {GUIDE_FILE}")
         tmp_guide_list = []
         guide_connector_list = []
 
@@ -45,8 +46,13 @@ class mirror_data():
             else:
                 guide_name =  f"{guide[:-2]}{self.side}" # guide_0_shoulder_L remove '_L' & add '_R'
                 tmp = cmds.file(GUIDE_FILE, i=1, namespace="guide_shape_import", rnn=1)
-                utils.colour_guide_custom_shape(guide)
+                cmds.scale(self.module.guide_scale+1, self.module.guide_scale+1, 
+                            self.module.guide_scale+1, tmp)
                 imported_guide = guide = cmds.rename(tmp[0], guide_name)
+                utils.colour_guide_custom_shape(guide_name) #       shape_list = cmds.listRelatives(custom_crv, shapes=1)
+                                                                    #                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                                                    # ValueError: No object matches name: guide_0_wrist_R
+                
 
             cmds.xform(imported_guide, t=pos, ro=rot)
             tmp_guide_list.append(imported_guide)
@@ -58,14 +64,14 @@ class mirror_data():
         cmds.parent(tmp_guide_list, w=1)
         cmds.makeIdentity(tmp_guide_list[-1], apply=1, s=1)
         cmds.delete(grp_name)
+
         
+        print(f"CONNECTING GUIDES Mirror : {tmp_guide_list}")
         for guide in range(len(tmp_guide_list)):
             try:
                 cmds.parent(tmp_guide_list[guide], tmp_guide_list[guide+1])
                 # create connectors:
-                guide_connector = utils.guide_curve_connector(
-                    tmp_guide_list[guide], tmp_guide_list[guide+1]
-                    )
+                guide_connector = utils.guide_curve_connector(tmp_guide_list[guide], tmp_guide_list[guide+1])
                 guide_connector_list.append(guide_connector)
             except:
                 pass # ignore trying to parent last guide in the list
@@ -74,7 +80,7 @@ class mirror_data():
             cmds.parent(guide_connector_list, "grp_guideConnector_clusters")
         else: 
             cmds.group(guide_connector_list, n="grp_guideConnector_clusters", w=1)
-        # cmds.select(cl=1)
+        cmds.select(cl=1)
         
         self.master_guide = tmp_guide_list[-1]
         self.guide_list = tmp_guide_list
@@ -214,8 +220,9 @@ class mirror_data():
         # Update the 'data_to_be_made' dict with this new data
         self.data_to_be_checked.update(temp_otherside_systems_to_be_made)
         print(f"Data for the mirror class{self.data_to_be_checked}")
-
-        guide_data.setup(temp_dictionary, self.data_guide)
+        
+        if mirror_attribute == "Yes":
+            guide_data.setup(temp_dictionary, self.data_guide)
         
     def get_mirror_data(self):
         return self.data_to_be_checked

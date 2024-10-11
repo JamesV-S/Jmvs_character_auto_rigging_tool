@@ -66,7 +66,7 @@ class QtSampler(QWidget):
         self.init_existing_module()
 
         # Initialise a counter for unique ID
-        self.unique_id_counter = 0
+        #self.unique_id_counter = 0
 
         #self.ui.hand_module_btn.clicked.connect(self.temp_hand_func)
         # Tab 1 - RIG
@@ -208,52 +208,65 @@ class QtSampler(QWidget):
 
     def add_module(self):
         # function imports the selected module dynamically during runtim!
-        
         module = self.ui.module_picker_ddbox.currentText()
+        
         sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
                                      "systems", "modules"))
         # you are calling the import_module function from the importlib module
         module_path = importlib.import_module(module)
         importlib.reload(module_path)
         
-        print("module_path: ", module_path, "print from ui in add_module()" )
+        #----------------------------------------------------------------------
+        #module_match_dict = {"biped_arm.py": ""}
+
+        print("existing MODULE", module," ///// ","module_path: ", module_path, "print from ui in add_module()" )
         
+        # Search for existing modules of the same type in the scene
+        existing_guides = cmds.ls(f"master_*_{module}_*")
+        existing_ids = []
+        
+        # Extract unique IDs from existing guides
+        for guide in existing_guides:
+            parts = guide.split('_')
+            if len(parts) > 2 and parts[1].isdigit():
+                existing_ids.append(int(parts[1]))
+     
+        # Determine the next unique ID 
+        if existing_ids:
+            self.unique_id_counter = max(existing_ids) + 1
+        else:
+            self.unique_id_counter = 0 
+
+        self.numb_id = self.unique_id_counter
+        print(f"Assigned unique ID: {self.numb_id}")
+        
+        #----------------------------------------------------------------------
+        # self.numb_id = 0
         offset = [self.ui.offset_Xaxes_spinbx.value(), 
                   self.ui.offset_Yaxes_spinbx.value(), 
                   self.ui.offset_Zaxes_spinbx.value()
                   ]
-
+         
         # create_guides.py is needed! > in the systems folder!
-        guides = create_guides.Guides_class(
-            module, offset, module_path.side, to_connect_to=[], 
-            use_existing_attr=[], orientation=self.orientation_func()
-        )
+        guides = create_guides.Guides_class(module, offset, module_path.side, to_connect_to=[], 
+            use_existing_attr=[], orientation=self.orientation_func(), numb_id=self.numb_id)
         guide = guides.collect_guides()
         
         print(f"GUIIDE RETURNED DICT: {guide}")
         # If guides are succesfully created, this extracts important elements like these:
         if guide:
-            guide_number = self.unique_id_counter
-            #if "root" in module.system:
-             #   master_guide = f"guide_{guide_number}_root"
-            #else:    
             master_guide =  guide["master_guide"] # guide["master_guide"] - f"master_{guide_number}_{module}"
-            
             guide_connector_list = guide["guide_connector_list"]
             systems_to_connect = guide["system_to_connect"]
             guide_list = guide["ui_guide_list"]
             data_guide = guide["data_guide"]
+            number_int = guide["guide_number"]
             
-            print(f"Grab number of the current module added: {guide_number}") # output: 0 (this is the first number set for a module)
-            
-            # Increment the counter
-            # self.unique_id_counter += 1
-            guide_number += 1
-
             # Append the 'master_guide' to a list of created guides 
             self.created_guides.append(master_guide)
             print(f"ADD_MODULE, created_guides == {self.created_guides}")
             # create a temp dict to store details abt the module and its guides... 
+            
             temp_dictionary = {
                 "module": module, 
                 "master_guide": master_guide, 
@@ -267,11 +280,9 @@ class QtSampler(QWidget):
                 "fk_ctrl_list": [],
                 "ik_joint_list": [],
                 "fk_joint_list": [], 
-                "guide_number": guide_number
+                "guide_number": number_int
                 
-            } # When it comes to joint creation I need to add ik/fk ctrl & 
-            # joint list as well as rev_lovcators
-            
+            }            
             # add the temp dict to systems to be made, to manage all systems that eed to be constructed. 
             self.systems_to_be_made[master_guide] = temp_dictionary
             print(f"temp dict for setup: {temp_dictionary}")
@@ -283,10 +294,7 @@ class QtSampler(QWidget):
         self.ui.offset_Xaxes_spinbx.setValue(0)
         self.ui.offset_Yaxes_spinbx.setValue(0)
         self.ui.offset_Zaxes_spinbx.setValue(0)
-        
-        
-        
-        # clear the selection
+         # clear the selection
         cmds.select(cl=1)
     
     def remove_module(self):
@@ -311,29 +319,6 @@ class QtSampler(QWidget):
 
         print(f"The systems to be made are:>> {self.systems_to_be_made}")
         '''guide root:'''
-        # {'guide_root': {'module': 'root_basic', 'master_guide': 'guide_root', 
-        # 'guide_list': ['crv_guide_COG'], 
-        # 'scale': 1, 
-        # 'joints': [], 
-        # 'side': 'None', 
-        # 'guide_connectors': ['crv_guide_COG'], 
-        # 'systems_to_connect': [], 
-        # 'ik_ctrl_list': [], 
-        # 'fk_ctrl_list': [], 
-        # 'ik_joint_list': [], 
-        # 'fk_joint_list': []},
-        '''guide biped arm:'''
-        # 'master_biped_arm_l_1': {'module': 'biped_arm', 'master_guide': 'master_biped_arm_l_1', 
-        # 'guide_list': ['crv_guide_wrist_l', 'crv_guide_elbow_l', 'crv_guide_shoulder_l', 'crv_guide_clavicle_l', 'crv_master_biped_arm_l_1'], 
-        # 'scale': 1, 
-        # 'joints': [], 
-        # 'side': '_l', 
-        # 'guide_connectors': ['crv_guide_wrist_l', 'crv_guide_elbow_l', 'crv_guide_shoulder_l', 'crv_guide_clavicle_l', 'crv_master_biped_arm_l_1'], 
-        # 'systems_to_connect': ['guide_clavicle_l', 'guide_COG'], 
-        # 'ik_ctrl_list': [], 
-        # 'fk_ctrl_list': [], 
-        # 'ik_joint_list': [], 
-        # 'fk_joint_list': []}}
         print(f"Orientation from UI <@@@> {self.ui.orientation_ddbox.currentText()}")
         
         
@@ -342,7 +327,6 @@ class QtSampler(QWidget):
             self.created_guides, system="rig"
         )
         
-
         # Not too sure what this is doing, if i'd have to guess it's 
         # adding the joint list to the dictionary...
         num = 0

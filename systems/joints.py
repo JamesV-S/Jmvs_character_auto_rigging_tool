@@ -7,12 +7,12 @@ def get_joint_list(orientation, skeleton_roots, system):
     for top_skeleton_joint in skeleton_roots:
         # Implement name check for unique naming
         # The name concerning the guides list provided, so there are no duplicates! 
-        joint_list = joint(orientation, top_skeleton_joint, system)
+        joint_list = joint(top_skeleton_joint, system)
         jnts_list.append(joint_list)
     
     return jnts_list
 
-def joint(orientation, top_skeleton_joint, system):
+def joint(top_skeleton_joint, system):
     prefix = "jnt"
     jnt_tag = f"{prefix}_{system}_"
     jnt_names = []
