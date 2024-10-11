@@ -37,7 +37,7 @@ twist_joint= {
     "end": "ankle"
 }
 
-side = "_l"
+side = "_L"
 stretch = True
 space_swapping = ["hip","root","COG","Custom"]
 guide_scale = 1

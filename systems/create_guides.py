@@ -66,10 +66,10 @@ class Guides_class():
                                  "imports", "ctrl_root_octagon_import.abc")
        # print("down here")
         #imported = cmds.file(ROOT_FILE, i=1, rnn=1)
-        number_id = "0"
+        
         guide_list = []
         root_exists = False
-        guide_pref = f"guide_{number_id}"
+        # guide_pref = f"guide_{number_id}"
         
         # 2) Determine Side
         if self.module.side == "None":
@@ -78,10 +78,6 @@ class Guides_class():
             side = self.module.side
 
         # Orientation:
-        # gets 2 options from cicked: 'XYZ', 'YZX' DONE
-        # returns the 2 options
-        # How do I then use them?
-        # If the orientation returned is 'XYZ', use the xyz dictionary!
         if self.module.has_orientation == "None": # root_basic
             pos_dict = self.module.system_pos
             rot_dict = self.module.system_rot
@@ -96,7 +92,7 @@ class Guides_class():
                 pos_dict = self.module.system_pos_yzx
                 rot_dict = self.module.system_rot_yzx
         
-        
+        number_id = "0"
         tmp_list = []
         module_list = cmds.ls("data*")
         for obj in module_list:
@@ -139,7 +135,7 @@ class Guides_class():
             master_guide = "pinky_phal_proximal"
         else:
             master_guide = control_shape.controlTypes(
-                f"master_{number_id}_{accessed_module}{side}", [5, 5, 5]).create_octagon()
+                f"master_{number_id}_{accessed_module}{side}", [5, 5, 5]).create_octagon() # f"master_{number_id}_{accessed_module}{side}"
             cmds.setAttr(f"{master_guide}.overrideEnabled", 1)
             cmds.setAttr(f"{master_guide}.overrideColor", 9)
             cmds.scale(8, 8, 8, master_guide)
@@ -161,14 +157,14 @@ class Guides_class():
                 print(">>>>>>>>root print in creation()")
                 root_exists = True
                 
-                guide = cmds.rename(imported[0], f"{guide_pref}_root") # f"{guide_pref}_root") f"{guide_pref}_{number_id}_root"
+                guide = cmds.rename(imported[0], f"guide_{number_id}_{x}") # f"guide_{number_id}_root" f"{guide_pref}_{number_id}_root"
                 print(f"root guide: {guide}")
                 utils.colour_root_control(guide)
             else:
                 imported = cmds.file(GUIDE_FILE, i=1, namespace="guide_shape_import", rnn=1)
                 cmds.scale(self.module.guide_scale+1, self.module.guide_scale+1, 
                             self.module.guide_scale+1, imported)
-                guide = cmds.rename(imported[0], f"{guide_pref}_{x}{side}") # f"{guide_pref}_{x}{side}"), f"{guide_pref}_{number_id}_{x}{side}"
+                guide = cmds.rename(imported[0], f"guide_{number_id}_{x}{side}") # f"guide_{number_id}_{x}{side}", f"{guide_pref}_{number_id}_{x}{side}"
                 # Set the colour of the guide shape!
                 utils.colour_guide_custom_shape(guide)
             
@@ -209,16 +205,15 @@ class Guides_class():
         guide_list.reverse()
         ui_guide_list = guide_list
         guide_list.append(master_guide)
-        print("1: ", guide_list)
-        print("2: ", len(guide_list))
+        #print("1: ", guide_list)
+        #print("2: ", len(guide_list))
         for i in range(len(guide_list)):
             try:
                 cmds.parent(guide_list[i], guide_list[i+1])
                 guide_connector = utils.guide_curve_connector(guide_list[i], guide_list[i+1])
                 guide_connector_list.append(guide_connector)
             except:
-                print("This is the end of the list of shapes to create a connector between!")
-                pass # This is the end of the list of shapes to create a connector between!
+                pass # ignore last element of the list erroring.
         
         # Guide connectors are grouped under this grp: 
         if "grp_guideConnector_clusters" in cmds.ls("grp_guideConnector_clusters"):
@@ -272,11 +267,9 @@ class Guides_class():
                     control_shape_instance.return_filtered_list(type=ikfk, object=guide)
                     
                     control_shape_list = control_shape_instance.return_list()
-                    print(control_shape_list)
-                    print("CONTROL SHAPE LIST >>>>>>>>>>>>>>>> ", type(control_shape_list))
-                    
+                    print("ctrl_shape_list : ", control_shape_list)                    
                     control_shape_en = ":".join(control_shape_list)
-                    print("With guide_number too!: ", f"{guide[8:]}_{ikfk}_control")
+                    print("Create_guides <(Line 275)> CONTROL SHAPE INDEX: ", f"{guide[8:]}_{ikfk}_control")
                     cmds.addAttr(guide, ln=f"{guide[8:]}_{ikfk}_control", 
                                  at="enum", en=control_shape_en, k=1)
         

@@ -26,7 +26,7 @@ twist_joint= {
     "end": "wrist"
 }
 # If axis_orientation = a specific axis, use that specified system_pos
-side = "_l"
+side = "_L"
 stretch = True
 space_swapping = ["shoulder","root","COG","Custom"]
 guide_scale = 1

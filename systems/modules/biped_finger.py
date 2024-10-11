@@ -30,5 +30,5 @@ has_orientation = "yes"
 
 # somewhere in space with a locator that loads in from selecting checkbox on my ui
 number_of_fingers = [] # This the option to add as many pibed fingers you want
-side = "_l"
+side = "_L"
 available_rig_types = ["FK", "IK", "IKFK"]

@@ -150,5 +150,5 @@ if axis_orientation == "yzx":
     palm_system_rot = palm_system_rot_yzx
     print[f"yzx orientation"]
 '''
-side = "_l"
+side = "_L"
 available_rig_types = ["FK", "IK", "IKFK"]

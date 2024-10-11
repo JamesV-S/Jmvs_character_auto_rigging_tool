@@ -65,6 +65,9 @@ class QtSampler(QWidget):
         self.systems_to_be_made = {}
         self.init_existing_module()
 
+        # Initialise a counter for unique ID
+        self.unique_id_counter = 0
+
         #self.ui.hand_module_btn.clicked.connect(self.temp_hand_func)
         # Tab 1 - RIG
         # if biped_finger is the chosen then enable the finger number ddbox
@@ -201,6 +204,7 @@ class QtSampler(QWidget):
             master_guide = dict["master_guide"]
             self.created_guides.append(master_guide)
             self.systems_to_be_made[master_guide] = dict
+            # self.data_unique_number = dict["guide_number"]
 
     def add_module(self):
         # function imports the selected module dynamically during runtim!
@@ -209,7 +213,7 @@ class QtSampler(QWidget):
         sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
                                      "systems", "modules"))
         # you are calling the import_module function from the importlib module
-        module_path = importlib.import_module(module) 
+        module_path = importlib.import_module(module)
         importlib.reload(module_path)
         
         print("module_path: ", module_path, "print from ui in add_module()" )
@@ -218,24 +222,37 @@ class QtSampler(QWidget):
                   self.ui.offset_Yaxes_spinbx.value(), 
                   self.ui.offset_Zaxes_spinbx.value()
                   ]
-    
+
         # create_guides.py is needed! > in the systems folder!
-        guides = create_guides.Guides_class(module, offset, module_path.side, to_connect_to=[], use_existing_attr=[], orientation=self.orientation_func())
+        guides = create_guides.Guides_class(
+            module, offset, module_path.side, to_connect_to=[], 
+            use_existing_attr=[], orientation=self.orientation_func()
+        )
         guide = guides.collect_guides()
+        
         print(f"GUIIDE RETURNED DICT: {guide}")
         # If guides are succesfully created, this extracts important elements like these:
         if guide:
-            master_guide = guide["master_guide"]
+            guide_number = self.unique_id_counter
+            #if "root" in module.system:
+             #   master_guide = f"guide_{guide_number}_root"
+            #else:    
+            master_guide =  guide["master_guide"] # guide["master_guide"] - f"master_{guide_number}_{module}"
+            
             guide_connector_list = guide["guide_connector_list"]
             systems_to_connect = guide["system_to_connect"]
             guide_list = guide["ui_guide_list"]
             data_guide = guide["data_guide"]
-            guide_number = guide["guide_number"]
-            # you would have if statement if rev_locators in guide  make a vairable for it, otherwise rev_locators = [] 
             
+            print(f"Grab number of the current module added: {guide_number}") # output: 0 (this is the first number set for a module)
+            
+            # Increment the counter
+            # self.unique_id_counter += 1
+            guide_number += 1
+
             # Append the 'master_guide' to a list of created guides 
             self.created_guides.append(master_guide)
-            
+            print(f"ADD_MODULE, created_guides == {self.created_guides}")
             # create a temp dict to store details abt the module and its guides... 
             temp_dictionary = {
                 "module": module, 
@@ -266,6 +283,8 @@ class QtSampler(QWidget):
         self.ui.offset_Xaxes_spinbx.setValue(0)
         self.ui.offset_Yaxes_spinbx.setValue(0)
         self.ui.offset_Zaxes_spinbx.setValue(0)
+        
+        
         
         # clear the selection
         cmds.select(cl=1)
@@ -318,8 +337,10 @@ class QtSampler(QWidget):
         print(f"Orientation from UI <@@@> {self.ui.orientation_ddbox.currentText()}")
         
         
-        rig_jnt_list = joints.get_joint_list(self.ui.orientation_ddbox.currentText(),
-                                              self.created_guides, system="rig")
+        rig_jnt_list = joints.get_joint_list(
+            self.ui.orientation_ddbox.currentText(), 
+            self.created_guides, system="rig"
+        )
         
 
         # Not too sure what this is doing, if i'd have to guess it's 
@@ -327,14 +348,14 @@ class QtSampler(QWidget):
         num = 0
         for dict in self.systems_to_be_made.values():
             dict["joints"] = rig_jnt_list[num]
-            num = num+1
+            num += 1
          
         mirror_module = mirror_rig.mirror_data(self.systems_to_be_made)
         self.systems_to_be_made = mirror_module.get_mirror_data()
         
         connect_modules.attach_jnts(self.systems_to_be_made, system="rig")
         
-        
+        self.hide_guides()
         #rig_jnt_list = 
     
     def create_rig(self):
@@ -342,6 +363,11 @@ class QtSampler(QWidget):
 
     def polish_rig(self):
         pass
+
+    def hide_guides(self):
+        for key in self.systems_to_be_made.values():
+            cmds.hide(key["master_guide"])
+        cmds.hide("grp_guideConnector_clusters")
 
 def main():
     ui = QtSampler()

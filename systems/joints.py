@@ -3,7 +3,7 @@ import maya.cmds as cmds
 
 def get_joint_list(orientation, skeleton_roots, system):
     jnts_list = []
-
+    print(f"JOINTS, skeleton_roots == {skeleton_roots}")
     for top_skeleton_joint in skeleton_roots:
         # Implement name check for unique naming
         # The name concerning the guides list provided, so there are no duplicates! 
@@ -18,10 +18,11 @@ def joint(orientation, top_skeleton_joint, system):
     jnt_names = []
     list_ctrls = []
     list = []
-
+    print(f"JOINTS, top_top_skeleton_joint == {top_skeleton_joint}")
     # make list w/ all transform type descendants of var
-    list = cmds.listRelatives(top_skeleton_joint, ad=1, type="transform")
     print(f"systems>joints.py(joint) the list is: {list}")
+    list = cmds.listRelatives(top_skeleton_joint, ad=1, type="transform")
+    
 
     # If top_skeleton_joint contains "root" append it to the list
     if "root" in top_skeleton_joint:

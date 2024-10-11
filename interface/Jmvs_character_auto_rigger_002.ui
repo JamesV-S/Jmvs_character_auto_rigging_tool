@@ -657,12 +657,12 @@
          <widget class="QComboBox" name="whichside_ddbox">
           <item>
            <property name="text">
-            <string>_l</string>
+            <string>L</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>_r</string>
+            <string>R</string>
            </property>
           </item>
          </widget>
