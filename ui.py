@@ -344,10 +344,6 @@ class QtSampler(QWidget):
        
         # DON'T DO THAT, YOURE ADDING ALL JOINTS TO EACH DICT!
         # ROOT, SPINE, LEG ETC HAVE ALL JOINT LISTS INSTEAD OF DESIGNATED ONES!
-        '''for key in self.systems_to_be_made.values():
-            key.update({"joints": rig_jnt_list})
-        print("RIG JOINTTTTTTTTTTTTT", self.systems_to_be_made)
-        '''
         self.hide_guides()
         #rig_jnt_list = 
     

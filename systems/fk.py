@@ -28,7 +28,7 @@ class create_fk_sys():
         # Instead of having to adapt for a leg or arm or biped or quad 
         # - creare for one & read data to fit the right module.
         for x in range(len(joint_fk_list)):
-            print(f"'create_fk_sys()', guide: {joint_fk_list[x][6:]}")
+            #print(f"'create_fk_sys()', guide: {joint_fk_list[x][6:]}")
             control_module = control_shape.Controls(scale, guide=f"{joint_fk_list[x][6:]}", 
                 ctrl_name=f"ctrl_fk{joint_fk_list[x][6:]}", rig_type="fk" 
                 )

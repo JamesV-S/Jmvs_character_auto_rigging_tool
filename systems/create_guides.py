@@ -124,7 +124,7 @@ class Guides_class():
             master_guide = "pinky_phal_proximal"
         else:
             master_guide = control_shape.controlTypes(f"master_{self.unique_id}_{accessed_module}{side}", "octagon")
-            master_guide = str(master_guide) # master_guide is not a string, but rather an instance of an object called controlTypes,
+            master_guide = str(master_guide) # master_guide is not a string, but rather an instance of an controlTypes class.
             print("hmmmm: ", master_guide)
             cmds.setAttr(f"{master_guide}.overrideEnabled", 1)
             cmds.setAttr(f"{master_guide}.overrideColor", 9)
