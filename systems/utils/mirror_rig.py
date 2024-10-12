@@ -80,7 +80,7 @@ class mirror_data():
             cmds.parent(guide_connector_list, "grp_guideConnector_clusters")
         else: 
             cmds.group(guide_connector_list, n="grp_guideConnector_clusters", w=1)
-        cmds.select(cl=1)
+        #cmds.select(cl=1)
         
         self.master_guide = tmp_guide_list[-1]
         self.guide_list = tmp_guide_list
