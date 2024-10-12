@@ -20,7 +20,8 @@ import platform
 
 from systems import (
     create_guides,
-    joints
+    joints, 
+    fk
 )
 
 from systems.utils import (
@@ -37,6 +38,7 @@ importlib.reload(connect_modules)
 importlib.reload(utils)
 importlib.reload(mirror_rig)
 importlib.reload(guide_data)
+importlib.reload(fk)
 
 mayaMainWindowPtr = omui.MQtUtil.mainWindow()
 mayaMainWindow = wrapInstance(int(mayaMainWindowPtr), QWidget)
@@ -100,6 +102,7 @@ class QtSampler(QWidget):
         self.ui.remove_mdl_btn.clicked.connect(self.remove_module)
         self.ui.orientation_ddbox.currentIndexChanged.connect(self.orientation_func)
         self.ui.build_skeleton_btn.clicked.connect(self.create_joints)
+        self.ui.Create_systems_btn.clicked.connect(self.create_rig)
         
         # Tab 2 - SKINNING
         tab2_image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -226,10 +229,10 @@ class QtSampler(QWidget):
         # if module has no side : f"master_*_{module}"
         if "spine" in module:
             existing_guides = cmds.ls(f"master_*_{module}")
-            print("WHOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+            #print("existing_guides without 'side': spine, tail, neck")
         else:
             existing_guides = cmds.ls(f"master_*_{module}_*")
-            print("NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+            #print("existing_guides with 'side': arm, leg")
             
         #existing_guides = cmds.ls(f"master_*_{module}_*")
         existing_ids = []
@@ -319,30 +322,20 @@ class QtSampler(QWidget):
     
 
     def create_joints(self):
-        # initialise in the outut the guide list
-        print("'Build Skeleton' button clicked!")
-
-        # Example is just root & biped arm guide!
-        print(f"Here is the list of created guides in the scene: {self.created_guides}")
-        # ['guide_root', 'master_biped_arm_l_1']
-
+        # master_guides: ['guide_root', 'master_biped_arm_l_1']
         print(f"The systems to be made are:>> {self.systems_to_be_made}")
-        '''guide root:'''
-        print(f"Orientation from UI <@@@> {self.ui.orientation_ddbox.currentText()}")
-        
-        
-        rig_jnt_list = joints.get_joint_list(
-            self.ui.orientation_ddbox.currentText(), 
-            self.created_guides, system="rig"
-        )
+               
+        rig_jnt_list = joints.get_joint_list(self.created_guides, system="rig")
         
         # Not too sure what this is doing, if i'd have to guess it's 
         # adding the joint list to the dictionary...
+        '''
         num = 0
         for dict in self.systems_to_be_made.values():
             dict["joints"] = rig_jnt_list[num]
             num += 1
-         
+        '''
+        
         mirror_module = mirror_rig.mirror_data(self.systems_to_be_made)
         self.systems_to_be_made = mirror_module.get_mirror_data()
         
@@ -352,7 +345,75 @@ class QtSampler(QWidget):
         #rig_jnt_list = 
     
     def create_rig(self):
-        pass
+        # gather master_guide, rig_type = ikfk, (don't need orientation tbh - but u never know)
+        for key in self.systems_to_be_made.values():
+            pass
+            master_guide = key['master_guide']
+            rig_type = cmds.getAttr(f"{master_guide}.{master_guide}_rig_type", asString=1) # name of master_guide
+            orientation = self.orientation_func() # Upper case: XYZ not xyz
+
+            # Import the current module used 
+            sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
+                                        "systems", "modules"))
+            # you are calling the import_module function from the importlib module
+            module = importlib.import_module(key["module"])
+            importlib.reload(module)
+            if key["module"] == "root_basic": 
+                pass
+            else:
+                if rig_type == "FK":
+                    # create fk joints, system & control, then constrain to rig_joints!
+                    print(f"Build 'fk' joints! {master_guide}")
+                    fk_joint_list = joints.joint(master_guide, system="fk")
+                    cmds.select(cl=1)
+                    fk_module = fk.create_fk_sys(fk_joint_list, master_guide, 
+                                                 key['guide_scale'], delete_end=0)
+                elif rig_type == "IK":
+                    print(f"Build 'ik' joints! {master_guide}")
+                    ik_joint_list = joints.joint(master_guide, system="ik")
+                elif rig_type == "IKFK":
+                    print(f"Build 'ikfk' joints! {master_guide}")
+                    fk_joint_list = joints.joint(master_guide, system="fk")
+
+                    ik_joint_list = joints.joint(master_guide, system="ik")
+                else:
+                    cmds.error(f"Fat ERROR: 'rig_type' attr cannot be found!")
+                
+                # get stretch & squash attr & add system if 'Yes'
+                if rig_type == "IKFK" or rig_type == "IK":
+                    squash_stretch_attr = cmds.getAttr(
+                        f"{master_guide}.{master_guide}_squash_stretch", asString=1
+                        )
+                    if squash_stretch_attr == "Yes":
+                        # call squash & stretch system!
+                        print(f"Build squahs_stretch system! {master_guide}")
+                        squash_stretch_instance = []
+        
+        '''system_group.grpSetup(self.ui.rig_master_name.text())''' # What does this do?
+        
+        # Connect systems & add space_swapping!
+        for key in self.systems_to_be_made.values():
+            #rig_type = cmds.getAttr(f"{key['master_guide']}.{key['master_guide']}_rig_type", asString=1)
+            if key["systems_to_connect"]:
+                print(f"connect modules after systems! {master_guide}")
+                systems_to_connect = key["systems_to_connect"]
+                # connect_modules.connect_pilished(systems_to_connect)
+            if rig_type == "IKFK" or rig_type == "IK":
+                print(f"Add space_swap sys {master_guide}")
+                pass
+                # space_swap_mdl = space_swap.SpaceSwapping()
+
+        '''
+        # colour the controls: 
+        colour_dict = {"L_colour":[], "C_colour":[], "R_colour":[]} # C stands for centre so yellow. 
+        
+        ctrl_list = cmds.ls("ctrl_*", type="transform")
+        utils.colour_conrols(ctrl_list, colour_dict)
+
+        system_group.hierarchy_parenting(self.systems_to_be_made)
+
+        cmds.select(cl=1)
+        '''
 
     def polish_rig(self):
         pass

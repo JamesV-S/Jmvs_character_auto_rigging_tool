@@ -44,27 +44,28 @@ class controlShapeList():
 class controlTypes():
     def __init__(self, name, ctrl_type):
         self.ctrl_name = name
-        #module = f"self.create_{ctrl_type}()"
-        #eval(module)
+        module = f"self.create_{ctrl_type}()"
+        print(f"'controlTypes()' MODULE: {module}") # when calling for fk MODULE: self.create_circle()
+        eval(module)
 
     def create_circle(self):
-        self.ctrl_crv = cmds.curve(n=self.ctrl_name, r=1, nr=(1, 0, 0))[0]
-        return self.ctrl_crv
-    
+        self.ctrl_shape = cmds.circle(n=self.ctrl_name, r=1, nr=(1, 0, 0))[0]
+        return self.ctrl_shape
+        
     def create_cube(self):
-        self.ctrl_crv = cmds.curve(n=self.ctrl_name, d=1, 
+        self.ctrl_shape = cmds.curve(n=self.ctrl_name, d=1, 
                                    p=[(0,0,0), (1,0,0), (1,0,1),
                                       (0,0,1), (0,0,0), (0,1,0),
                                       (1,1,0), (1,0,0), (1,1,0),
                                       (1,1,1), (1,0,1), (1,1,1),
                                       (0,1,1), (0,0,1), (0,1,1), (0,1,0)])
         cmds.CenterPivot()
-        cmds.xform(self.ctrl_crv, t=(-.5, -.5, -.5))
+        cmds.xform(self.ctrl_shape, t=(-.5, -.5, -.5))
         cmds.makeIdentity(a=1 ,t=1, r=1, s=0, n=0, pn=1)
-        return self.ctrl_crv
+        return self.ctrl_shape
     
     def create_octagon(self):
-        self.ctrl_crv = cmds.curve(n=self.ctrl_name, d=1, 
+        self.ctrl_shape = cmds.curve(n=self.ctrl_name, d=1, 
                                 p=[(0.287207, 0, 0.676617),
                                     (0.677828, 0, 0.275354),
                                     (0.677828, 0, -0.287207),
@@ -75,14 +76,14 @@ class controlTypes():
                                     (-0.275354, 0, 0.677828),
                                     (0.287207, 0, 0.676617)
                                     ], k=[0, 1, 2, 3, 4, 5, 6, 7, 8])
-        return self.ctrl_crv
+        return self.ctrl_shape
 
     def create_locator(self):
-        self.ctrl_crv = cmds.spaceLocator(n=self.ctrl_name)
-        return self.ctrl_crv
+        self.ctrl_shape = cmds.spaceLocator(n=self.ctrl_name)
+        return self.ctrl_shape
     
     def return_ctrl(self):
-        return self.ctrl_crv
+        return self.ctrl_shape
 
 
 class Controls():
@@ -95,11 +96,12 @@ class Controls():
             self.scale = [self.scale, self.scale, self.scale]
 
         # put this line into a variable so every ctrl in the list has it's control type gotten!
-        control_type = cmds.getAttr(f"{guide}.{guide}_{rig_type}_control_shape", asString=1)
+        control_type = cmds.getAttr(f"guide{guide}.{guide}_{rig_type}_control", asString=1)
         
         # Get a list of possible control shapes
         ctrl_shape_instance = controlShapeList()
         ctrl_list = ctrl_shape_instance.return_list()
+        print(f" CONTROL LIST IN 'Controls()': {ctrl_list}")
         if control_type in ctrl_list: # If the retrieved control shape type is in the list, 
             # it creates the control using ControlTypes and assigns it to self.ctrl.
             control_module = controlTypes(self.ctrl_name ,control_type) 

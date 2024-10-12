@@ -124,7 +124,7 @@ class Guides_class():
             master_guide = "pinky_phal_proximal"
         else:
             master_guide = control_shape.controlTypes(
-                f"master_{self.unique_id}_{accessed_module}{side}", [5, 5, 5]).create_octagon()
+                f"master_{self.unique_id}_{accessed_module}{side}", "octagon")
             cmds.setAttr(f"{master_guide}.overrideEnabled", 1)
             cmds.setAttr(f"{master_guide}.overrideColor", 9)
             cmds.scale(8, 8, 8, master_guide)
@@ -239,8 +239,8 @@ class Guides_class():
                     control_shape_list = control_shape_instance.return_list()
                     print("ctrl_shape_list : ", control_shape_list)                    
                     control_shape_en = ":".join(control_shape_list)
-                    print("Create_guides <(Line 275)> CONTROL SHAPE INDEX: ", f"{guide[8:]}_{ikfk}_control")
-                    cmds.addAttr(guide, ln=f"{guide[8:]}_{ikfk}_control", 
+                    print("Create_guides <(Line 275)> CONTROL SHAPE INDEX: ", f"{guide[6:]}_{ikfk}_control")
+                    cmds.addAttr(guide, ln=f"{guide[5:]}_{ikfk.lower()}_control", 
                                  at="enum", en=control_shape_en, k=1)
         
         # 9) Return UI data

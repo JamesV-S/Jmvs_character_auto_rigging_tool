@@ -30,18 +30,27 @@ TO DO: > Understand why mirrored joints do not wotk with connect_modules.attatch
 
 
 -----------------------------
-WIP. 
-import maya.cmds as cmds
+To do:
 
-def reposition_guide_shape():
-    pass
-    # unparent the selected guide, so it's child doesn't move!
-    # unparent the child too
-    
-    '''A lot easier if i just use grps!'''
-    # sl child > sl selected > aim constraint, depending on orientation setting(write a way to check!)
-    # > aim constraint so selected always looks at child. 
-    # > put the selected into a grp orientation set to world & only move in the
-    
-    # Possibilty of using a live plane plane & grp that points at the child so the orientation only moves in one 
+> Get all systems, ikfk, ikfkswitch, space_swap, squash & stretch added!
+- Joints
+- System
+- constraint to rig joints
+- update dictionary
+
+> Edit how the attributes on the mirrored guides work:
+- The mirrored attributes shouldn't be linked to the orginal one like a proxy attr.
+- The joints created shoudln't acc be mirrored (axis facing opposite dirction), since 
+guides are created for the mirrored module, create joints off of them!
+
+> Add button to each section on the ui.
+- Switch back & forth between blueprints, rig_joints, systems, polished.
+
+> Add Advanced systems to the rig:
+- Head/neck module (change number of neck joints
+[either as an option or be able to add guides into the added module]), & head bend system!
+- ribbon system (arm twist & what not)
+- twist system (New method)
+- reverse foot
+- Corrective_joints/sliding_joints (be able to load guides for them to position on a rig!)
 

@@ -1,7 +1,7 @@
 
 import maya.cmds as cmds
 
-def get_joint_list(orientation, skeleton_roots, system):
+def get_joint_list(skeleton_roots, system):
     jnts_list = []
     print(f"JOINTS, skeleton_roots == {skeleton_roots}")
     for top_skeleton_joint in skeleton_roots:
