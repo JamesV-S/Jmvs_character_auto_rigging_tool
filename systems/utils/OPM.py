@@ -5,7 +5,6 @@ import maya.cmds as cmds
 def OpmCleanTool(ctrl):
     object = ctrl
     cmds.select(object)
-    print("Is it working? aka OPM")
 
     TRANSFORM_NODETYPES = ["transform", "joint"]
 

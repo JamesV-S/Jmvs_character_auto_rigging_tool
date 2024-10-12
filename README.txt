@@ -27,7 +27,15 @@ TO DO: > Understand why mirrored joints do not wotk with connect_modules.attatch
 - for context this is being used within a class to create joints on blueprint guides for a modular auto rigger within autodesk maya using python 
 
 
-
+-----------------------------
+[-] Issues to solve:
+- By haveing guides already in a scene, 'data_guide' works to store the necessary data, 
+and joints are created & stored in modular dictionary's properly.
+HOWEVER, when building the system, everything works except the ctrl's are a 
+cluster of points only visible thru their cvs!
+- Basically the ctrls arnt loading properly. 
+They a visible if the guides were created with the same loaded tool
+> Figure out this issue. 
 
 -----------------------------
 To do:

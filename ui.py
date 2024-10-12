@@ -329,18 +329,25 @@ class QtSampler(QWidget):
         
         # Not too sure what this is doing, if i'd have to guess it's 
         # adding the joint list to the dictionary...
-        '''
+        
+        
         num = 0
-        for dict in self.systems_to_be_made.values():
-            dict["joints"] = rig_jnt_list[num]
+        for key in self.systems_to_be_made.values():
+            key["joints"] = rig_jnt_list[num]
             num += 1
-        '''
+        
         
         mirror_module = mirror_rig.mirror_data(self.systems_to_be_made)
         self.systems_to_be_made = mirror_module.get_mirror_data()
         
         connect_modules.attach_jnts(self.systems_to_be_made, system="rig")
-        
+       
+        # DON'T DO THAT, YOURE ADDING ALL JOINTS TO EACH DICT!
+        # ROOT, SPINE, LEG ETC HAVE ALL JOINT LISTS INSTEAD OF DESIGNATED ONES!
+        '''for key in self.systems_to_be_made.values():
+            key.update({"joints": rig_jnt_list})
+        print("RIG JOINTTTTTTTTTTTTT", self.systems_to_be_made)
+        '''
         self.hide_guides()
         #rig_jnt_list = 
     
@@ -365,15 +372,23 @@ class QtSampler(QWidget):
                     # create fk joints, system & control, then constrain to rig_joints!
                     print(f"Build 'fk' joints! {master_guide}")
                     fk_joint_list = joints.joint(master_guide, system="fk")
-                    cmds.select(cl=1)
                     fk_module = fk.create_fk_sys(fk_joint_list, master_guide, 
                                                  key['guide_scale'], delete_end=0)
+                    fk_ctrls = fk_module.get_ctrls()
+                    print(f"list 1: {fk_joint_list}, list 2: {key['joints']}")
+                    utils.constraint_from_lists_1to1(fk_joint_list, key["joints"],mo=1)
+                    key.update({"fk_joint_list": fk_joint_list, "fk_ctrl_list": fk_ctrls})
                 elif rig_type == "IK":
                     print(f"Build 'ik' joints! {master_guide}")
                     ik_joint_list = joints.joint(master_guide, system="ik")
                 elif rig_type == "IKFK":
                     print(f"Build 'ikfk' joints! {master_guide}")
                     fk_joint_list = joints.joint(master_guide, system="fk")
+                    fk_module = fk.create_fk_sys(fk_joint_list, master_guide, 
+                                                 key['guide_scale'], delete_end=0)
+                    fk_ctrls = fk_module.get_ctrls()
+                    utils.constraint_from_lists_1to1(fk_joint_list, key['joints'], 1)
+                    key.update({"fk_joint_list": fk_joint_list, "fk_ctrl_list": fk_ctrls})
 
                     ik_joint_list = joints.joint(master_guide, system="ik")
                 else:

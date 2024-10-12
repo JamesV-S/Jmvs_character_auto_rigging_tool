@@ -123,8 +123,9 @@ class Guides_class():
         elif "pinky_phal_proximal" in self.module.system:
             master_guide = "pinky_phal_proximal"
         else:
-            master_guide = control_shape.controlTypes(
-                f"master_{self.unique_id}_{accessed_module}{side}", "octagon")
+            master_guide = control_shape.controlTypes(f"master_{self.unique_id}_{accessed_module}{side}", "octagon")
+            master_guide = str(master_guide) # master_guide is not a string, but rather an instance of an object called controlTypes,
+            print("hmmmm: ", master_guide)
             cmds.setAttr(f"{master_guide}.overrideEnabled", 1)
             cmds.setAttr(f"{master_guide}.overrideColor", 9)
             cmds.scale(8, 8, 8, master_guide)
@@ -201,6 +202,7 @@ class Guides_class():
         if "root" in self.module.system: # or "proximal" in self.module.system:
             data_guide_name = f"data_{master_guide}"
         else:
+            print("ERRRRRRRRRRRRRRRRRRRRRRRROOOOOOOR: ", master_guide)
             data_guide_name = master_guide.replace("master_", f"data_")
         cmds.spaceLocator(n=data_guide_name)
         cmds.matchTransform(data_guide_name, master_guide)

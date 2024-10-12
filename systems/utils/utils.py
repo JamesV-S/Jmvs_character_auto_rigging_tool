@@ -185,3 +185,9 @@ def colour_root_control(custom_crv):
         cmds.setAttr(f"{shape}.overrideColor", 16)
 # colour_root_control("ctrl_root")
 
+def constraint_from_lists_1to1(list_1, list_2, mo):
+    for x in range(len(list_1)):
+        if "root" in list_2[x]:
+            pass
+        else:
+            cmds.parentConstraint(list_1[x], list_2[x], mo=mo, n=f"cons_prnt_{list_1[x]}")

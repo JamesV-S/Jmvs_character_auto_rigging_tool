@@ -44,10 +44,14 @@ class controlShapeList():
 class controlTypes():
     def __init__(self, name, ctrl_type):
         self.ctrl_name = name
-        module = f"self.create_{ctrl_type}()"
-        print(f"'controlTypes()' MODULE: {module}") # when calling for fk MODULE: self.create_circle()
-        eval(module)
-
+        # module = f"self.create_{ctrl_type}()"
+        # eval(module)
+        self.ctrl_shape = None
+        method = getattr(self, f"create_{ctrl_type}", None)
+        if callable(method):
+            self.ctrl_shape = method()
+       
+        
     def create_circle(self):
         self.ctrl_shape = cmds.circle(n=self.ctrl_name, r=1, nr=(1, 0, 0))[0]
         return self.ctrl_shape
@@ -76,6 +80,7 @@ class controlTypes():
                                     (-0.275354, 0, 0.677828),
                                     (0.287207, 0, 0.676617)
                                     ], k=[0, 1, 2, 3, 4, 5, 6, 7, 8])
+    
         return self.ctrl_shape
 
     def create_locator(self):
@@ -83,6 +88,9 @@ class controlTypes():
         return self.ctrl_shape
     
     def return_ctrl(self):
+        return self.ctrl_shape
+    
+    def __str__(self):
         return self.ctrl_shape
 
 
@@ -97,14 +105,15 @@ class Controls():
 
         # put this line into a variable so every ctrl in the list has it's control type gotten!
         control_type = cmds.getAttr(f"guide{guide}.{guide}_{rig_type}_control", asString=1)
-        
+        # ^["circle", "cube", "octagon", "locator"]
+
         # Get a list of possible control shapes
         ctrl_shape_instance = controlShapeList()
         ctrl_list = ctrl_shape_instance.return_list()
-        print(f" CONTROL LIST IN 'Controls()': {ctrl_list}")
-        if control_type in ctrl_list: # If the retrieved control shape type is in the list, 
+        if control_type in ctrl_list:
+            # If the retrieved control shape type is in the list, 
             # it creates the control using ControlTypes and assigns it to self.ctrl.
-            control_module = controlTypes(self.ctrl_name ,control_type) 
+            control_module = controlTypes(self.ctrl_name, control_type) 
             self.ctrl = control_module.return_ctrl()
             # Call methods to set the control's size and name.
             self.set_control_size()

@@ -48,7 +48,7 @@ def joint(top_skeleton_joint, system):
             list_ctrls.append(x)
     
     name_list_ctrls = [guide_name.replace('guide_', '') for guide_name in list_ctrls]
-    print(f"LIST OF CONTRLSSS >>>> {list_ctrls}")
+    #print(f"LIST OF CONTRLSSS >>>> {list_ctrls}")
 
     # ['guide_root', 'guide_COG']
    
@@ -58,7 +58,7 @@ def joint(top_skeleton_joint, system):
     for locator in list_ctrls:
         # get locator location
         loc = cmds.xform(locator, r=1, ws=1, q=1, t=1)
-        print(f"guides xform's: {loc}")
+        #print(f"guides xform's: {loc}")
         # create joint based off the location
         jnt_name = cmds.joint(n=f"{jnt_tag}{locator[6:]}",) # remove 'guide' from name!
         cmds.matchTransform(jnt_name, locator)
