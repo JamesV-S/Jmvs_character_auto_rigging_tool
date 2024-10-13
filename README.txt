@@ -37,10 +37,13 @@ cluster of points only visible thru their cvs!
 They a visible if the guides were created with the same loaded tool
 > Figure out this issue. 
 
+
+
 -----------------------------
 To do:
+>> Get ikfkswitch system done then move onto space swap!
 
-> Get all systems, ikfk, ikfkswitch, space_swap, squash & stretch added!
+> Get all systems, ikfk{DONE}, ikfkswitch, space_swap, squash & stretch added!
 - Joints
 - System
 - constraint to rig joints

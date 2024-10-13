@@ -33,8 +33,8 @@ class create_fk_sys():
                 ctrl_name=f"ctrl_fk{joint_fk_list[x][6:]}", rig_type="fk" 
                 )
             # master_guide is not a string, but rather an instance of an controlTypes class.
-            control_module = str(control_module) 
-            #ctrl_shape = control_module.return_ctrl()
+            # control_module = str(control_module) 
+            # ctrl_shape = control_module.return_ctrl()
             cmds.matchTransform(f"ctrl_fk{joint_fk_list[x][6:]}", joint_fk_list[x])
             if delete_end is True:
                 if cmds.listRelatives(joint_fk_list[x], c=1) is None:
@@ -65,7 +65,7 @@ class create_fk_sys():
         for item in range(len(self.fk_ctrls)):
             cmds.parentConstraint(
                 self.fk_ctrls[item], jnt_fk_ctrls[item], 
-                n=f"cons_prnt_{self.fk_ctrls[item]}"
+                n=f"pCons_{self.fk_ctrls[item]}"
             )
 
     def get_ctrls(self):

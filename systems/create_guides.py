@@ -1,11 +1,11 @@
 import maya.cmds as cmds
 import importlib
 import os
-from systems.utils import (connect_modules, utils, control_shape) #  reverse_foot, 
+from systems.utils import (connect_modules, utils, control_shape)  
 importlib.reload(connect_modules)
 importlib.reload(utils)
 importlib.reload(control_shape)
-# importlib.reload(reverse_foot)
+
 
 
 scale = 1
@@ -123,8 +123,10 @@ class Guides_class():
         elif "pinky_phal_proximal" in self.module.system:
             master_guide = "pinky_phal_proximal"
         else:
-            master_guide = control_shape.controlTypes(f"master_{self.unique_id}_{accessed_module}{side}", "octagon")
-            master_guide = str(master_guide) # master_guide is not a string, but rather an instance of an controlTypes class.
+            master_guide = f"master_{self.unique_id}_{accessed_module}{side}"
+            control_shape.controlTypes(f"master_{self.unique_id}_{accessed_module}{side}", "octagon")
+            # master_guide = control_shape.Controls(scale=(1, 1, 1), guide="", ctrl_name=f"master_{self.unique_id}_{accessed_module}{side}", rig_type= "", ctrl_type="octagon")
+            #master_guide = str(master_guide) # master_guide is not a string, but rather an instance of an controlTypes class.
             print("hmmmm: ", master_guide)
             cmds.setAttr(f"{master_guide}.overrideEnabled", 1)
             cmds.setAttr(f"{master_guide}.overrideColor", 9)
@@ -152,8 +154,8 @@ class Guides_class():
                 utils.colour_root_control(guide)
             else:
                 imported = cmds.file(GUIDE_FILE, i=1, namespace="guide_shape_import", rnn=1)
-                cmds.scale(self.module.guide_scale+1, self.module.guide_scale+1, 
-                            self.module.guide_scale+1, imported)
+                cmds.scale(self.module.guide_scale+0.5, self.module.guide_scale+0.5, 
+                            self.module.guide_scale+0.5, imported)
                 guide = cmds.rename(imported[0], f"guide_{self.unique_id}_{x}{side}")
                 utils.colour_guide_custom_shape(guide)
             

@@ -187,7 +187,14 @@ def colour_root_control(custom_crv):
 
 def constraint_from_lists_1to1(list_1, list_2, mo):
     for x in range(len(list_1)):
-        if "root" in list_1[x]:
+        if "root" in list_2[x]:
             pass
         else:
-            cmds.parentConstraint(list_1[x], list_2[x], mo=mo, n=f"cons_prnt_{list_1[x]}")
+            cmds.parentConstraint(list_1[x], list_2[x], mo=mo, n=f"pCons_{list_1[x]}")
+
+def constraint_from_lists_2to1(list_1, list_2, list_3, mo):
+    for x in range(len(list_1)):
+        if "root" in list_2[x]:
+            pass
+        else:
+            cmds.parentConstraint(list_1[x], list_2[x], list_3[x], mo=mo, n=f"pCons_{list_1[x]}")

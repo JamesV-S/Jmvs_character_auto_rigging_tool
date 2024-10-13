@@ -346,8 +346,8 @@ class QtSampler(QWidget):
        
         # DON'T DO THAT, YOURE ADDING ALL JOINTS TO EACH DICT!
         # ROOT, SPINE, LEG ETC HAVE ALL JOINT LISTS INSTEAD OF DESIGNATED ONES!
-        self.hide_guides()
-        #rig_jnt_list = 
+        #self.hide_guides()
+
     
     def create_rig(self):
         # gather master_guide, rig_type = ikfk, (don't need orientation tbh - but u never know)
@@ -381,20 +381,27 @@ class QtSampler(QWidget):
                     ik_joint_list = joints.joint(master_guide, system="ik")
                     ik_module = ik.create_fk_sys(ik_joint_list, master_guide, 
                                                  key['guide_scale'], module.ik_joints)
-                    # ik_ctrls = ik_module.get_ctrls
-                    # ik_handle = ik_module.get_handle
-                    # utils.constraint_from_lists_1to1(ik_joint_list, key["joints"],mo=1)
-                    # key.update({"ik_joint_list": fk_joint_list, "ik_ctrl_list": fk_ctrls})
+                    ik_ctrls = ik_module.get_ctrls()
+                    utils.constraint_from_lists_1to1(ik_joint_list, key["joints"],mo=1)
+                    key.update({"ik_joint_list": ik_joint_list, "ik_ctrl_list": ik_ctrls})
                 elif rig_type == "IKFK":
                     print(f"Build 'ikfk' joints! {master_guide}")
                     fk_joint_list = joints.joint(master_guide, system="fk")
                     fk_module = fk.create_fk_sys(fk_joint_list, master_guide, 
                                                  key['guide_scale'], delete_end=0)
                     fk_ctrls = fk_module.get_ctrls()
-                    utils.constraint_from_lists_1to1(fk_joint_list, key['joints'], 1)
-                    key.update({"fk_joint_list": fk_joint_list, "fk_ctrl_list": fk_ctrls})
+                    # utils.constraint_from_lists_1to1(fk_joint_list, key['joints'], 1)
+                    
 
                     ik_joint_list = joints.joint(master_guide, system="ik")
+                    ik_module = ik.create_fk_sys(ik_joint_list, master_guide, 
+                                                 key['guide_scale'], module.ik_joints)
+                    ik_ctrls = ik_module.get_ctrls()
+                    # utils.constraint_from_lists_1to1(ik_joint_list, key["joints"],mo=1)
+                    
+                    utils.constraint_from_lists_2to1(fk_joint_list, ik_joint_list, key["joints"] ,mo=1)
+                    key.update({"fk_joint_list": fk_joint_list, "fk_ctrl_list": fk_ctrls})
+                    key.update({"ik_joint_list": ik_joint_list, "ik_ctrl_list": ik_ctrls})
                 else:
                     cmds.error(f"Fat ERROR: 'rig_type' attr cannot be found!")
                 

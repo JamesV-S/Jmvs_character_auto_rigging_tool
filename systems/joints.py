@@ -20,8 +20,9 @@ def joint(top_skeleton_joint, system):
     list = []
     print(f"JOINTS, top_top_skeleton_joint == {top_skeleton_joint}")
     # make list w/ all transform type descendants of var
-    print(f"systems>joints.py(joint) the list is: {list}")
+    
     list = cmds.listRelatives(top_skeleton_joint, ad=1, type="transform")
+    print(f"HEART systems>joints.py(joint) the list is: {list}")
     
 
     # If top_skeleton_joint contains "root" append it to the list
@@ -46,7 +47,7 @@ def joint(top_skeleton_joint, system):
             pass
         else:
             list_ctrls.append(x)
-    
+    print(f"SOUL the list_ctrls is: {list_ctrls}")
     name_list_ctrls = [guide_name.replace('guide_', '') for guide_name in list_ctrls]
     #print(f"LIST OF CONTRLSSS >>>> {list_ctrls}")
 
