@@ -21,7 +21,8 @@ import platform
 from systems import (
     create_guides,
     joints, 
-    fk
+    fk, 
+    ik
 )
 
 from systems.utils import (
@@ -39,6 +40,7 @@ importlib.reload(utils)
 importlib.reload(mirror_rig)
 importlib.reload(guide_data)
 importlib.reload(fk)
+importlib.reload(ik)
 
 mayaMainWindowPtr = omui.MQtUtil.mainWindow()
 mayaMainWindow = wrapInstance(int(mayaMainWindowPtr), QWidget)
@@ -377,6 +379,12 @@ class QtSampler(QWidget):
                 elif rig_type == "IK":
                     print(f"Build 'ik' joints! {master_guide}")
                     ik_joint_list = joints.joint(master_guide, system="ik")
+                    ik_module = ik.create_fk_sys(ik_joint_list, master_guide, 
+                                                 key['guide_scale'], module.ik_joints)
+                    # ik_ctrls = ik_module.get_ctrls
+                    # ik_handle = ik_module.get_handle
+                    # utils.constraint_from_lists_1to1(ik_joint_list, key["joints"],mo=1)
+                    # key.update({"ik_joint_list": fk_joint_list, "ik_ctrl_list": fk_ctrls})
                 elif rig_type == "IKFK":
                     print(f"Build 'ikfk' joints! {master_guide}")
                     fk_joint_list = joints.joint(master_guide, system="fk")

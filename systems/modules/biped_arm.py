@@ -21,9 +21,16 @@ system_rot_yzx = {'clavicle': [-101.01687892466632, -54.72478122395495, 5.507410
 
 has_orientation = "yes"
 
+ik_joints = {
+    "start_joint": "shoulder",
+    "end_joint": "wrist", 
+    "pv_joint": "elbow", 
+    "world_orientation": False
+}
+
 twist_joint= {
     "start": "shoulder",
-    "end": "wrist"
+    "end": "wrist", 
 }
 # If axis_orientation = a specific axis, use that specified system_pos
 side = "_L"
