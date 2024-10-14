@@ -41,11 +41,9 @@ They a visible if the guides were created with the same loaded tool
 
 -----------------------------
 To do:
+>> the mirrored guides DO NOT have guide."_0_wrist_R_fk_control" attributes
 
->>> Get ikfkswitch system done then move onto space swap!
->> the mirrored guides DO NOT have guide."_0_wrist_R_fk_control" attributes copied!
-
-> Get all systems, ikfk{DONE}, ikfkswitch, space_swap, squash & stretch added!
+> ADD systems: ikfk{DONE}, ikfkswitch{DONE}, space_swap, squash & stretch 
 - Joints
 - System
 - constraint to rig joints

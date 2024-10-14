@@ -29,9 +29,10 @@ from systems.utils import (
     connect_modules, 
     utils, 
     mirror_rig,
-    guide_data, 
-    ikfk_switch, 
-    arrow_ctrl
+    guide_data,
+    arrow_ctrl,
+    ikfk_switch 
+    
 )
 
 # Reload Modules
@@ -43,9 +44,8 @@ importlib.reload(mirror_rig)
 importlib.reload(guide_data)
 importlib.reload(fk)
 importlib.reload(ik)
-importlib.reload(ikfk_switch)
 importlib.reload(arrow_ctrl)
-
+importlib.reload(ikfk_switch)
 
 
 mayaMainWindowPtr = omui.MQtUtil.mainWindow()
@@ -383,7 +383,8 @@ class QtSampler(QWidget):
                     print(f"list 1: {fk_joint_list}, list 2: {key['joints']}")
                     utils.constraint_from_lists_1to1(fk_joint_list, key["joints"],mo=1)
                     key.update({"fk_joint_list": fk_joint_list, "fk_ctrl_list": fk_ctrls})
-    
+                    # ------------------
+                    # ikfk blend arrow ctrl or COG 
                     mdl_switch_ctrl = arrow_ctrl.cr_arrow_control(
                         module_name=key['module'], master_guide=key['master_guide'], 
                         side=key['side']
@@ -398,21 +399,17 @@ class QtSampler(QWidget):
                     ik_ctrls = ik_module.get_ctrls()
                     utils.constraint_from_lists_1to1(ik_joint_list, key["joints"],mo=1)
                     key.update({"ik_joint_list": ik_joint_list, "ik_ctrl_list": ik_ctrls})
-
-                    mdl_switch_ctrl = arrow_ctrl.cr_arrow_control(
-                        module_name=key['module'], master_guide=key['master_guide'], 
-                        side=key['side']
-                        )
-                    key.update({"mdl_switch_ctrl_list": mdl_switch_ctrl})
-                elif rig_type == "IKFK":
-                    # mdl_switch_ctrl > for ikfk switch arw control! 
+                    # ------------------
+                    # ikfk blend arrow ctrl or COG 
                     mdl_switch_ctrl = arrow_ctrl.cr_arrow_control(
                         module_name=key['module'], master_guide=key['master_guide'], 
                         side=key['side']
                         )
                     key.update({"mdl_switch_ctrl_list": mdl_switch_ctrl})
                     print("looking for update::::::::::::::::::::::: ", key)
-
+                    
+                elif rig_type == "IKFK":
+                    
                     print(f"Build 'ikfk' joints! {master_guide}")
                     fk_joint_list = joints.joint(master_guide, system="fk")
                     fk_module = fk.create_fk_sys(fk_joint_list, master_guide, 
@@ -423,11 +420,24 @@ class QtSampler(QWidget):
                     ik_module = ik.create_fk_sys(ik_joint_list, master_guide, 
                                                  key['guide_scale'], module.ik_joints)
                     ik_ctrls = ik_module.get_ctrls()
-                    # utils.constraint_from_lists_1to1(ik_joint_list, key["joints"],mo=1)
-                    
+            
                     utils.constraint_from_lists_2to1(fk_joint_list, ik_joint_list, key["joints"] ,mo=1)
                     key.update({"fk_joint_list": fk_joint_list, "fk_ctrl_list": fk_ctrls})
                     key.update({"ik_joint_list": ik_joint_list, "ik_ctrl_list": ik_ctrls})
+                    # ------------------
+                    # ikfk blend arrow ctrl or COG 
+                    mdl_switch_ctrl = arrow_ctrl.cr_arrow_control(
+                        module_name=key['module'], master_guide=key['master_guide'], 
+                        side=key['side']
+                        )
+                    key.update({"mdl_switch_ctrl_list": mdl_switch_ctrl})
+                    print("looking for update::::::::::::::::::::::: ", key)
+                    # ------------------
+                    # ikfk blend system
+                    ikfk_switch.cr_ikfk_switch_sys(
+                        rig_joints=key["joints"], mdl_switch_ctrl=mdl_switch_ctrl,
+                        fk_ctrls=fk_ctrls, ik_ctrls=ik_ctrls, fk_joint_list=key['fk_joint_list'], 
+                        ik_joint_list=key['ik_joint_list'], master_guide=master_guide)
 
                 else:
                     cmds.error(f"Fat ERROR: 'rig_type' attr cannot be found!")
@@ -448,11 +458,11 @@ class QtSampler(QWidget):
         for key in self.systems_to_be_made.values():
             #rig_type = cmds.getAttr(f"{key['master_guide']}.{key['master_guide']}_rig_type", asString=1)
             if key["systems_to_connect"]:
-                print(f"connect modules after systems! {master_guide}")
+                #print(f"connect modules after systems! {master_guide}")
                 systems_to_connect = key["systems_to_connect"]
                 # connect_modules.connect_pilished(systems_to_connect)
             if rig_type == "IKFK" or rig_type == "IK":
-                print(f"Add space_swap sys {master_guide}")
+                #print(f"Add space_swap sys {master_guide}")
                 pass
                 # space_swap_mdl = space_swap.SpaceSwapping()
 

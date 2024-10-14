@@ -1,5 +1,5 @@
-import maya.cmds as cmds 
 
+import maya.cmds as cmds 
 
 def add_float_attrib(ctrl, flt, val, limited):
     MinVal = val[0]
@@ -18,6 +18,7 @@ def add_float_attrib(ctrl, flt, val, limited):
                     cmds.setAttr(f"{target}.{attr}", e=1, k=1 )
             else:
                 print(f"Attribute {attr} already exists on {target}")
+
 
 def add_locked_attrib(ctrl, en):
     dividerNN = "------------" 
@@ -44,6 +45,7 @@ def add_locked_attrib(ctrl, en):
         else:
             print(f"Attribute {attr} already exists on {ctrl}")
 
+
 def add_multile_enum_attribute(ctrl, enum_long_name, enum_name_options):
     # ctrl = cmds.ls(sl=1, type="transform")
     if not cmds.attributeQuery(enum_long_name, node=ctrl, exists=True):
@@ -54,6 +56,7 @@ def add_multile_enum_attribute(ctrl, enum_long_name, enum_name_options):
             print(f"Failed to add multiple_choice enum attr {enum_long_name} on {ctrl}: {e}" )
     else: 
         print(f"Attribute {enum_long_name} a;ready exists on {ctrl}")
+
 
 def get_selection_trans_rots_dictionary():
     selection = cmds.ls(sl=1, type="transform")
@@ -192,9 +195,88 @@ def constraint_from_lists_1to1(list_1, list_2, mo):
         else:
             cmds.parentConstraint(list_1[x], list_2[x], mo=mo, n=f"pCons_{list_1[x]}")
 
+
 def constraint_from_lists_2to1(list_1, list_2, list_3, mo):
     for x in range(len(list_1)):
         if "root" in list_2[x]:
             pass
         else:
             cmds.parentConstraint(list_1[x], list_2[x], list_3[x], mo=mo, n=f"pCons_{list_1[x]}")
+
+
+def cr_node_if_not_exists(util_type, node_type, node_name, set_attrs=None):
+    if not cmds.objExists(node_name):
+        if util_type:
+            cmds.shadingNode(node_type, au=1, n=node_name )
+        else:
+            cmds.createNode(node_type, n=node_name)
+        if set_attrs:
+            for attr, value in set_attrs.items():
+                cmds.setAttr(f"{node_name}.{attr}", value)
+
+
+def connect_attr(source_attr, target_attr):
+    connections = cmds.listConnections(target_attr, destination=False ,source=True)
+    #print(f"here is the listed connection: {connections}")
+    if not connections:
+        cmds.connectAttr(source_attr, target_attr, force=True)
+    else:
+        print(f" CON {source_attr} is already connected to {target_attr} ")
+
+
+def add_locked_attrib(ctrl, en):              
+    dividerNN = "------------" 
+    atrrType = "enum"
+    
+    for attr in en:
+        # Generate the long name for the attribute
+        ln = f"{attr.lower()}_dvdr"
+        attr.upper() 
+
+        #check if the attribute already exists
+        if not cmds.attributeQuery(ln, node=ctrl, exists=True):
+            try:
+                # add the attributes
+                cmds.addAttr(ctrl, longName=ln, niceName=dividerNN, 
+                            attributeType=atrrType, enumName=attr, k=True
+                            )
+                
+                cmds.setAttr(f"{ctrl}.{ln}", lock=True, keyable=False, 
+                            channelBox=True
+                            )
+                print(f"Added locked attr {attr} on {ctrl}")
+            except Exception as e:
+                print(f"Failed to add locked attr {attr} on {ctrl}: {e}")
+        else:
+            print(f"Attribute {attr} already exists on {ctrl}")
+
+
+def add_float_attrib(ctrl, flt, val, limited):
+    MinVal = val[0]
+    MaxVal = val[1]
+    
+    for target in [ctrl]:
+        for attr in flt:
+            if not cmds.attributeQuery(attr, node=target, exists=True):
+                if limited:                            
+                    cmds.addAttr(target, longName=attr, at='double', dv=MinVal, 
+                                min= MinVal, max = MaxVal)
+                    cmds.setAttr(f"{target}.{attr}", e=1, k=1 )
+                else:
+                    cmds.addAttr(target, longName=attr, at='double', dv=0, 
+                                )
+                    cmds.setAttr(f"{target}.{attr}", e=1, k=1 )
+            else:
+                print(f"Attribute {attr} already exists on {target}")
+
+
+def proxy_attr_list(master_ctrl, ctrl_list, N_of_Attr):
+    ctrls = cmds.ls(sl=1, type="transform")
+
+    #N_of_Ctrl = 'ctrl_COG'
+    #N_of_Attr = 'ik_fk_Switch'
+
+    # Proxy Code:
+    for target in [ctrl_list]:
+        cmds.addAttr( target, ln=N_of_Attr, proxy=f"{master_ctrl}.{N_of_Attr}" )
+        
