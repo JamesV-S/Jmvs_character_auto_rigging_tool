@@ -22,7 +22,8 @@ from systems import (
     create_guides,
     joints, 
     fk, 
-    ik
+    ik, 
+    squash_stretch
 )
 
 from systems.utils import (
@@ -46,6 +47,7 @@ importlib.reload(fk)
 importlib.reload(ik)
 importlib.reload(arrow_ctrl)
 importlib.reload(ikfk_switch)
+importlib.reload(squash_stretch)
 
 
 mayaMainWindowPtr = omui.MQtUtil.mainWindow()
@@ -451,6 +453,8 @@ class QtSampler(QWidget):
                         # call squash & stretch system!
                         print(f"Build squahs_stretch system! {master_guide}")
                         squash_stretch_instance = []
+                        squash_stretch.cr_squash_stretch(key, module.ik_joints)
+
         
         '''system_group.grpSetup(self.ui.rig_master_name.text())''' # What does this do?
         
