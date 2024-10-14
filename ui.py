@@ -29,7 +29,9 @@ from systems.utils import (
     connect_modules, 
     utils, 
     mirror_rig,
-    guide_data
+    guide_data, 
+    ikfk_switch, 
+    arrow_ctrl
 )
 
 # Reload Modules
@@ -41,6 +43,10 @@ importlib.reload(mirror_rig)
 importlib.reload(guide_data)
 importlib.reload(fk)
 importlib.reload(ik)
+importlib.reload(ikfk_switch)
+importlib.reload(arrow_ctrl)
+
+
 
 mayaMainWindowPtr = omui.MQtUtil.mainWindow()
 mayaMainWindow = wrapInstance(int(mayaMainWindowPtr), QWidget)
@@ -293,10 +299,11 @@ class QtSampler(QWidget):
                 "ik_ctrl_list": [],
                 "fk_ctrl_list": [],
                 "ik_joint_list": [],
-                "fk_joint_list": [], 
-                "guide_number": number_int
-                
-            }            
+                "fk_joint_list": [],
+                "mdl_switch_ctrl_list": [],
+                "guide_number": number_int                
+            }
+
             # add the temp dict to systems to be made, to manage all systems that eed to be constructed. 
             self.systems_to_be_made[master_guide] = temp_dictionary
             print(f"temp dict for setup: {temp_dictionary}")
@@ -376,6 +383,13 @@ class QtSampler(QWidget):
                     print(f"list 1: {fk_joint_list}, list 2: {key['joints']}")
                     utils.constraint_from_lists_1to1(fk_joint_list, key["joints"],mo=1)
                     key.update({"fk_joint_list": fk_joint_list, "fk_ctrl_list": fk_ctrls})
+    
+                    mdl_switch_ctrl = arrow_ctrl.cr_arrow_control(
+                        module_name=key['module'], master_guide=key['master_guide'], 
+                        side=key['side']
+                        )
+                    key.update({"mdl_switch_ctrl_list": mdl_switch_ctrl})
+                    print("looking for update::::::::::::::::::::::: ", key)
                 elif rig_type == "IK":
                     print(f"Build 'ik' joints! {master_guide}")
                     ik_joint_list = joints.joint(master_guide, system="ik")
@@ -384,14 +398,26 @@ class QtSampler(QWidget):
                     ik_ctrls = ik_module.get_ctrls()
                     utils.constraint_from_lists_1to1(ik_joint_list, key["joints"],mo=1)
                     key.update({"ik_joint_list": ik_joint_list, "ik_ctrl_list": ik_ctrls})
+
+                    mdl_switch_ctrl = arrow_ctrl.cr_arrow_control(
+                        module_name=key['module'], master_guide=key['master_guide'], 
+                        side=key['side']
+                        )
+                    key.update({"mdl_switch_ctrl_list": mdl_switch_ctrl})
                 elif rig_type == "IKFK":
+                    # mdl_switch_ctrl > for ikfk switch arw control! 
+                    mdl_switch_ctrl = arrow_ctrl.cr_arrow_control(
+                        module_name=key['module'], master_guide=key['master_guide'], 
+                        side=key['side']
+                        )
+                    key.update({"mdl_switch_ctrl_list": mdl_switch_ctrl})
+                    print("looking for update::::::::::::::::::::::: ", key)
+
                     print(f"Build 'ikfk' joints! {master_guide}")
                     fk_joint_list = joints.joint(master_guide, system="fk")
                     fk_module = fk.create_fk_sys(fk_joint_list, master_guide, 
                                                  key['guide_scale'], delete_end=0)
                     fk_ctrls = fk_module.get_ctrls()
-                    # utils.constraint_from_lists_1to1(fk_joint_list, key['joints'], 1)
-                    
 
                     ik_joint_list = joints.joint(master_guide, system="ik")
                     ik_module = ik.create_fk_sys(ik_joint_list, master_guide, 
@@ -402,6 +428,7 @@ class QtSampler(QWidget):
                     utils.constraint_from_lists_2to1(fk_joint_list, ik_joint_list, key["joints"] ,mo=1)
                     key.update({"fk_joint_list": fk_joint_list, "fk_ctrl_list": fk_ctrls})
                     key.update({"ik_joint_list": ik_joint_list, "ik_ctrl_list": ik_ctrls})
+
                 else:
                     cmds.error(f"Fat ERROR: 'rig_type' attr cannot be found!")
                 

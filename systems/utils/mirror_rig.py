@@ -84,6 +84,7 @@ class mirror_data():
         
         self.master_guide = tmp_guide_list[-1]
         self.guide_list = tmp_guide_list
+        self.guide_number = self.master_guide[7]
 
         # Create the data guide for the mirrored side!
         if "root" in self.module.system: # or "proximal" in self.module.system:
@@ -93,6 +94,8 @@ class mirror_data():
         self.data_guide = cmds.spaceLocator(n=data_guide_name)[0]
         cmds.matchTransform(data_guide_name, self.master_guide)
         cmds.parent(data_guide_name, self.master_guide)
+        
+        
 
     
     def copy_mirrored_attrs(self): # copy attrs across
@@ -203,7 +206,9 @@ class mirror_data():
                     "ik_ctrl_list": [],
                     "fk_ctrl_list": [],
                     "ik_joint_list": [],
-                    "fk_joint_list": [] # Might have to include 'number_id' to update properly!
+                    "fk_joint_list": [],
+                    "guide_number": self.guide_number, # Might have to include 'number_id' to update properly!
+                    "mdl_switch_ctrl": []
                 }
 
 

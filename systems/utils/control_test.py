@@ -28,9 +28,6 @@ class controlTypes():
             self.create_locator()
         
         
-           
-       
-        
     def create_circle(self):
         self.ctrl_curve = cmds.circle(n=self.ctrl_name, r=1, nr=(1, 0, 0))[0]
         return self.ctrl_name
@@ -64,7 +61,7 @@ class controlTypes():
 
     def create_locator(self):
         self.ctrl_curve = cmds.spaceLocator(n=self.ctrl_name)
-        return self.ctrl_name
+        return str(self.ctrl_name)
     
 control = controlTypes("sunny", "cube")
 print(control)

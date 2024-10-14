@@ -14,6 +14,7 @@ dict_var_types = {
                 "fk_ctrl_list": "list",
                 "ik_joint_list": "list",
                 "fk_joint_list": "list",
+                "mdl_switch_ctrl_list": "list",
                 "guide_number": "float"
             }
 
@@ -30,7 +31,7 @@ dict_var_types = {
 def setup(temp_dict, data_guide):
     for key in temp_dict.keys():
 
-        print(f"Alpha keys: {key}")
+        # print(f"Alpha keys: {key}")
 
         if key == "guide_number":
             print(f"A guide_number> Adding attribute to: {data_guide}, attribute name: {key}")
