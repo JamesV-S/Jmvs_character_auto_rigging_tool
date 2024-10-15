@@ -46,7 +46,8 @@ class cr_squash_stretch():
         utils.add_float_attrib(self.key['mdl_switch_ctrl_list'], [self.stretchy_attr], 
                                [0,1], True)
         print("here bruv : ", self.key['mdl_switch_ctrl_list'])
-        utils.custom_enum_attr([self.key['mdl_switch_ctrl_list']], self.stretch_type, stretch_options_enum) 
+        utils.custom_enum_attr(self.key['mdl_switch_ctrl_list'], self.stretch_type, stretch_options_enum) 
+        
         for x in range(len(self.key['ik_ctrl_list'])):
             utils.add_locked_attrib(self.key['ik_ctrl_list'][x], ["STRETCH"])
             utils.proxy_attr_list(self.key['mdl_switch_ctrl_list'], 
@@ -54,9 +55,12 @@ class cr_squash_stretch():
             utils.proxy_attr_list(self.key['mdl_switch_ctrl_list'], 
                                   self.key['ik_ctrl_list'][x], self.stretch_type)
         
+        
     # func for create nodes
     def cr_nodes(self):
+        print(f"{self.key['master_guide']}")
         self.stretch_distance = f"{self.key['master_guide'].replace('master_', 'DIST_str_')}"
+        print(self.stretch_distance)
         utils.cr_node_if_not_exists(1, "distanceBetween", self.stretch_distance)
         self.scalefactor = f"{self.key['master_guide'].replace('master_', 'SCLFACTMULTI_str_')}"
         utils.cr_node_if_not_exists(1, "multiplyDivide", self.scalefactor, {"operation": 2})
@@ -71,6 +75,7 @@ class cr_squash_stretch():
         self.blend_colours_2 = f"{self.key['master_guide'].replace('master_', 'BC2_str_')}"
         utils.cr_node_if_not_exists(1, "blendColors", self.blend_colours_2)
         
+        
     # func for connect nodes
     def connect_nodes(self):
         loc_endposs = cmds.spaceLocator(n=f"{self.end_guide.replace('guide_', 'loc_')}_stretchEndPoss")[0]
@@ -80,7 +85,7 @@ class cr_squash_stretch():
         utils.connect_attr(f"{self.start_ctrl}.worldMatrix[0]", f"{self.stretch_distance}.inMatrix1")
         utils.connect_attr(f"{loc_endposs}.worldMatrix[0]", f"{self.stretch_distance}.inMatrix2")
         
-        distance_value = cmds.getAttr(f"{self.stretch_distance}.input1X")
+        distance_value = cmds.getAttr(f"{self.stretch_distance}.distance") # what's this
         utils.connect_attr(f"{self.stretch_distance}.distance", f"{self.scalefactor}.input1X")
         cmds.setAttr(f"{self.scalefactor}.input2X", distance_value)
 

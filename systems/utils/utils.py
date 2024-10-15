@@ -271,16 +271,16 @@ def add_float_attrib(ctrl, flt, val, limited):
 
 
 def proxy_attr_list(master_ctrl, ctrl_list, N_of_Attr):
+    ctrls = cmds.ls(sl=1, type="transform")
+
     for target in [ctrl_list]:
         cmds.addAttr( target, ln=N_of_Attr, proxy=f"{master_ctrl}.{N_of_Attr}" )
 
 def custom_enum_attr(ctrl, enm_lng_nm, CtrlEnmOptions):
-    
-    
     for target in [ctrl]:
-        if not cmds.attributeQuery(enm_lng_nm, node=target[0], exists=True):
+        if not cmds.attributeQuery(enm_lng_nm, node=target, exists=True):
             cmds.addAttr(longName=enm_lng_nm, at="enum", enumName=CtrlEnmOptions )
-            cmds.setAttr( f"{target[0]}.{enm_lng_nm}", e=1, k=1 )
+            cmds.setAttr( f"{target}.{enm_lng_nm}", e=1, k=1 )
 
 #custom_enum_attr( "James", "Thuki:Arron:Harv")
         
