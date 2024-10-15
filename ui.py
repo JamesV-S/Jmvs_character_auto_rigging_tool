@@ -453,7 +453,7 @@ class QtSampler(QWidget):
                         # call squash & stretch system!
                         print(f"Build squahs_stretch system! {master_guide}")
                         squash_stretch_instance = []
-                        squash_stretch.cr_squash_stretch(key, module.ik_joints)
+                        squash_stretch.cr_squash_stretch(key, module.ik_joints, rig_type)
 
         
         '''system_group.grpSetup(self.ui.rig_master_name.text())''' # What does this do?
