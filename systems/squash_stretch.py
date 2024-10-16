@@ -19,6 +19,13 @@ class cr_squash_stretch():
 
     # function for 'name_definition'
     def define_names(self):
+        for rig_jnt in self.key['joints']:
+            if self.val_joints["start_joint"] in rig_jnt:
+                self.rig_start_joint = rig_jnt
+            elif self.val_joints["pv_joint"] in rig_jnt:
+                self.rig_pv_joint = rig_jnt
+            
+
         for joint in self.key['ik_joint_list']:
             if self.val_joints["start_joint"] in joint:
                 self.start_joint = joint
@@ -121,7 +128,6 @@ class cr_squash_stretch():
             utils.connect_attr(f"{self.key['mdl_switch_ctrl_list']}.{self.switch_Attr}", f"{self.blend_colours_2}.blender")
         elif self.rig_type == "IK":
             cmds.setAttr(f"{self.blend_colours_2}.blender", 0)
-
         utils.connect_attr(f"{self.condition}.outColorR", f"{self.blend_colours_2}.color2R")
         utils.connect_attr(f"{self.volume_multi}.outputX", f"{self.blend_colours_2}.color2G")
 
