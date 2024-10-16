@@ -50,7 +50,7 @@ class cr_squash_stretch():
         
         for x in range(len(self.key['ik_ctrl_list'])):
             utils.add_locked_attrib(self.key['ik_ctrl_list'][x], ["STRETCH"])
-            utils.proxy_attr_list(self.key['mdl_switch_ctrl_list'], 
+            utils.proxy_attr_list(self.key['mdl_switch_ctrl_list'],
                                   self.key['ik_ctrl_list'][x], self.stretchy_attr)
             utils.proxy_attr_list(self.key['mdl_switch_ctrl_list'], 
                                   self.key['ik_ctrl_list'][x], self.stretch_type)
@@ -65,7 +65,7 @@ class cr_squash_stretch():
         self.scalefactor = f"{self.key['master_guide'].replace('master_', 'SCLFACTMULTI_str_')}"
         utils.cr_node_if_not_exists(1, "multiplyDivide", self.scalefactor, {"operation": 2})
         self.blend_colours_1 = f"{self.key['master_guide'].replace('master_', 'BC1_str_')}"
-        utils.cr_node_if_not_exists(1, "blendColors", self.blend_colours_1)
+        utils.cr_node_if_not_exists(1, "blendColors", self.blend_colours_1, {"color2R": 1, "color2G": 1, "color2B": 1} )
         self.control_pma = f"{self.key['master_guide'].replace('master_', 'PMA_')}"
         utils.cr_node_if_not_exists(1, "plusMinusAverage", self.control_pma, {"input1D[0]": 1})
         self.condition = f"{self.key['master_guide'].replace('master_', 'COND_str_')}"
@@ -81,11 +81,18 @@ class cr_squash_stretch():
         loc_endposs = cmds.spaceLocator(n=f"{self.end_guide.replace('guide_', 'loc_')}_stretchEndPoss")[0]
         cmds.matchTransform(loc_endposs, self.end_ctrl)
         cmds.parent(loc_endposs, self.end_ctrl)
+
+        loc_startposs = cmds.spaceLocator(n=f"{self.start_guide.replace('guide_', 'loc_')}_stretchEndPoss")[0]
+        cmds.matchTransform(loc_startposs, self.start_ctrl)
+        cmds.parent(loc_startposs, self.start_ctrl)
         
-        utils.connect_attr(f"{self.start_ctrl}.worldMatrix[0]", f"{self.stretch_distance}.inMatrix1")
+        utils.connect_attr(f"{loc_startposs}.worldMatrix[0]", f"{self.stretch_distance}.inMatrix1")
         utils.connect_attr(f"{loc_endposs}.worldMatrix[0]", f"{self.stretch_distance}.inMatrix2")
         
-        distance_value = cmds.getAttr(f"{self.stretch_distance}.distance") # what's this
+        mid_joint_length = cmds.getAttr(f"{self.pv_joint}.translateX") 
+        end_joint_length = cmds.getAttr(f"{self.end_joint}.translateX") 
+        distance_value = mid_joint_length + end_joint_length
+        print(f" DISTACNE VALUE: {distance_value}")
         utils.connect_attr(f"{self.stretch_distance}.distance", f"{self.scalefactor}.input1X")
         cmds.setAttr(f"{self.scalefactor}.input2X", distance_value)
 
@@ -115,15 +122,15 @@ class cr_squash_stretch():
         elif self.rig_type == "IK":
             cmds.setAttr(f"{self.blend_colours_2}.blender", 0)
 
-        # connectAttr -f arm_l_stretch_condition.outColorR arm_l_stretch_ik_blend.color2R
-        # connectAttr -f arm_l_volume_multi.outputX arm_l_stretch_ik_blend.color2G
         utils.connect_attr(f"{self.condition}.outColorR", f"{self.blend_colours_2}.color2R")
         utils.connect_attr(f"{self.volume_multi}.outputX", f"{self.blend_colours_2}.color2G")
 
         # Connect to the joints:
         # connect to joint scale
+        
         cmds.connectAttr(f"{self.blend_colours_2}.outputR",f"{self.start_joint}.scaleX")
         cmds.connectAttr(f"{self.blend_colours_2}.outputR",f"{self.pv_joint}.scaleX")
+
         cmds.connectAttr(f"{self.blend_colours_2}.outputG",f"{self.start_joint}.scaleY")
         cmds.connectAttr(f"{self.blend_colours_2}.outputG",f"{self.pv_joint}.scaleY")
         cmds.connectAttr(f"{self.blend_colours_2}.outputG",f"{self.start_joint}.scaleZ")
