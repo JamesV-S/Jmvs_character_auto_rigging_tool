@@ -41,6 +41,8 @@ They a visible if the guides were created with the same loaded tool
 
 -----------------------------
 To do:
+>>> Get stretchy working, check the primary axis(X) for ik scale input. (ouptutR > scaleX)
+The rig joints get primary axis (outputR > scaleX, outputG > scaleYZ[other axis!])
 >> the mirrored guides DO NOT have guide."_0_wrist_R_fk_control" attributes
 
 > ADD systems: ikfk{DONE}, ikfkswitch{DONE}, space_swap, squash & stretch 

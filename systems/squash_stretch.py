@@ -19,6 +19,13 @@ class cr_squash_stretch():
 
     # function for 'name_definition'
     def define_names(self):
+        for rig_jnt in self.key['joints']:
+            if self.val_joints["start_joint"] in rig_jnt:
+                self.rig_start_joint = rig_jnt
+            elif self.val_joints["pv_joint"] in rig_jnt:
+                self.rig_pv_joint = rig_jnt
+            
+
         for joint in self.key['ik_joint_list']:
             if self.val_joints["start_joint"] in joint:
                 self.start_joint = joint
@@ -114,7 +121,7 @@ class cr_squash_stretch():
             utils.connect_attr(f"{self.key['mdl_switch_ctrl_list']}.{self.switch_Attr}", f"{self.blend_colours_2}.blender")
         elif self.rig_type == "IK":
             cmds.setAttr(f"{self.blend_colours_2}.blender", 0)
-
+        
         # connectAttr -f arm_l_stretch_condition.outColorR arm_l_stretch_ik_blend.color2R
         # connectAttr -f arm_l_volume_multi.outputX arm_l_stretch_ik_blend.color2G
         utils.connect_attr(f"{self.condition}.outColorR", f"{self.blend_colours_2}.color2R")
@@ -122,10 +129,24 @@ class cr_squash_stretch():
 
         # Connect to the joints:
         # connect to joint scale
-        cmds.connectAttr(f"{self.blend_colours_2}.outputR",f"{self.start_joint}.scaleX")
-        cmds.connectAttr(f"{self.blend_colours_2}.outputR",f"{self.pv_joint}.scaleX")
-        cmds.connectAttr(f"{self.blend_colours_2}.outputG",f"{self.start_joint}.scaleY")
-        cmds.connectAttr(f"{self.blend_colours_2}.outputG",f"{self.pv_joint}.scaleY")
-        cmds.connectAttr(f"{self.blend_colours_2}.outputG",f"{self.start_joint}.scaleZ")
-        cmds.connectAttr(f"{self.blend_colours_2}.outputG",f"{self.pv_joint}.scaleZ")
-        
+        # ik_joints:
+        '''
+        utils.connect_attr(f"{self.blend_colours_2}.outputR",f"{self.start_joint}.scaleX")
+        utils.connect_attr(f"{self.blend_colours_2}.outputR",f"{self.pv_joint}.scaleX")
+
+        utils.connect_attr(f"{self.blend_colours_2}.outputR",f"{self.rig_start_joint}.scaleX")
+        utils.connect_attr(f"{self.blend_colours_2}.outputR",f"{self.rig_pv_joint}.scaleX")
+
+        utils.connect_attr(f"{self.blend_colours_2}.outputG",f"{self.rig_start_joint}.scaleY")
+        utils.connect_attr(f"{self.blend_colours_2}.outputG",f"{self.rig_pv_joint}.scaleY")
+        utils.connect_attr(f"{self.blend_colours_2}.outputG",f"{self.rig_start_joint}.scaleZ")
+        utils.connect_attr(f"{self.blend_colours_2}.outputG",f"{self.rig_pv_joint}.scaleZ")
+
+
+
+
+        #cmds.connectAttr(f"{self.blend_colours_2}.outputG",f"{self.start_joint}.scaleY")
+        #cmds.connectAttr(f"{self.blend_colours_2}.outputG",f"{self.pv_joint}.scaleY")
+        #cmds.connectAttr(f"{self.blend_colours_2}.outputG",f"{self.start_joint}.scaleZ")
+        #cmds.connectAttr(f"{self.blend_colours_2}.outputG",f"{self.pv_joint}.scaleZ")
+        '''
