@@ -41,7 +41,7 @@ They a visible if the guides were created with the same loaded tool
 
 -----------------------------
 To do:
->> Add data_loc info to mirrored data!
+
 > ADD systems: space_swap, ikfk{DONE}, ikfkswitch{DONE}, squash & stretch {DONE}
  
 > after the space-swap and other issues r fixed, move onto the neck system, 
@@ -52,6 +52,8 @@ So i can test creating a rig for testing rotomation > Email Malcom to pass a
 - System
 - constraint to rig joints
 - update dictionary
+
+> Get stretch to work on mirrored side!
 
 > Add button to each section on the ui.
 - Switch back & forth between blueprints, rig_joints, systems, polished.

@@ -220,6 +220,7 @@ class mirror_data():
     def mirror_data(self):
         # guide_pref = f"guide_{number_id}"
         temp_otherside_systems_to_be_made = {}
+
         # For loop to iterate through the keys in 'self.data_to_be_made'
         for key in self.data_to_be_checked.values():
             #self.locator_list = []
@@ -235,6 +236,7 @@ class mirror_data():
                 f"{key['master_guide']}.{key['master_guide']}_mirror_jnts", 
                 asString=1
             )
+            
 
             if mirror_attribute == "Yes": # Yes mirror joint
                 # Call the other functions
@@ -269,8 +271,8 @@ class mirror_data():
                     "fk_ctrl_list": [],
                     "ik_joint_list": [],
                     "fk_joint_list": [],
-                    "guide_number": self.guide_number, # Might have to include 'number_id' to update properly!
-                    "mdl_switch_ctrl": []
+                    "mdl_switch_ctrl_list": [],
+                    "guide_number": self.guide_number # Might have to include 'number_id' to update properly!
                 }
 
 
@@ -280,15 +282,14 @@ class mirror_data():
                 print("***Data for the mirror class > ", temp_otherside_systems_to_be_made)
                 # set attribute on mirrored master guides! 
                 cmds.setAttr(f"{key['master_guide']}.{key['master_guide']}_mirror_jnts", 0)
-
+                #if mirror_attribute == "Yes":
+                guide_data.setup(temp_dictionary, self.data_guide)
 
         # Update the 'data_to_be_made' dict with this new data
         self.data_to_be_checked.update(temp_otherside_systems_to_be_made)
         print(f"Data for the mirror class{self.data_to_be_checked}")
-        
-        #if mirror_attribute == "Yes":
-         #   guide_data.setup(temp_dictionary, self.data_guide)
-        
+        print("IMPORTANT ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~: ", self.data_to_be_checked)
+
     def get_mirror_data(self):
         return self.data_to_be_checked
 
