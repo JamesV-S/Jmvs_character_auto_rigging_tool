@@ -58,6 +58,8 @@ def joint(top_skeleton_joint, system):
 
     # Joint creation: 
     cmds.select(cl=1)
+    
+    
     for locator in list_ctrls:
         # get locator location
         loc = cmds.xform(locator, r=1, ws=1, q=1, t=1)
@@ -67,18 +69,23 @@ def joint(top_skeleton_joint, system):
         cmds.matchTransform(jnt_name, locator)
         cmds.makeIdentity(jnt_name, a=1, t=0, r=1, s=1)
         cmds.makeIdentity(jnt_name, a=1, t=0, )
-        #makeIdentity -apply true -t 0 -r 0 -s 1 -n 0 -pn 1
         jnt_names.append(jnt_name)
-
-    mirror_attribute = cmds.getAttr(f"{top_skeleton_joint}.module_orientation")
+    
+    mirror_attribute = cmds.getAttr(f"{top_skeleton_joint}.module_orientation",  asString=1)
+    print(f"CREATE JOINT attrib <((((((()))))))> {mirror_attribute}")
     # if mirroring it:
+    
     if mirror_attribute == "XYZ": # used to be 'Yes'
         sao_axis = f"xdown" # xdown
-    else:
+        orientation = "xyz"
+        print("CREATE JOINT <((((((()))))))> XYZ ")
+    elif mirror_attribute == "YZX":
         sao_axis = f"yup" # xup
-
-    if side == "_R":
-        cmds.joint(jnt_names, edit=1, zso=1, oj="xyz", sao=sao_axis, ch=1)
+        orientation = "yzx"
+        print("CREATE JOINT <((((((()))))))> YZX ")
+    
+    # if side == "_R":
+      #   pass # cmds.joint(jnt_names[1:], edit=1, zso=1, oj=orientation, sao=sao_axis, ch=1)
         
     # I'm matching the joint's to the guides instead ofg orientaing them!
     '''

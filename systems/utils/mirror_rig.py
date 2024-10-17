@@ -181,24 +181,15 @@ class mirror_data():
 
 
     def mirror_joints(self):
-        joint_list = joints.joint(top_skeleton_joint=self.master_guide, system="rig")
-        # the 'self.master_guide' is the mirrored one
-        '''
-        joint_list = []
-        for guide in self.guide_list:
-            cmds.select()
-            loc_name = f"loc_orientation_test_{guide}"
-            cmds.joint(n=loc_name)
-            cmds.matchTransform(loc_name, self.guide_list)
-            joint_list.append(loc_name)
-            
-        '''
-            
+        #joint_list = joints.joint(top_skeleton_joint=self.master_guide, system="rig")
         
-       # cmds.matchTransform(loc_name, guide)
-            
-        # joint_list = ''
-        
+        if self.side == "_L": # self.side = the side to be mirrores
+            mirror_to_side = ("_R", "_L")
+        elif self.side == "_R":
+            mirror_to_side = ("_L", "_R")
+        cmds.select(self.rig_joint)
+        joint_list = cmds.mirrorJoint(mirrorYZ=True, mirrorBehavior=True, searchReplace = mirror_to_side ) 
+        cmds.select(cl=1)
         return joint_list
 
 
@@ -233,6 +224,7 @@ class mirror_data():
         for key in self.data_to_be_checked.values():
             #self.locator_list = []
             self.accessed_module = key["module"]
+            self.rig_joint = key["joints"][0]
             self.module = importlib.import_module(f"systems.modules.{self.accessed_module}")
             importlib.reload(self.module)
             self.available_rig_modules_type = ":".join(self.module.available_rig_types)
@@ -259,7 +251,7 @@ class mirror_data():
                 # Test if i should do this: 
                 self.joint_list = self.mirror_joints()
                 
-                # self.mirrored_system_to_connect = self.get_mirrored_system_to_connect()
+                self.mirrored_system_to_connect = self.get_mirrored_system_to_connect()
                 
                 # 'systems_to_connect': ['guide_COG'] is wrong & should be ['guide_clavicle_r', 'guide_COG'] from ['guide_clavicle_l', 'guide_COG']
 
@@ -272,7 +264,7 @@ class mirror_data():
                     "joints": self.joint_list, # Test if i should use this. Probbly need it.
                     "side": self.side,
                     "guide_connectors": [],
-                    "systems_to_connect": [], #self.mirrored_system_to_connect, 
+                    "systems_to_connect": self.mirrored_system_to_connect, 
                     "ik_ctrl_list": [],
                     "fk_ctrl_list": [],
                     "ik_joint_list": [],

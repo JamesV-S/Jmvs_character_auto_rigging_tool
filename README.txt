@@ -41,11 +41,8 @@ They a visible if the guides were created with the same loaded tool
 
 -----------------------------
 To do:
-
-The rig joints get primary axis (outputR > scaleX, outputG > scaleYZ[other axis!])
->> the mirrored guides DO NOT have guide."_0_wrist_R_fk_control" attributes
-
-> ADD systems: ikfk{DONE}, ikfkswitch{DONE}, space_swap, squash & stretch 
+>> Add data_loc info to mirrored data!
+> ADD systems: space_swap, ikfk{DONE}, ikfkswitch{DONE}, squash & stretch {DONE}
  
 > after the space-swap and other issues r fixed, move onto the neck system, 
 So i can test creating a rig for testing rotomation > Email Malcom to pass a 
@@ -55,11 +52,6 @@ So i can test creating a rig for testing rotomation > Email Malcom to pass a
 - System
 - constraint to rig joints
 - update dictionary
-
-> Edit how the attributes on the mirrored guides work:
-- The mirrored attributes shouldn't be linked to the orginal one like a proxy attr.
-- The joints created shoudln't acc be mirrored (axis facing opposite dirction), since 
-guides are created for the mirrored module, create joints off of them!
 
 > Add button to each section on the ui.
 - Switch back & forth between blueprints, rig_joints, systems, polished.
