@@ -25,7 +25,6 @@ class cr_squash_stretch():
             elif self.val_joints["pv_joint"] in rig_jnt:
                 self.rig_pv_joint = rig_jnt
             
-
         for joint in self.key['ik_joint_list']:
             if self.val_joints["start_joint"] in joint:
                 self.start_joint = joint
@@ -53,8 +52,12 @@ class cr_squash_stretch():
         utils.add_float_attrib(self.key['mdl_switch_ctrl_list'], [self.stretchy_attr], 
                                [0,1], True)
         print("here bruv : ", self.key['mdl_switch_ctrl_list'])
+        print("Control list:", self.key['mdl_switch_ctrl_list'])
+        print("Adding custom enum attribute to:", self.key['mdl_switch_ctrl_list'])
         utils.custom_enum_attr(self.key['mdl_switch_ctrl_list'], self.stretch_type, stretch_options_enum) 
-        
+        #cmds.addAttr(self.key['mdl_switch_ctrl_list'], longName=self.stretch_type, at="enum", enumName=stretch_options_enum )
+        #print(f"{target}.{enm_lng_nm}")
+        #cmds.setAttr( f"{self.key['mdl_switch_ctrl_list']}.{self.stretch_type}", e=1, k=1 )
         for x in range(len(self.key['ik_ctrl_list'])):
             utils.add_locked_attrib(self.key['ik_ctrl_list'][x], ["STRETCH"])
             utils.proxy_attr_list(self.key['mdl_switch_ctrl_list'],
@@ -103,27 +106,18 @@ class cr_squash_stretch():
         utils.connect_attr(f"{self.stretch_distance}.distance", f"{self.scalefactor}.input1X")
         cmds.setAttr(f"{self.scalefactor}.input2X", distance_value)
 
-        #connectAttr -f arm_L_ik_ctrl.Stretchiness arm_l_stretch_blend.blender;
-        # connectAttr -f arm_l_scalefactor_mult.outputX arm_l_stretch_blend.color1R
         utils.connect_attr(f"{self.key['mdl_switch_ctrl_list']}.{self.stretchy_attr}", f"{self.blend_colours_1}.blender")
         utils.connect_attr(f"{self.scalefactor}.outputX", f"{self.blend_colours_1}.color1R")
 
-        # connectAttr -f arm_L_ik_ctrl.Stretch_Type arm_l_stretch_control_pma.input1D[1]
-        # connectAttr -f arm_L_ik_ctrl.Stretch_Type arm_l_stretch_control_pma.input1D[2]
         utils.connect_attr(f"{self.key['mdl_switch_ctrl_list']}.{self.stretch_type}", f"{self.control_pma}.input1D[1]")
         utils.connect_attr(f"{self.key['mdl_switch_ctrl_list']}.{self.stretch_type}", f"{self.control_pma}.input1D[2]")
         
-        # connectAttr -f arm_l_stretch_control_pma.output1D arm_l_stretch_condition.operation
-        # connectAttr -f arm_l_scalefactor_mult.outputX arm_l_stretch_condition.firstTerm
-        # connectAttr -f arm_l_stretch_blend.outputR arm_l_stretch_condition.colorIfTrueR
         utils.connect_attr(f"{self.control_pma}.output1D", f"{self.condition}.operation")
         utils.connect_attr(f"{self.scalefactor}.outputX", f"{self.condition}.firstTerm")
         utils.connect_attr(f"{self.blend_colours_1}.outputR", f"{self.condition}.colorIfTrueR")
 
-        # connectAttr -f arm_l_stretch_condition.outColorR arm_l_volume_multi.input1X
         utils.connect_attr(f"{self.condition}.outColorR", f"{self.volume_multi}.input1X")
 
-        # connectAttr -f arm_L_ik_ctrl.FK_IK_Switch arm_l_stretch_ik_blend.blender
         if self.rig_type == "IKFK":
             utils.connect_attr(f"{self.key['mdl_switch_ctrl_list']}.{self.switch_Attr}", f"{self.blend_colours_2}.blender")
         elif self.rig_type == "IK":

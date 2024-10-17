@@ -276,11 +276,22 @@ def proxy_attr_list(master_ctrl, ctrl_list, N_of_Attr):
     for target in [ctrl_list]:
         cmds.addAttr( target, ln=N_of_Attr, proxy=f"{master_ctrl}.{N_of_Attr}" )
 
+
 def custom_enum_attr(ctrl, enm_lng_nm, CtrlEnmOptions):
+    print("In util the control is: ", ctrl)
+    print("In util the attr is: ", enm_lng_nm)
     for target in [ctrl]:
         if not cmds.attributeQuery(enm_lng_nm, node=target, exists=True):
-            cmds.addAttr(longName=enm_lng_nm, at="enum", enumName=CtrlEnmOptions )
+            cmds.addAttr(target, longName=enm_lng_nm, at="enum", enumName=CtrlEnmOptions )
+            print(f"{target}.{enm_lng_nm}")
             cmds.setAttr( f"{target}.{enm_lng_nm}", e=1, k=1 )
+'''
 
+def custom_enum_attr(ctrl, enm_lng_nm, CtrlEnmOptions):
+       if not cmds.attributeQuery(enm_lng_nm, node=ctrl, exists=True):
+           cmds.addAttr(longName=enm_lng_nm, at="enum", enumName=CtrlEnmOptions)
+           print(f"{ctrl}.{enm_lng_nm}")
+           cmds.setAttr(f"{ctrl}.{enm_lng_nm}", e=1, k=1)
+'''
 #custom_enum_attr( "James", "Thuki:Arron:Harv")
         
