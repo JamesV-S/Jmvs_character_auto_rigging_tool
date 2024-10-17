@@ -3,16 +3,19 @@ import importlib
 import os
 
 from systems import joints
-from systems.utils import (utils, control_shape, guide_data)
+from systems.utils import (utils, control_shape, guide_data, system_custom_attr)
 importlib.reload(joints)
 importlib.reload(utils)
 importlib.reload(control_shape)
 importlib.reload(guide_data)
+importlib.reload(system_custom_attr)
 
 class mirror_data():
-    def __init__(self, systems_to_be_made):
-        self.data_to_be_checked = systems_to_be_made 
+    def __init__(self, systems_to_be_made, orientation):
+        self.data_to_be_checked = systems_to_be_made
+        self.orientation = orientation
         self.mirror_data()
+
     
     def get_mirrored_side(self):
         if self.key["side"] == "_L":
@@ -46,8 +49,8 @@ class mirror_data():
             else:
                 guide_name =  f"{guide[:-2]}{self.side}" # guide_0_shoulder_L remove '_L' & add '_R'
                 tmp = cmds.file(GUIDE_FILE, i=1, namespace="guide_shape_import", rnn=1)
-                cmds.scale(self.module.guide_scale+1, self.module.guide_scale+1, 
-                            self.module.guide_scale+1, tmp)
+                cmds.scale(self.module.guide_scale+0.5, self.module.guide_scale+0.5, 
+                            self.module.guide_scale+0.5, tmp)
                 imported_guide = guide = cmds.rename(tmp[0], guide_name)
                 utils.colour_guide_custom_shape(guide_name) #       shape_list = cmds.listRelatives(custom_crv, shapes=1)
                                                                     #                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -56,7 +59,11 @@ class mirror_data():
 
             cmds.xform(imported_guide, t=pos, ro=rot)
             tmp_guide_list.append(imported_guide)
+
+            cmds.addAttr(tmp_guide_list, ln="original_guide", at="enum", en=guide[8:-2], k=0) 
         
+        print(f"MIRROR_RIG< 'create_mirrored_guides()', tmp huide list: {tmp_guide_list}")
+        # 'tmp_guide_list' == mirrored guide list
         # this works to avoide mirroring transform issue
         grp_name = cmds.group(n="mirroring_transform", em=1)
         cmds.parent(tmp_guide_list, grp_name)
@@ -64,7 +71,6 @@ class mirror_data():
         cmds.parent(tmp_guide_list, w=1)
         cmds.makeIdentity(tmp_guide_list[-1], apply=1, s=1)
         cmds.delete(grp_name)
-
         
         print(f"CONNECTING GUIDES Mirror : {tmp_guide_list}")
         for guide in range(len(tmp_guide_list)):
@@ -85,7 +91,7 @@ class mirror_data():
         self.master_guide = tmp_guide_list[-1]
         self.guide_list = tmp_guide_list
         self.guide_number = self.master_guide[7]
-
+        
         # Create the data guide for the mirrored side!
         if "root" in self.module.system: # or "proximal" in self.module.system:
             data_guide_name = f"data_{self.master_guide}"
@@ -95,19 +101,55 @@ class mirror_data():
         cmds.matchTransform(data_guide_name, self.master_guide)
         cmds.parent(data_guide_name, self.master_guide)
         
-        
-
     
     def copy_mirrored_attrs(self): # copy attrs across
-        self.non_proxy_attr_list = []
-        proxy_obj_list = self.guide_list
+        print(f"List of attr on master guide: {cmds.listAttr(self.key['master_guide'], r=1, ud=1)}")
+        print(f"str(self.module):: {str(self.module)}")
+
+        system_custom_attr.cstm_attr(self.guide_list, self.master_guide, [], self.accessed_module, self.available_rig_modules_type)
+        
+        #self.add_custom_attr(self.guide_list, self.master_guide, [], self.accessed_module)
+        
+        cmds.addAttr(self.master_guide, ln="is_master", at="enum", en="True", k=0)
+        cmds.addAttr(self.master_guide, ln="base_module", at="enum", en=self.accessed_module, k=0) # mdl_attr
+        cmds.addAttr(self.master_guide, ln="module_side", at="enum", en=self.side, k=0)
+        cmds.addAttr(self.master_guide, ln="master_guide", at="enum", en=self.master_guide, k=0)
+        cmds.addAttr(self.master_guide, ln="module_orientation", at="enum", en=self.orientation, k=0)
+
+        # proxy to rest of the mirrored guide controls:
+        for item in ["is_master", "base_module", "module_side", "master_guide", "module_orientation"]:
+            cmds.addAttr(self.guide_list[:-1],ln=f"{item}", proxy=f"{self.guide_list[-1]}.{item}")
+            for guide in self.guide_list[:-1]:
+                cmds.setAttr(f"{guide}.{item}",k=0)
+
+        for guide in self.guide_list:
+            # Ignore the these:
+            if "root" in guide or "COG" in guide or "master" in guide: 
+                pass
+            else:
+                for ikfk in ["FK", "IK"]:
+                    print("for ikfk in []: ", ikfk)
+                    control_shape_instance = control_shape.controlShapeList()
+                    control_shape_instance.return_filtered_list(type=ikfk, object=guide)
+                    
+                    control_shape_list = control_shape_instance.return_list()
+                    print("ctrl_shape_list : ", control_shape_list)                    
+                    control_shape_en = ":".join(control_shape_list)
+                    print("Create_guides <(Line 275)> CONTROL SHAPE INDEX: ", f"{guide[6:]}_{ikfk}_control")
+                    cmds.addAttr(guide, ln=f"{guide[5:]}_{ikfk.lower()}_control", 
+                                 at="enum", en=control_shape_en, k=1)
+
+        '''
+
         for attr in cmds.listAttr(self.key["master_guide"], r=1, ud=1):
+            # print("ATTR: ", attr)
             if "_control_shape" in attr:
                 pass
             else:
                 try:
                     if attr == "master_guide":
-                        cmds.addAttr(proxy_obj_list, ln="master_guide", at="enum", en=self.master_guide, k=0)
+                        print(f"if attr == 'master_guide': YES {attr}")
+                        cmds.addAttr(other_side_guides, ln="master_guide", at="enum", en=self.master_guide, k=0)
                     elif attr not in ['visibility', 'translateX', 'translateY', 
                                       'translateZ', 'rotateX', 'rotateY', 
                                       'rotateZ', 'scaleX', 'scaleY', 'scaleZ']:
@@ -115,9 +157,16 @@ class mirror_data():
                             new_attr_name = attr.replace(f"{self.key['side']}", self.side, 1)
                         except:
                             pass
-                        cmds.addAttr(proxy_obj_list,ln=f"{new_attr_name}", proxy=f"{self.key['master_guide']}.{attr}")
+                        
+                        #cmds.addAttr(other_side_guides[-1], ln=f"{new_attr_name}")
+
+                        #cmds.setAttr(f"{other_side_guides[-1]}.{new_attr_name}", l=1, keyable=False, channelBox=True)
+                        print(f"name of new attr: {new_attr_name}")
+                        print(f"proxy obj list: {other_side_guides}")
+                        #cmds.addAttr(other_side_guides,ln=f"{new_attr_name}", proxy=f"{self.key['master_guide']}.{attr}")
                 except:
                     pass
+        
         # replace side with opposite for the attr & guide names. 
         print(f"Within 'copy_mirrored_attrs' the key is: ", self.key["guide_list"])
         for guide in self.key["guide_list"]:
@@ -128,11 +177,28 @@ class mirror_data():
                     enum_value = cmds.getAttr(f"{guide}.{attr}", asString=1)
                     # Then add the attr to mirrored guide!
                     cmds.addAttr(mirrored_guide, ln=f"{new_attr_name}", at="enum", en=enum_value)
+        '''
 
 
     def mirror_joints(self):
         joint_list = joints.joint(top_skeleton_joint=self.master_guide, system="rig")
         # the 'self.master_guide' is the mirrored one
+        '''
+        joint_list = []
+        for guide in self.guide_list:
+            cmds.select()
+            loc_name = f"loc_orientation_test_{guide}"
+            cmds.joint(n=loc_name)
+            cmds.matchTransform(loc_name, self.guide_list)
+            joint_list.append(loc_name)
+            
+        '''
+            
+        
+       # cmds.matchTransform(loc_name, guide)
+            
+        # joint_list = ''
+        
         return joint_list
 
 
@@ -166,9 +232,12 @@ class mirror_data():
         # For loop to iterate through the keys in 'self.data_to_be_made'
         for key in self.data_to_be_checked.values():
             #self.locator_list = []
-            accessed_module = key["module"]
-            self.module = importlib.import_module(f"systems.modules.{accessed_module}")
+            self.accessed_module = key["module"]
+            self.module = importlib.import_module(f"systems.modules.{self.accessed_module}")
             importlib.reload(self.module)
+            self.available_rig_modules_type = ":".join(self.module.available_rig_types)
+            print(f"MIRROR DATA module: {self.module}")
+            print(f"MIRROR DATA avalbale rig modules: {self.available_rig_modules_type}")
             # Gather mirror_jnts attrib on each guide!
             mirror_attribute = cmds.getAttr(
                 f"{key['master_guide']}.{key['master_guide']}_mirror_jnts", 
@@ -190,7 +259,8 @@ class mirror_data():
                 # Test if i should do this: 
                 self.joint_list = self.mirror_joints()
                 
-                self.mirrored_system_to_connect = self.get_mirrored_system_to_connect()
+                # self.mirrored_system_to_connect = self.get_mirrored_system_to_connect()
+                
                 # 'systems_to_connect': ['guide_COG'] is wrong & should be ['guide_clavicle_r', 'guide_COG'] from ['guide_clavicle_l', 'guide_COG']
 
                 # create temp dict to store same module data as 'add_module() from ui.py'
@@ -202,7 +272,7 @@ class mirror_data():
                     "joints": self.joint_list, # Test if i should use this. Probbly need it.
                     "side": self.side,
                     "guide_connectors": [],
-                    "systems_to_connect": self.mirrored_system_to_connect, 
+                    "systems_to_connect": [], #self.mirrored_system_to_connect, 
                     "ik_ctrl_list": [],
                     "fk_ctrl_list": [],
                     "ik_joint_list": [],
@@ -217,17 +287,15 @@ class mirror_data():
                 temp_otherside_systems_to_be_made[self.master_guide] = temp_dictionary
                 print("***Data for the mirror class > ", temp_otherside_systems_to_be_made)
                 # set attribute on mirrored master guides! 
-                cmds.setAttr(
-                f"{key['master_guide']}.{key['master_guide']}_mirror_jnts", 0
-                )
+                cmds.setAttr(f"{key['master_guide']}.{key['master_guide']}_mirror_jnts", 0)
 
 
         # Update the 'data_to_be_made' dict with this new data
         self.data_to_be_checked.update(temp_otherside_systems_to_be_made)
         print(f"Data for the mirror class{self.data_to_be_checked}")
         
-        if mirror_attribute == "Yes":
-            guide_data.setup(temp_dictionary, self.data_guide)
+        #if mirror_attribute == "Yes":
+         #   guide_data.setup(temp_dictionary, self.data_guide)
         
     def get_mirror_data(self):
         return self.data_to_be_checked

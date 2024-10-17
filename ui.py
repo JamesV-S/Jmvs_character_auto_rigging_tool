@@ -309,6 +309,8 @@ class QtSampler(QWidget):
             # add the temp dict to systems to be made, to manage all systems that eed to be constructed. 
             self.systems_to_be_made[master_guide] = temp_dictionary
             print(f"temp dict for setup: {temp_dictionary}")
+            
+            # Add the attributes to the data locator!
             guide_data.setup(temp_dictionary, data_guide)
 
             # if statement id add_hand.isChecked() on the ui later on. 
@@ -348,7 +350,7 @@ class QtSampler(QWidget):
             num += 1
         
         
-        mirror_module = mirror_rig.mirror_data(self.systems_to_be_made)
+        mirror_module = mirror_rig.mirror_data(self.systems_to_be_made, self.orientation_func())
         self.systems_to_be_made = mirror_module.get_mirror_data()
         
         connect_modules.attach_jnts(self.systems_to_be_made, system="rig")

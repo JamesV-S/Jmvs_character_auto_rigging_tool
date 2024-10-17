@@ -39,7 +39,9 @@ def joint(top_skeleton_joint, system):
     side = cmds.getAttr(f"{top_skeleton_joint}.module_side", asString=1)
     if side == "None":
         side = ""
-    
+
+    if side == "_R":
+        print(f"JOINTS.py, THis is the '_R' side!")
     # Creatre the list of controls for future while
     # Filtering out any controls with a 'cluster' or 'data_', adding rest to list controls
     for x in list:
@@ -67,7 +69,17 @@ def joint(top_skeleton_joint, system):
         cmds.makeIdentity(jnt_name, a=1, t=0, )
         #makeIdentity -apply true -t 0 -r 0 -s 1 -n 0 -pn 1
         jnt_names.append(jnt_name)
-    
+
+    mirror_attribute = cmds.getAttr(f"{top_skeleton_joint}.module_orientation")
+    # if mirroring it:
+    if mirror_attribute == "XYZ": # used to be 'Yes'
+        sao_axis = f"xdown" # xdown
+    else:
+        sao_axis = f"yup" # xup
+
+    if side == "_R":
+        cmds.joint(jnt_names, edit=1, zso=1, oj="xyz", sao=sao_axis, ch=1)
+        
     # I'm matching the joint's to the guides instead ofg orientaing them!
     '''
     mirror_attribute = cmds.getAttr(f"{top_skeleton_joint}.module_orientation", asString=1)

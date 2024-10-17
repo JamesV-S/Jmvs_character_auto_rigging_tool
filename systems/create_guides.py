@@ -16,7 +16,7 @@ class Guides_class():
         self.module = importlib.import_module(f"systems.modules.{accessed_module}")
         # Reload the module for any updates!
         importlib.reload(self.module)
-
+       
         # [if] statement for "self.create_guide" variable {if == "hand"}
         # else:
 
@@ -231,9 +231,11 @@ class Guides_class():
         
         # 8) control shape attributes
         # for each guide it adds attributes for control shapes, associated with ik & fk systems. 
+        
         for guide in ui_guide_list:
             # Ignore the these:
-            if "root" in guide or "COG" in guide or "master" in guide: pass
+            if "root" in guide or "COG" in guide or "master" in guide: 
+                pass
             else:
                 for ikfk in ["FK", "IK"]:
                     print("for ikfk in []: ", ikfk)
@@ -318,37 +320,8 @@ class Guides_class():
             add_proxy(system[:-1], skip_attr=[], proxy_item=system[-1], add_missing=False)
 
 '''
-numbers_unfiltered = []
-for data_guide in tmp_list:
-    if cmds.attributeQuery("guide_number", node=data_guide, exists=True):
-        numbers_unfiltered.append(cmds.getAttr(f"{data_guide}.guide_number"))
-    else:
-        cmds.warning(
-            f"guide_number attr doesn't exist on this node '{data_guide}',guide seup might not work as sexpected to."
-                        )
-'''
-# Increment the counter
-# self.unique_id_counter += 1
-#print("Create_guides, number id:::: ", type(number_unique))
-#number_unique += 1 
-# number_id = str(number_unique) 
-'''
-if numbers_unfiltered:
-    numbers_unfiltered.sort()
-    number_id = numbers_unfiltered[-1]+1
-            '''
 
-'''
 for shape in imported[1:]:
     shape = shape.split("|")[-1]
     cmds.rename(shape, f"{guide}_shape_#")
     '''
-   
-#except RuntimeError:
-    #   print("Couldn't load guide shape file, using basic shapes instead")
-    #  cmds.spaceLocator(n=x)
-'''
-if "root" in x: # Ignore the orientation!
-    pos = root_pos_dict[x]
-    rot = root_rot_dict[x]
-'''

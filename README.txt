@@ -41,11 +41,16 @@ They a visible if the guides were created with the same loaded tool
 
 -----------------------------
 To do:
->>> Get stretchy working, check the primary axis(X) for ik scale input. (ouptutR > scaleX)
+
 The rig joints get primary axis (outputR > scaleX, outputG > scaleYZ[other axis!])
 >> the mirrored guides DO NOT have guide."_0_wrist_R_fk_control" attributes
 
 > ADD systems: ikfk{DONE}, ikfkswitch{DONE}, space_swap, squash & stretch 
+ 
+> after the space-swap and other issues r fixed, move onto the neck system, 
+So i can test creating a rig for testing rotomation > Email Malcom to pass a 
+> acapture movement. question onto Stephen cpncerning creating a head & arm rig for cg replacments.  
+
 - Joints
 - System
 - constraint to rig joints
