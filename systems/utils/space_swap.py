@@ -24,13 +24,15 @@ class cr_spaceSwapping():
         rig_type = cmds.getAttr(f"{self.key['master_guide']}.{self.key['master_guide']}_rig_type", asString=1)
         if rig_type == "IKFK":
             self.space_swap_locators = self.create_locators()
-            #if self.key["mdl_switch_ctrl_list"] == ''
-            #    self.cog_ctrl = 
-            if "pv" in self.ik_ctrl_list:
-                self.pv_ctrl = self.ik_ctrl_list
-            if "wrist" in self.ik_ctrl_list or "ankle" in self.ik_ctrl_list:
-                self.master_swap = self.ik_ctrl_list
-        # self.
+            print(self.space_swap_locators)
+            self.pv_ctrl = [item for item in self.ik_ctrl_list if 'pv' in item][0]
+            self.master_swap_ctrl = [item for item in self.ik_ctrl_list if 'wrist' in item or 'ankle' in item][0]
+            self.top_ctrl = [item for item in self.ik_ctrl_list if 'shoulder' in item or 'hip' in item or 'scapula' in item][0]
+            
+            print(f"top_joint : {self.top_ctrl}")
+
+            self.parent_to_location()
+        
 
     # might need to create temporary ctrl_root to work as the inverse_matrix. 
     def create_locators(self):
@@ -41,6 +43,7 @@ class cr_spaceSwapping():
         created_loc_list = []
         for item in self.locator_list:
             created_loc_list.append(cmds.spaceLocator(n=f"swappos_{item}_{custom_loc_name_id}")[0])
+        
         '''
         tmp_list = []
         for x in self.locator_list:
@@ -63,16 +66,22 @@ class cr_spaceSwapping():
     # Locators are matched to the same control, like pv or master_ctrl, 
     # then parented to dpaceswap like root, cog...
     def parent_to_location(self):
-        def match_and_parent(loc, ctrl, target):
-            cmds.matchTransform(loc, ctrl)
-            cmds.parent(loc, target)
-            
-            # match these lists of locator's to the master
-            for locator in self.locator_list:
-                cmds.matchTransform(self.master_swap)
+        # ['swappos_world_biped_arm_0_L', 'swappos_COG_biped_arm_0_L', 'swappos_shoulder_biped_arm_0_L', 'swappos_custom_biped_arm_0_L', 'swappos_custom_1']
+    
+        # match these lists of locator's to the master
+        #cmds.matchTransform(locator, self.master_swap_ctrl)
+        print("test loc list; ", self.space_swap_locators)
+        for locator in self.space_swap_locators:
+            if "COG" in locator:
+                print(f"found COG in locator list > {locator}")
+                cmds.parent(locator, self.ctrl_cog)
+            elif "world" in locator:
+                print(f"found world in locator list > {locator}")
+                cmds.parent(locator, self.ctrl_root)
+            elif f"{locator[10:-2]}" in locator:
+                cmds.parent(locator, self.top_ctrl)
 
-                if "COG" in self.locator_list:
-                    cmds.parent(, ctrl_cog)
+                
                 
 
 
