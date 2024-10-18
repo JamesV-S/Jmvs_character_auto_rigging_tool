@@ -306,7 +306,7 @@ class QtSampler(QWidget):
                 "fk_ctrl_list": [],
                 "ik_joint_list": [],
                 "fk_joint_list": [],
-                "space_swap": module_path.space_swap,
+                "space_swap": module_path.space_swapping,
                 "mdl_switch_ctrl_list": [],
                 "guide_number": number_int
             }
@@ -489,16 +489,16 @@ class QtSampler(QWidget):
         # Connect systems & add space_swapping!
         for key in self.systems_to_be_made.values():
             updated_rig_type = cmds.getAttr(f"{key['master_guide']}.{key['master_guide']}_rig_type", asString=1)
-            print("print type > ", updated_rig_type)
+            print("print key > ", key)
             if key["systems_to_connect"]:
                 #print(f"connect modules after systems! {master_guide}")
                 systems_to_connect = key["systems_to_connect"]
                 # connect_modules.connect_polished(systems_to_connect)
             if updated_rig_type == "IKFK" or updated_rig_type == "IK":
-                print("calling space_swap")
                 #print(f"Add space_swap sys {master_guide}")
+                print(f"before calling spaceSwap: {key['space_swap']}")
                 space_swap_mdl = space_swap.cr_spaceSwapping(key, self.ctrl_cog, self.ctrl_root)
-
+        
         '''
         # colour the controls: 
         colour_dict = {"L_colour":[], "C_colour":[], "R_colour":[]} # C stands for centre so yellow. 

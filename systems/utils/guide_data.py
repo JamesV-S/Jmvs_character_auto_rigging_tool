@@ -28,7 +28,15 @@ dict_var_types = {
 
 # Each key in the dict represents a attribute name, & 
 # its corresponding value determines the the attribute type and initial value.
-    
+
+def flatten_list_of_lists(nested_list):
+    flattened = []
+    for sublist in nested_list:
+        if isinstance(sublist, list):
+            flattened.extend(sublist)
+    return ":".join(flattened) if flattened else "empty"
+
+
 def setup(temp_dict, data_guide):
     for key in temp_dict.keys():
 
@@ -48,17 +56,22 @@ def setup(temp_dict, data_guide):
             cmds.addAttr(data_guide, ln=key, at="enum", en=temp_dict[key], k=1)
             '''try replace "enum" with "string"'''
         
-        elif isinstance(temp_dict[key], list):
-            #print(f"C list> Adding attribute to: {data_guide}, attribute name: {key}")
-            # if valueis a list, checks if list is empty. 
-            if len(temp_dict[key]) == 0: 
-                enum_list = "empty"
+        elif isinstance(temp_dict[key], list): 
+            if key == "space_swap":
+                # Handle the space_swap attribute specifically 
+                if isinstance(temp_dict[key], list) and all(isinstance(i, list) for i in temp_dict[key]):
+                    flattened_value = flatten_list_of_lists(temp_dict[key])
+                    cmds.addAttr(data_guide, ln=key, at="enum", en=flattened_value, k=1)
+                else:
+                    # handle unexpected format
+                    print(f"Warning: sapce_swap is not a list of lists for {data_guide}")
             else:
-                # if not, the list is joined into a single string with elements 
-                # after colon(:)
-                enum_list = ":".join(temp_dict[key])
-            # An enum attr is added with the values, as a way to store list data in Maya.
-            cmds.addAttr(data_guide, ln=key, at="enum", en=enum_list, k=1)
+                if len(temp_dict[key]) == 0: 
+                    enum_list = "empty"
+                else:
+                    enum_list = ":".join(temp_dict[key])
+                # An enum attr is added with the values, as a way to store list data in Maya.
+                cmds.addAttr(data_guide, ln=key, at="enum", en=enum_list, k=1)
         
         # if float or int, a float attr is added & value is set.
         elif isinstance(temp_dict[key], float):
@@ -86,6 +99,8 @@ def setup(temp_dict, data_guide):
 
 # Potential fixes:
     # Make sure list types are correctly interpreted and split using attribute values
+
+
 def init_data():
     return_dict = {}
     data_guides = cmds.ls("data_*", type="transform")

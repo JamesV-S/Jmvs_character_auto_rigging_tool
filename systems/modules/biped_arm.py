@@ -46,7 +46,5 @@ default_ctrl_shape = {
 
 
  # Need to split it up: Clav, PV, master(wrist)
-space_swap = ["world", "COG", "shoulder", "custom", ] # Custom being whatever i want it to be
-master_space_swap = ["world", "COG", "shoulder", "custom"]
-pv_space_swap = []
-chest_space_swap = []
+space_swapping = [["world", "COG", "shoulder", "custom"], ["world", "wrist"], ["world", "chest"]]
+space_swap = ["world", "COG", "shoulder", "custom"]

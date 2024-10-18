@@ -9,15 +9,16 @@ importlib.reload(utils)
 # space_swap for 3 things: 
 
 class cr_spaceSwapping():
-    def __init__(self, key, ctrl_cog, ctrl_root, ):
+    def __init__(self, key, ctrl_cog, ctrl_root):
         self.key = key
         self.ctrl_cog = ctrl_cog
         self.ctrl_root = ctrl_root
-        ''' atm it's just locators for the hand, need a list of locators for the pv & shoulder/hip '''
-        self.locator_list = self.key["space_swap"]
+        ''' atm it's just locators for the hand, need a list of locators for the pv & shoulder/hip ''' 
+        self.swap_master_name_ls = self.key["space_swap"]
         
-        # self.locator_dict = 
-
+        space_swap_list = [["world", "COG", "shoulder", "custom"], ["world", "wrist"], ["world", "chest"]]
+        print(f"locator swap list master = {space_swap_list[1]}")
+        
         self.guide_list = self.key["guide_list"]
         self.ik_ctrl_list = self.key["ik_ctrl_list"]
 
@@ -37,22 +38,22 @@ class cr_spaceSwapping():
     # might need to create temporary ctrl_root to work as the inverse_matrix. 
     def create_locators(self):
        # created_loc_list = [cmds.spaceLocator(n=f"loc_swappos{x}")[0] 
-       #                     for x in self.guide_list[6:] for item in self.locator_list if item in x] 
+       #                     for x in self.guide_list[6:] for item in self.swap_master_name_ls if item in x] 
         custom_loc_name_id = f"{self.key['module']}_{int(self.key['guide_number'])}{self.key['side']}"
         print(f"swappos names: {custom_loc_name_id}")
         created_loc_list = []
-        for item in self.locator_list:
+        for item in self.swap_master_name_ls:
             created_loc_list.append(cmds.spaceLocator(n=f"swappos_{item}_{custom_loc_name_id}")[0])
         
         '''
         tmp_list = []
-        for x in self.locator_list:
+        for x in self.swap_master_name_ls:
             for item in ["root", "COG"]:
                 if item in x:
                     tmp_list.append(cmds.spaceLocator(n=f"swappos_{item}_#")[0])
         '''
 
-        if "custom" in self.locator_list:
+        if "custom" in self.swap_master_name_ls:
             loc = cmds.spaceLocator(n="swappos_custom_#")[0]
             created_loc_list.append(loc)
             self.custom_loc = loc
