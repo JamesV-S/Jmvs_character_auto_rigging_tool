@@ -221,6 +221,12 @@ class QtSampler(QWidget):
             master_guide = dict["master_guide"]
             self.created_guides.append(master_guide)
             self.systems_to_be_made[master_guide] = dict
+            if not dict["space_swap"] == []:
+                sublist = [dict["space_swap"][0:4], dict["space_swap"][4:6], dict["space_swap"][6:8]]
+                print(f"OLD space_swap key: {dict['space_swap']}")
+                dict.update({"space_swap": sublist})
+                print(f"updated space_swap key: {dict['space_swap']}")
+            space_swap = dict['space_swap']
             # self.data_unique_number = dict["guide_number"]
 
     def add_module(self):
@@ -489,14 +495,13 @@ class QtSampler(QWidget):
         # Connect systems & add space_swapping!
         for key in self.systems_to_be_made.values():
             updated_rig_type = cmds.getAttr(f"{key['master_guide']}.{key['master_guide']}_rig_type", asString=1)
-            print("print key > ", key)
             if key["systems_to_connect"]:
                 #print(f"connect modules after systems! {master_guide}")
                 systems_to_connect = key["systems_to_connect"]
                 # connect_modules.connect_polished(systems_to_connect)
             if updated_rig_type == "IKFK" or updated_rig_type == "IK":
                 #print(f"Add space_swap sys {master_guide}")
-                print(f"before calling spaceSwap: {key['space_swap']}")
+                print(f"before calling spaceSwap: {key}")
                 space_swap_mdl = space_swap.cr_spaceSwapping(key, self.ctrl_cog, self.ctrl_root)
         
         '''

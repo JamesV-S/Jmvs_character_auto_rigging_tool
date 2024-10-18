@@ -39,7 +39,8 @@ twist_joint= {
 
 side = "_L"
 stretch = True
-space_swapping = ["hip","root","COG","Custom"]
+space_swapping = [["world", "COG", "hip", "custom"], ["world", "ankle"], ["world", "spine_0"]]
+
 guide_scale = 1
 available_rig_types = ["FK", "IK", "IKFK"] # Add ribbon in future!
 reverse_foot = True
