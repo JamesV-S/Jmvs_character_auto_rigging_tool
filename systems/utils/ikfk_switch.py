@@ -69,7 +69,3 @@ def cr_ikfk_switch_sys(rig_joints, mdl_switch_ctrl, fk_ctrls, ik_ctrls, fk_joint
     }
 
     return ikfk_switch_dict
-
-
-
-
