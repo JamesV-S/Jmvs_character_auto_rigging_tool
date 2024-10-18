@@ -56,3 +56,5 @@ default_ctrl_shape = {
     "fk_ball": "circle", 
     "ik_ball": "cube"
 } # Have fk as circle, ik as cube & ribbon as octogan. 
+
+space_swap = ["world", "COG", "hips", "custom"] # Custom being whatever i want it to be

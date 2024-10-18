@@ -44,10 +44,4 @@ default_ctrl_shape = {
     "ik_wrist": "cube"
 } # Have fk as circle, ik as cube & ribbon as octagon. 
 
-'''
-module files do not use defined functions because blueprint guides 
-prioritize a visual, modular, and attribute-driven approach that imporoves 
-flexibility, ease of use, and automation in the rigging process. This method 
-allows me to efficiently create and customize complex rig 
-systems without delving into the intricacies of coding functions.
-'''
+space_swap = ["world", "COG", "shoulder", "custom"] # Custom being whatever i want it to be

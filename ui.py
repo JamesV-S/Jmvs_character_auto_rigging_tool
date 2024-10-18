@@ -9,7 +9,7 @@ from PySide6.QtWidgets import *
 from PySide6.QtUiTools import *
 from shiboken6 import wrapInstance
 from PySide6 import QtUiTools, QtWidgets, QtCore
-from functools import partial # if you want to include args with UI method calls
+from functools import partial # if you want to include args with UI method calls                   
 
 
 import os.path
@@ -32,7 +32,8 @@ from systems.utils import (
     mirror_rig,
     guide_data,
     arrow_ctrl,
-    ikfk_switch 
+    ikfk_switch, 
+    space_swap
     
 )
 
@@ -48,6 +49,7 @@ importlib.reload(ik)
 importlib.reload(arrow_ctrl)
 importlib.reload(ikfk_switch)
 importlib.reload(squash_stretch)
+importlib.reload(space_swap)
 
 
 mayaMainWindowPtr = omui.MQtUtil.mainWindow()
@@ -302,6 +304,7 @@ class QtSampler(QWidget):
                 "fk_ctrl_list": [],
                 "ik_joint_list": [],
                 "fk_joint_list": [],
+                "space_swap": module_path.space_swap,
                 "mdl_switch_ctrl_list": [],
                 "guide_number": number_int                
             }
@@ -466,11 +469,10 @@ class QtSampler(QWidget):
             if key["systems_to_connect"]:
                 #print(f"connect modules after systems! {master_guide}")
                 systems_to_connect = key["systems_to_connect"]
-                # connect_modules.connect_pilished(systems_to_connect)
+                # connect_modules.connect_polished(systems_to_connect)
             if rig_type == "IKFK" or rig_type == "IK":
                 #print(f"Add space_swap sys {master_guide}")
-                pass
-                # space_swap_mdl = space_swap.SpaceSwapping()
+                space_swap_mdl = space_swap.cr_spaceSwapping(key)
 
         '''
         # colour the controls: 

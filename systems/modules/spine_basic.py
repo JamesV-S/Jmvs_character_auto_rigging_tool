@@ -44,7 +44,7 @@ ik_joints = {
     "world_orientation": True
 }
 side = "None"
-space_swapping = []
+space_swap = []
 guide_scale = 1
 available_rig_types = ["FK", "IK", "IKFK"]
 default_ctrl_shape = {
