@@ -14,6 +14,7 @@ dict_var_types = {
                 "fk_ctrl_list": "list",
                 "ik_joint_list": "list",
                 "fk_joint_list": "list",
+                "space_swap": "list",
                 "mdl_switch_ctrl_list": "list",
                 "guide_number": "float"
             }

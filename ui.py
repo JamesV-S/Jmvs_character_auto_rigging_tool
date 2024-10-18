@@ -23,7 +23,7 @@ from systems import (
     joints, 
     fk, 
     ik, 
-    squash_stretch
+    squash_stretch    
 )
 
 from systems.utils import (
@@ -33,7 +33,8 @@ from systems.utils import (
     guide_data,
     arrow_ctrl,
     ikfk_switch, 
-    space_swap
+    space_swap,
+    OPM
     
 )
 
@@ -50,6 +51,7 @@ importlib.reload(arrow_ctrl)
 importlib.reload(ikfk_switch)
 importlib.reload(squash_stretch)
 importlib.reload(space_swap)
+importlib.reload(OPM)
 
 
 mayaMainWindowPtr = omui.MQtUtil.mainWindow()
@@ -306,7 +308,7 @@ class QtSampler(QWidget):
                 "fk_joint_list": [],
                 "space_swap": module_path.space_swap,
                 "mdl_switch_ctrl_list": [],
-                "guide_number": number_int                
+                "guide_number": number_int
             }
 
             # add the temp dict to systems to be made, to manage all systems that eed to be constructed. 
@@ -378,7 +380,27 @@ class QtSampler(QWidget):
             module = importlib.import_module(key["module"])
             importlib.reload(module)
             if key["module"] == "root_basic": 
-                pass
+                 # If root module, create cog_ctrl. TO be used in ikfk switch & space_swap: 
+                COG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "systems", 
+                                        "imports","cog_ctrl_import.abc")
+                imported = cmds.file(COG_FILE, i=1, namespace="imp_cog", rnn=1)
+                cmds.scale(1, 1, 1, imported)
+                self.ctrl_cog = cmds.rename(imported[0], f"ctrl_COG")
+                cmds.matchTransform(self.ctrl_cog, key["guide_list"][0],  pos=1, rot=0, scl=0)
+                cmds.setAttr(f"{self.ctrl_cog}.overrideEnabled", 1)
+                cmds.setAttr(f"{self.ctrl_cog}.overrideColor", 18)
+                OPM.OpmCleanTool(self.ctrl_cog)
+                key.update({"mdl_switch_ctrl_list": self.ctrl_cog})
+                print(f"Did the cog add to the key? > {key}")
+
+                CTRL_ROOT_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "systems", 
+                                        "imports","ctrl_root_import.abc")
+                root_imp = cmds.file(CTRL_ROOT_FILE, i=1, namespace="imp_root", rnn=1)
+                cmds.scale(1, 1, 1, root_imp)
+                self.ctrl_root = cmds.rename(root_imp[0], f"ctrl_root")
+                cmds.matchTransform(self.ctrl_root, key["guide_list"][1],  pos=1, rot=0, scl=0)
+                utils.colour_root_control(self.ctrl_root)
+            
             else:
                 if rig_type == "FK":
                     # create fk joints, system & control, then constrain to rig_joints!
@@ -463,16 +485,19 @@ class QtSampler(QWidget):
         
         '''system_group.grpSetup(self.ui.rig_master_name.text())''' # What does this do?
         
+
         # Connect systems & add space_swapping!
         for key in self.systems_to_be_made.values():
-            #rig_type = cmds.getAttr(f"{key['master_guide']}.{key['master_guide']}_rig_type", asString=1)
+            updated_rig_type = cmds.getAttr(f"{key['master_guide']}.{key['master_guide']}_rig_type", asString=1)
+            print("print type > ", updated_rig_type)
             if key["systems_to_connect"]:
                 #print(f"connect modules after systems! {master_guide}")
                 systems_to_connect = key["systems_to_connect"]
                 # connect_modules.connect_polished(systems_to_connect)
-            if rig_type == "IKFK" or rig_type == "IK":
+            if updated_rig_type == "IKFK" or updated_rig_type == "IK":
+                print("calling space_swap")
                 #print(f"Add space_swap sys {master_guide}")
-                space_swap_mdl = space_swap.cr_spaceSwapping(key)
+                space_swap_mdl = space_swap.cr_spaceSwapping(key, self.ctrl_cog, self.ctrl_root)
 
         '''
         # colour the controls: 

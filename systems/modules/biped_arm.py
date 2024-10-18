@@ -44,4 +44,9 @@ default_ctrl_shape = {
     "ik_wrist": "cube"
 } # Have fk as circle, ik as cube & ribbon as octagon. 
 
-space_swap = ["world", "COG", "shoulder", "custom"] # Custom being whatever i want it to be
+
+ # Need to split it up: Clav, PV, master(wrist)
+space_swap = ["world", "COG", "shoulder", "custom", ] # Custom being whatever i want it to be
+master_space_swap = ["world", "COG", "shoulder", "custom"]
+pv_space_swap = []
+chest_space_swap = []
