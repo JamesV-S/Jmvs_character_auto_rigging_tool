@@ -36,7 +36,7 @@ twist_joint= {
 # If axis_orientation = a specific axis, use that specified system_pos
 side = "_L"
 stretch = True
-space_swapping = ["shoulder","root","COG","Custom"]
+
 guide_scale = 1
 available_rig_types = ["FK", "IK", "IKFK"] # Add ribbon in future!
 default_ctrl_shape = {
