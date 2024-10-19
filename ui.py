@@ -385,8 +385,17 @@ class QtSampler(QWidget):
             # you are calling the import_module function from the importlib module
             module = importlib.import_module(key["module"])
             importlib.reload(module)
+
             if key["module"] == "root_basic": 
-                 # If root module, create cog_ctrl. TO be used in ikfk switch & space_swap: 
+                CTRL_ROOT_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "systems", 
+                                        "imports","ctrl_root_import.abc")
+                root_imp = cmds.file(CTRL_ROOT_FILE, i=1, namespace="imp_root", rnn=1)
+                cmds.scale(1, 1, 1, root_imp)
+                self.ctrl_root = cmds.rename(root_imp[0], f"ctrl_root")
+                cmds.matchTransform(self.ctrl_root, key["guide_list"][1],  pos=1, rot=0, scl=0)
+                utils.colour_root_control(self.ctrl_root)
+
+                # If root module, create cog_ctrl. TO be used in ikfk switch & space_swap: 
                 COG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "systems", 
                                         "imports","cog_ctrl_import.abc")
                 imported = cmds.file(COG_FILE, i=1, namespace="imp_cog", rnn=1)
@@ -395,18 +404,14 @@ class QtSampler(QWidget):
                 cmds.matchTransform(self.ctrl_cog, key["guide_list"][0],  pos=1, rot=0, scl=0)
                 cmds.setAttr(f"{self.ctrl_cog}.overrideEnabled", 1)
                 cmds.setAttr(f"{self.ctrl_cog}.overrideColor", 18)
+                cmds.parent(self.ctrl_cog, self.ctrl_root)
                 OPM.OpmCleanTool(self.ctrl_cog)
                 key.update({"mdl_switch_ctrl_list": self.ctrl_cog})
-                print(f"Did the cog add to the key? > {key}")
-
-                CTRL_ROOT_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "systems", 
-                                        "imports","ctrl_root_import.abc")
-                root_imp = cmds.file(CTRL_ROOT_FILE, i=1, namespace="imp_root", rnn=1)
-                cmds.scale(1, 1, 1, root_imp)
-                self.ctrl_root = cmds.rename(root_imp[0], f"ctrl_root")
-                cmds.matchTransform(self.ctrl_root, key["guide_list"][1],  pos=1, rot=0, scl=0)
-                utils.colour_root_control(self.ctrl_root)
-            
+    
+                # 'joints': ['jnt_rig_0_root', 'jnt_rig_0_COG']
+                cmds.parentConstraint(self.ctrl_root, key['joints'][0])
+                cmds.parentConstraint(self.ctrl_cog, key['joints'][1])
+                            
             else:
                 if rig_type == "FK":
                     # create fk joints, system & control, then constrain to rig_joints!
