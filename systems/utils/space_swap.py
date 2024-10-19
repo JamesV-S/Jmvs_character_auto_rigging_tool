@@ -128,7 +128,13 @@ class cr_spaceSwapping():
     def get_loc(self):
         pass
 
-
-    def cr_sys(self):
+    def add_attr(self):
         pass
+
+    def cr_sys(self, locator_ls):
+        for loc in locator_ls:
+            mmx_node = f"MMXspace_{loc}_{self.custom_loc_name_id}"
+            utils.cr_node_if_not_exists(1, "multMatrix", n=mmx_node)
+            blend_node = f"BLNDspace_{loc}_{self.custom_loc_name_id}"
+            utils.cr_node_if_not_exists(0, "blendMatrix")
 
