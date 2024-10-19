@@ -4,9 +4,10 @@ import importlib
 import re
 import maya.api.OpenMaya as om
 
-from systems.utils import (utils)
+from systems.utils import (utils, OPM)
 
 importlib.reload(utils)
+importlib.reload(OPM)
 
 # space_swap for 3 things: 
 
@@ -87,6 +88,7 @@ class cr_spaceSwapping():
                 print(spine_jnts)
                 if spine_jnts:
                     # figure out which spine_joints are closest to the locator!
+                    '''
                     def get_position(obj_name):
                         return om.MVector(cmds.xform(obj_name, query=True, 
                                                      worldSpace=True, translation=True))
@@ -97,24 +99,29 @@ class cr_spaceSwapping():
                     
                     closest_joint = find_closest_joint(loc, spine_jnts)
                     print(f"The closest joint to {loc} is {closest_joint}")
+                    '''
                     
-                    for jnt in spine_jnts:
-                        print(jnt)
-                    print("identified that this module has a spine module!")
+                    spine_joint = self.key['systems_to_connect'][-1].replace('guide_', 'jnt_rig_')
+                    print("systems to connect: ", spine_joint) # 'systems_to_connect': ['guide_0_clavicle_L', 'guide_0_spine_4']
+                    
+                    cmds.parentConstraint(spine_joint, loc, mo=1)
+                    cmds.select(cl=1)
+
                 else:
+                    # No spine for the locator to foolow
+                    pass
                     print("did NOT IDNETIFY that this module has a spine module!")
                     # if the spine module doesn't exist, create temp grp for the top_locator to parent to,
                     # otherwise find the closest spine(connect to spine) joint & constrain the locator to it, 
                     
             else:
+                # parent remianing locators to the write places
                 id = loc.split('_')[1]
                 print(f"id: {id}")
                 print(f"ctrl_ik_{int(self.key['guide_number'])}_{id}{self.key['side']}")
                 ik_ctrl = f"ctrl_ik_{int(self.key['guide_number'])}_{id}{self.key['side']}"
                 cmds.parent(loc, ik_ctrl)
-        # swappos_shoulder_biped_arm_0_L > ctrl_ik_0_#_L
-        # id = swappos_shoulder_biped_arm_0_L.split('_')[1]
-        # ik_ctrl = f"ctrl_ik_{int(self.key['guide_number'])}_shoulder{self.key['side']}"
+            OPM.OpmCleanTool(loc)
         
 
      
