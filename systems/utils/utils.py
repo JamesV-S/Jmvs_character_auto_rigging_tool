@@ -46,17 +46,6 @@ def add_locked_attrib(ctrl, en):
             print(f"Attribute {attr} already exists on {ctrl}")
 
 
-def add_multile_enum_attribute(ctrl, enum_long_name, enum_name_options):
-    # ctrl = cmds.ls(sl=1, type="transform")
-    if not cmds.attributeQuery(enum_long_name, node=ctrl, exists=True):
-        try:
-            cmds.addAttr(longName=enum_long_name, at="enum", enumName=enum_name_options)
-            cmds.setAttr(f"{ctrl}.{enum_long_name}", e=1, k=1)
-        except Exception as e:
-            print(f"Failed to add multiple_choice enum attr {enum_long_name} on {ctrl}: {e}" )
-    else: 
-        print(f"Attribute {enum_long_name} a;ready exists on {ctrl}")
-
 
 def get_selection_trans_rots_dictionary():
     selection = cmds.ls(sl=1, type="transform")
@@ -207,7 +196,7 @@ def constraint_from_lists_2to1(list_1, list_2, list_3, mo):
 def cr_node_if_not_exists(util_type, node_type, node_name, set_attrs=None):
     if not cmds.objExists(node_name):
         if util_type:
-            cmds.shadingNode(node_type, au=1, n=node_name )
+            cmds.shadingNode(node_type, au=1, n=node_name)
         else:
             cmds.createNode(node_type, n=node_name)
         if set_attrs:
@@ -285,13 +274,5 @@ def custom_enum_attr(ctrl, enm_lng_nm, CtrlEnmOptions):
             cmds.addAttr(target, longName=enm_lng_nm, at="enum", enumName=CtrlEnmOptions )
             print(f"{target}.{enm_lng_nm}")
             cmds.setAttr( f"{target}.{enm_lng_nm}", e=1, k=1 )
-'''
-
-def custom_enum_attr(ctrl, enm_lng_nm, CtrlEnmOptions):
-       if not cmds.attributeQuery(enm_lng_nm, node=ctrl, exists=True):
-           cmds.addAttr(longName=enm_lng_nm, at="enum", enumName=CtrlEnmOptions)
-           print(f"{ctrl}.{enm_lng_nm}")
-           cmds.setAttr(f"{ctrl}.{enm_lng_nm}", e=1, k=1)
-'''
 #custom_enum_attr( "James", "Thuki:Arron:Harv")
         
