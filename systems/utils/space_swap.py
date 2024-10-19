@@ -9,8 +9,6 @@ from systems.utils import (utils, OPM)
 importlib.reload(utils)
 importlib.reload(OPM)
 
-# space_swap for 3 things: 
-
 class cr_spaceSwapping():
     def __init__(self, key, ctrl_cog, ctrl_root):
         self.key = key
@@ -49,9 +47,9 @@ class cr_spaceSwapping():
             self.match_and_parent_to_ctrl(loc_pv_list, self.pv_ctrl)
             self.match_and_parent_to_ctrl(loc_top_list, self.top_ctrl)
 
-            self.cr_nodes(self.master_space_ctrl, loc_master_list)
-            # self.connect_nodes(loc_master_list, self.mmx_node_ls, self.bmx_node, [])
-            self.connect_nodes(loc_pv_list, self.mmx_node_ls, self.bmx_node, [])
+            self.cr_nodes_and_connect(ctrl=self.master_space_ctrl, locator_ls=loc_master_list)
+            self.cr_nodes_and_connect(ctrl=self.pv_ctrl , locator_ls=loc_pv_list)
+            self.cr_nodes_and_connect(ctrl=self.top_ctrl , locator_ls=loc_top_list)
 
     def create_locators(self, space_loc_names):
         self.custom_loc_name_id = f"{self.key['module']}_{int(self.key['guide_number'])}{self.key['side']}"
@@ -144,7 +142,7 @@ class cr_spaceSwapping():
     # space with 2 options needs mmx & blendmatrix only.
     # space with 4 options needs extra 4 condition nodes total,
     # 3 for each other option & the last to tie it together. 
-    def cr_nodes(self, ctrl, locator_ls):
+    def cr_nodes_and_connect(self, ctrl, locator_ls):
         print(f"Creat nodes, the locator is: {locator_ls}")
         print(f"Creat nodes, the ctrl is: {ctrl}")
         self.mmx_node_ls = []
@@ -163,60 +161,61 @@ class cr_spaceSwapping():
 
         bmx_node = f"BMXspace_{ctrl}"
         utils.cr_node_if_not_exists(0, "blendMatrix", bmx_node)
-        self.bmx_node.append(bmx_node)
-        print(f"blend matrix: {self.bmx_node}")
+        # self.bmx_node.append(bmx_node)
+        print(f"blend matrix: {bmx_node}")
 
         # the length of 'locator_ls' is less than 3 or greater than 2 make condition nodes: 
         if len(locator_ls) > 2:
             cond_master_node_name = f"CONDspace_master{ctrl}"
-            utils.cr_node_if_not_exists(1, "condition", cond_master_node_name, {"colorIfFalseR":0, "colorIfFalseG":0, "colorIfFalseB":0, "operation":2 })
+            utils.cr_node_if_not_exists(1, "condition", cond_master_node_name, 
+                                        {"colorIfFalseR":0, "colorIfFalseG":0, 
+                                         "colorIfFalseB":0, "operation":2 })
             num_ls = [1, 2, 3]
             for loc in locator_ls:
                 if "world" in loc: pass
                 else:  
                     cond_node_name = f"CONDspace_{loc}"
-                    utils.cr_node_if_not_exists(1, "condition", cond_node_name)
+                    utils.cr_node_if_not_exists(1, "condition", cond_node_name, 
+                                                {"colorIfTrueR":1, "colorIfFalseR":0})
                     self.cond_node_ls.append(cond_node_name)
                     temp_set_attr_cond_list.append(cond_node_name)
             for x in range(len(num_ls)):
                 cmds.setAttr( f"{temp_set_attr_cond_list[x]}.secondTerm", num_ls[x])
             self.cond_node_ls.append(cond_master_node_name)
             print(f"condition list: {self.cond_node_ls}")
-            # condition list: ['CONDspace_swappos_COG_biped_arm_0_L', 'CONDspace_swappos_shoulder_biped_arm_0_L', 'CONDspace_swappos_custom_biped_arm_0_L', 'CONDspace_masterctrl_ik_0_wrist_L']
         else:
+            # connect follow from pv vtrl to weight in blemd
+            utils.connect_attr(f"{ctrl}.Follow", f"{bmx_node}.target[0].weight")
             print("no need for condition nodes")
         
-        '''
-        num_ls = [1, 2, 3]
-            for i in range(len(loc_list)):
-                cmds.setAttr( spc_cond_ls[i] + ".colorIfTrueR", 1)
-                cmds.setAttr( spc_cond_ls[i] + ".colorIfFalseR", 0)
-                cmds.setAttr( spc_cond_ls[i] + ".secondTerm", num_ls[i])
-        '''
-
-    def connect_nodes(self, locator_ls, mmx_list, bmx_node, cond_list):
-        # first 1 is always world
+        # Create connections
         print(f"CONNECT_NODES: {locator_ls}") # CONNECT_NODES: ['swappos_wrist_biped_arm_0_L']
         new_locator_ls = [item for item in locator_ls if 'world' not in item]# ignore the world name        
         print(f"new_locator_ls : {new_locator_ls}")
-        for x in range(len(new_locator_ls)):
-            utils.connect_attr(f"{new_locator_ls[x]}.worldMatrix[0]", f"{mmx_list[x]}.matrixIn[0]")
-            utils.connect_attr(f"{self.ctrl_root}.inverseWorldMatrix[0]", f"{mmx_list[x]}.matrixIn[0]")
-            utils.connect_attr(f"{mmx_list[x]}.matrixSum", f"{bmx_node[0]}.target[{x}].targetMatrix")
-            utils.connect_attr(f"{mmx_list[x]}.matrixSum", f"{bmx_node[0]}.target[{x}].targetMatrix")
-            if cond_list:
-                 utils.connect_attr(f"{mmx_list[x]}.matrixSum", f"{bmx_node[0]}.target[{x}].targetMatrix")
         
+        #set the blendmatrix inputmatrix to the location of the 
+        
+        # connectAttr -f guide_0_wrist_L.worldMatrix[0] BMXspace_ctrl_ik_0_wrist_L.inputMatrix;
+        utils.connect_attr(f"{ctrl}.worldMatrix[0]", f"{bmx_node}.inputMatrix")
+        
+        # disconnectAttr guide_0_wrist_L.worldMatrix[0] BMXspace_ctrl_ik_0_wrist_L.inputMatrix;
+        cmds.disconnectAttr(f"{ctrl}.worldMatrix[0]", f"{bmx_node}.inputMatrix")
 
-                
-        
-        '''
-        # connect swappos_locators to the mmx_list:
-        for item in locator_ls:
-            for x in range(len(item)):
-                if "world" in item[x]: 
-                    pass
-                else:
-                    utils.connect_attr(f"{item[x]}.worldMatrix[0]", f"{mmx_list[x]}.matrixIn[0]")
-        '''
+        element_cond_list = self.cond_node_ls[:-1]
+        for x in range(len(new_locator_ls)):
+            utils.connect_attr(f"{new_locator_ls[x]}.worldMatrix[0]", f"{self.mmx_node_ls[x]}.matrixIn[0]")
+            utils.connect_attr(f"{self.ctrl_root}.worldInverseMatrix[0]", f"{self.mmx_node_ls[x]}.matrixIn[1]")
+            utils.connect_attr(f"{self.mmx_node_ls[x]}.matrixSum", f"{bmx_node}.target[{x}].targetMatrix")
+
+        if len(locator_ls) > 2: # do condition bullshit
+            rgb_list = ["R", "G", "B"]
+            for x in range(len(num_ls)):
+                utils.connect_attr(f"{ctrl}.Follow", f"{cond_master_node_name}.firstTerm")
+                utils.connect_attr(f"{ctrl}.Follow", f"{element_cond_list[x]}.firstTerm")
+                utils.connect_attr(f"{element_cond_list[x]}.outColorR", f"{cond_master_node_name}.colorIfTrue{rgb_list[x]}") 
+                utils.connect_attr(f"{cond_master_node_name}.outColor{rgb_list[x]}", f"{bmx_node}.target[{x}].useMatrix")
+            pass
+            
+        for x in range(len(new_locator_ls)):
+            utils.connect_attr(f"{bmx_node}.outputMatrix", f"{ctrl}.offsetParentMatrix")
 
