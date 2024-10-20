@@ -41,9 +41,10 @@ They a visible if the guides were created with the same loaded tool
 
 -----------------------------
 To do:
+> 
 
-> ADD systems: space_swap, ikfk{DONE}, ikfkswitch{DONE}, squash & stretch {DONE}
- 
+> the quadleg needs to work better with IK(also, make control orient to the world!) & spaceSwap
+
 > after the space-swap and other issues r fixed, move onto the neck system, 
 So i can test creating a rig for testing rotomation > Email Malcom to pass a 
 > acapture movement. question onto Stephen cpncerning creating a head & arm rig for cg replacments.  
