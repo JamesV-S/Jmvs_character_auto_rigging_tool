@@ -8,12 +8,18 @@ importlib.reload(utils)
 importlib.reload(cr_pole_vector)
 importlib.reload(control_shape)
 
-class create_fk_sys():
-    def __init__(self, ik_joint_list, master_guide, scale, val_joints):
+class create_ik_sys():
+    def __init__(self, module, ik_joint_list, master_guide, scale, val_joints):
         # varibales for joints above & below
         self.above_root_joints = []
         self.below_root_joints = []
         self.val_joints = val_joints
+        self.module = module
+
+        if 'arm' in self.module: 
+            print("IK system has found 'arm' name in the module")
+        else:
+            print("IK system has NOT found 'arm' name in the module")
 
         # Call the function: 
         self.ik_systems(ik_joint_list)
@@ -23,6 +29,7 @@ class create_fk_sys():
             cmds.group(ik_joint_list[0], n=f"grp_ik_jnts_{master_guide}", w=1)
         except IndexError:
             pass
+
 
     def ik_systems(self, ik_joint_list):
         # Joint Identification, pole vector & end joints based on val data
@@ -34,6 +41,11 @@ class create_fk_sys():
                 self.pv_joint = joint
             elif self.val_joints["end_joint"] in joint:
                 self.end_joint = joint
+            if 'arm' in self.module: 
+                if self.val_joints["top_joint"] in joint:
+                    self.top_joint = joint
+                print(f"IK self.top_joint is :{self.top_joint}")
+
         # call helper scripts to create pole vector control(location)
         # - collect other ctrls
         self.collect_other_controls(ik_joint_list)
@@ -42,14 +54,23 @@ class create_fk_sys():
         hdl_ctrl = self.cr_ik_handle() 
         root_ctrl = self.cr_top_handle_ctrl()
         above_ctrls = self.cr_above_root_ctrl()
+        if 'arm' in self.module:
+            top_ctrl = self.cr_top_ctrl()
 
         # collect other ctrls & organise them. 
         if above_ctrls:
             self.ik_ctrls = [pv_ctrl, hdl_ctrl, root_ctrl] + above_ctrls
             self.grouped_ctrls = [pv_ctrl, hdl_ctrl, above_ctrls[0]]
         else:
+            
             self.ik_ctrls = [pv_ctrl, hdl_ctrl, root_ctrl]
             self.grouped_ctrls = [pv_ctrl, hdl_ctrl, root_ctrl]
+            # if the module has the name arm in it: 
+            if 'arm' in self.module:
+                self.ik_ctrls.append(top_ctrl)
+                self.grouped_ctrls.append(top_ctrl)
+            print(f"ik_system > module: {self.module} & hdl_ctrl = {hdl_ctrl}")
+        
 
         # OPM zero out ik ctrls
         OPM.OpmCleanTool(self.ik_ctrls)
@@ -58,12 +79,20 @@ class create_fk_sys():
     def collect_other_controls(self, ik_joint_list):
         start_index = ik_joint_list.index(self.start_joint)
         end_index = ik_joint_list.index(self.end_joint)
+        
         for joint in self.other_joints:
             joint_index = ik_joint_list.index(joint)
+            print(f"IK joint idex is: {joint_index}")
             if joint_index < start_index:
                 self.above_root_joints.append(joint)
             elif joint_index > end_index:
                 self.below_root_joints.append(joint)
+        print(f"IK self.above_root_joint is: {self.above_root_joints}")
+
+    
+    def cr_quad_driver_joints(self):
+        pass
+
     
     def cr_pv(self):
         pv_ctrl = cr_pole_vector.create_pole_vector(self.start_joint, self.pv_joint, self.end_joint)
@@ -83,7 +112,7 @@ class create_fk_sys():
             sj=self.start_joint, ee=self.end_joint 
             )
         cmds.poleVectorConstraint(
-            f"ctrl_pv{self.pv_joint[6:]}", f"hdl_ik{self.end_joint[6:]}", 
+            f"ctrl_pv{self.pv_joint[6:]}", f"hdl_ik{self.end_joint[6:]}",
             n= f"pvCons{self.end_joint[6:]}")
         
         if self.val_joints["world_orientation"] is True:
@@ -105,6 +134,22 @@ class create_fk_sys():
         cmds.matchTransform(self.start_ctrl_cv, self.start_joint)
         cmds.parentConstraint(self.start_ctrl_cv, self.start_joint, mo=1, n=f"pCons{self.start_joint[6:]}")
         return self.start_ctrl_cv
+    
+    def cr_top_ctrl(self):
+        top_ctrl_name = f"ctrl_ik{self.top_joint[6:]}"
+        top_ctrl = control_shape.Controls(scale=[1,1,1], guide=self.top_joint[6:], 
+            ctrl_name=top_ctrl_name, 
+            rig_type="ik"
+        )
+        ctrl_ori = control_shape.Controls.return_ctrl_ori()
+        if 'object' in ctrl_ori:
+            cmds.matchTransform(top_ctrl_name, self.top_joint)
+        else:
+            cmds.matchTransform(top_ctrl_name, self.top_joint)
+            cmds.makeIdentity(top_ctrl_name, a=1, t=0, r=1, s=1)
+        cmds.parentConstraint(top_ctrl_name, self.top_joint, mo=1, n=f"pCons{self.top_joint[6:]}")
+        return top_ctrl_name
+
 
     def cr_above_root_ctrl(self):
         self.to_be_parented = []

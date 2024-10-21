@@ -215,6 +215,7 @@ class QtSampler(QWidget):
         index = files.index("root_basic")
         self.ui.module_picker_ddbox.setCurrentIndex(index)
 
+
     def init_existing_module(self):
         temp_dict = guide_data.init_data()
         for dict in temp_dict.values():
@@ -222,12 +223,14 @@ class QtSampler(QWidget):
             self.created_guides.append(master_guide)
             self.systems_to_be_made[master_guide] = dict
             if not dict["space_swap"] == []:
-                sublist = [dict["space_swap"][0:4], dict["space_swap"][4:6], dict["space_swap"][6:8]]
+                if 'arm' in dict['module']:
+                    sublist = [dict["space_swap"][0:4], dict["space_swap"][4:6], dict["space_swap"][6:8], dict["space_swap"][8:10]]
+                else:
+                    sublist = [dict["space_swap"][0:4], dict["space_swap"][4:6], dict["space_swap"][6:8]]
                 print(f"OLD space_swap key: {dict['space_swap']}")
                 dict.update({"space_swap": sublist})
                 print(f"updated space_swap key: {dict['space_swap']}")
-            space_swap = dict['space_swap']
-            # self.data_unique_number = dict["guide_number"]
+
 
     def add_module(self):
         # Get the selected module from the UI
@@ -320,7 +323,7 @@ class QtSampler(QWidget):
             # add the temp dict to systems to be made, to manage all systems that eed to be constructed. 
             self.systems_to_be_made[master_guide] = temp_dictionary
             print(f"temp dict for setup: {temp_dictionary}")
-            
+            print(f">>>>>>>>>>>>>>>>>>>>>>>> self.systems_to_be_made = {self.systems_to_be_made}")
             # Add the attributes to the data locator!
             guide_data.setup(temp_dictionary, data_guide)
 
@@ -434,7 +437,7 @@ class QtSampler(QWidget):
                 elif rig_type == "IK":
                     print(f"Build 'ik' joints! {master_guide}")
                     ik_joint_list = joints.joint(master_guide, system="ik")
-                    ik_module = ik.create_fk_sys(ik_joint_list, master_guide, 
+                    ik_module = ik.create_ik_sys(key["module"], ik_joint_list, master_guide, 
                                                  key['guide_scale'], module.ik_joints)
                     ik_ctrls = ik_module.get_ctrls()
                     utils.constraint_from_lists_1to1(ik_joint_list, key["joints"],mo=1)
@@ -457,7 +460,7 @@ class QtSampler(QWidget):
                     fk_ctrls = fk_module.get_ctrls()
 
                     ik_joint_list = joints.joint(master_guide, system="ik")
-                    ik_module = ik.create_fk_sys(ik_joint_list, master_guide, 
+                    ik_module = ik.create_ik_sys(key["module"], ik_joint_list, master_guide, 
                                                  key['guide_scale'], module.ik_joints)
                     ik_ctrls = ik_module.get_ctrls()
             

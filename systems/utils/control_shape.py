@@ -118,17 +118,22 @@ class Controls():
         # put this line into a variable so every ctrl in the list has it's control type gotten!
         control_type = cmds.getAttr(f"guide{guide}.{guide}_{rig_type}_control", asString=1)
         
+        self.control_ori = cmds.getAttr(f"guide{guide}.{guide}_ik_OriType", asString=1)        
+
         # Get a list of possible control shapes
         ctrl_shape_instance = controlShapeList()
         ctrl_list = ctrl_shape_instance.return_list()
         if control_type in ctrl_list:
             # If the retrieved control shape type is in the list, 
             # it creates the control using ControlTypes and assigns it to self.ctrl.
-            control_module = controlTypes(self.ctrl_name, control_type) 
+            control_module = controlTypes(self.ctrl_name, control_type)
             self.ctrl = control_module.return_ctrl()
             # Call methods to set the control's size and name.
             self.set_control_size()
             self.set_name()
+        
+        global ctrl_ori
+        ctrl_ori = self.control_ori
         
     # Methods:
     def set_control_size(self):
@@ -142,6 +147,9 @@ class Controls():
 
     def return_ctrl(self):
         return self.ctrl_name
+    
+    def return_ctrl_ori():
+        return ctrl_ori
         
 
         

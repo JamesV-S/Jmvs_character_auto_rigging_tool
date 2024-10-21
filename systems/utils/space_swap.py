@@ -14,12 +14,24 @@ class cr_spaceSwapping():
         self.key = key
         self.ctrl_cog = ctrl_cog
         self.ctrl_root = ctrl_root
-        self.space_space_list_names = self.key["space_swap"]
-        self.master_space_name = self.space_space_list_names[0]
-        self.pv_space_names = self.space_space_list_names[1]
-        self.top_space_names = self.space_space_list_names[2]
         
-        print(f"master; {self.master_space_name}, pv; {self.pv_space_names}, top; {self.top_space_names}")
+        self.space_list_names = self.key["space_swap"]
+        print(f"---------- SPACE: space_list_names is: {self.space_list_names}")
+        self.master_space_name = self.space_list_names[0]
+        self.pv_space_names = self.space_list_names[1]
+        self.start_space_names = self.space_list_names[2]
+
+        if 'arm' in self.key['module']:
+            print("------------ SPACE system has found 'arm' name in the module")
+            print(f"SPACE/ TOP SPACE NAME: {self.space_list_names[3]}")
+            self.top_space_name = self.space_list_names[3]
+        else:
+            print("SPACE system has NOT found 'arm' name in the module")
+
+        
+        #     self.top_space_names = self.space_list_names[3]
+        
+        # print(f"master; {self.master_space_name}, pv; {self.pv_space_names}, top; {self.start_space_names}")
 
         # self.guide_list = self.key["guide_list"]
         self.ik_ctrl_list = self.key["ik_ctrl_list"]
@@ -32,24 +44,45 @@ class cr_spaceSwapping():
 
             print(f"loc_master_list is : {loc_master_list}")
             loc_pv_list = self.create_locators(self.pv_space_names)
-            loc_top_list = self.create_locators(self.top_space_names)
-
-            self.master_space_ctrl = [item for item in self.ik_ctrl_list if 'wrist' in item or 'ankle' in item][0]
+            loc_start_list = self.create_locators(self.start_space_names)
+            if 'arm' in self.key['module']:
+                loc_top_list = self.create_locators(self.top_space_name)
+            
+            if 'quad' in self.key['module']:
+                self.master_space_ctrl = [item for item in self.ik_ctrl_list if 'quadWrist' in item or 'quadAnkle' in item][0]
+                self.start_ctrl = [item for item in self.ik_ctrl_list if 'quadShoulder' in item or 'quadHip' in item][0]
+            else:
+                self.master_space_ctrl = [item for item in self.ik_ctrl_list if 'wrist' in item or 'ankle' in item][0]
+                self.start_ctrl = [item for item in self.ik_ctrl_list if 'shoulder' in item or 'hip' in item][0]
+            print( f"333333333333333333 SPACE self.master_space_ctrl is = {self.master_space_ctrl}")
+            print( f"333333333333333333 SPACE self.start_ctrl is = {self.start_ctrl}")
             self.pv_ctrl = [item for item in self.ik_ctrl_list if 'pv' in item][0]
-            self.top_ctrl = [item for item in self.ik_ctrl_list if 'shoulder' in item or 'hip' in item or 'scapula' in item][0]
+            
+            if 'arm' in self.key['module']:
+                self.top_ctrl = [item for item in self.ik_ctrl_list if 'clavicle' in item or 'scapula' in item][0]
+
+            
             
             # Add attr to controls
             self.add_attr(self.master_space_ctrl, self.master_space_name)
             self.add_attr(self.pv_ctrl, self.pv_space_names)
-            self.add_attr(self.top_ctrl, self.top_space_names)
+            self.add_attr(self.start_ctrl, self.start_space_names)
+            if 'arm' in self.key['module']:
+                self.add_attr(self.top_ctrl, self.top_space_name)
             
             self.match_and_parent_to_ctrl(loc_master_list, self.master_space_ctrl)
             self.match_and_parent_to_ctrl(loc_pv_list, self.pv_ctrl)
-            self.match_and_parent_to_ctrl(loc_top_list, self.top_ctrl)
+            self.match_and_parent_to_ctrl(loc_start_list, self.start_ctrl)
+
+            if 'arm' in self.key['module']:
+                self.match_and_parent_to_ctrl(loc_top_list, self.top_ctrl)
 
             self.cr_nodes_and_connect(ctrl=self.master_space_ctrl, locator_ls=loc_master_list)
             self.cr_nodes_and_connect(ctrl=self.pv_ctrl , locator_ls=loc_pv_list)
-            self.cr_nodes_and_connect(ctrl=self.top_ctrl , locator_ls=loc_top_list)
+            self.cr_nodes_and_connect(ctrl=self.start_ctrl , locator_ls=loc_start_list)
+            
+            if 'arm' in self.key['module']:
+                self.cr_nodes_and_connect(ctrl=self.top_ctrl, locator_ls=loc_top_list)
 
     def create_locators(self, space_loc_names):
         self.custom_loc_name_id = f"{self.key['module']}_{int(self.key['guide_number'])}{self.key['side']}"
@@ -123,7 +156,7 @@ class cr_spaceSwapping():
                     # No spine for the locator to foolow
                     pass
                     print("did NOT IDNETIFY that this module has a spine module!")
-                    # if the spine module doesn't exist, create temp grp for the top_locator to parent to,
+                    # if the spine module doesn't exist, create temp grp for the start_locator to parent to,
                     # otherwise find the closest spine(connect to spine) joint & constrain the locator to it, 
                     
             else:

@@ -27,7 +27,7 @@ ik_joints = {
     "start_joint": "quadHip",
     "end_joint": "quadAnkle", 
     "pv_joint": "quadKnee", 
-    "world_orientation": False
+    "world_orientation": True
 }
 
 twist_joint= {

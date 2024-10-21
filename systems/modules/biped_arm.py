@@ -24,7 +24,8 @@ has_orientation = "yes"
 ik_joints = {
     "start_joint": "shoulder",
     "end_joint": "wrist", 
-    "pv_joint": "elbow", 
+    "pv_joint": "elbow",
+    "top_joint": "clavicle", 
     "world_orientation": False
 }
 
@@ -46,4 +47,5 @@ default_ctrl_shape = {
 
 
  # Need to split it up: Clav, PV, master(wrist)
-space_swapping = [["world", "COG", "shoulder", "custom"], ["world", "wrist"], ["world", "spine"]]
+# space_swapping = [["world", "COG", "shoulder", "custom"], ["world", "wrist"], ["world", "James"]]
+space_swapping = [["world", "COG", "shoulder", "custom"], ["world", "wrist"], ["world", "clavicle"], ["world", "spine"]]

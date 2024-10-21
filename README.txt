@@ -33,7 +33,7 @@ TO DO: > Understand why mirrored joints do not wotk with connect_modules.attatch
 and joints are created & stored in modular dictionary's properly.
 HOWEVER, when building the system, everything works except the ctrl's are a 
 cluster of points only visible thru their cvs!
-- Basically the ctrls arnt loading properly. 
+- Basically the fk ctrls arnt loading properly. 
 They a visible if the guides were created with the same loaded tool
 > Figure out this issue. 
 

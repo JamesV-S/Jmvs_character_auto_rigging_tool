@@ -138,46 +138,14 @@ class mirror_data():
                     print("Create_guides <(Line 275)> CONTROL SHAPE INDEX: ", f"{guide[6:]}_{ikfk}_control")
                     cmds.addAttr(guide, ln=f"{guide[5:]}_{ikfk.lower()}_control", 
                                  at="enum", en=control_shape_en, k=1)
-
-        '''
-
-        for attr in cmds.listAttr(self.key["master_guide"], r=1, ud=1):
-            # print("ATTR: ", attr)
-            if "_control_shape" in attr:
-                pass
-            else:
-                try:
-                    if attr == "master_guide":
-                        print(f"if attr == 'master_guide': YES {attr}")
-                        cmds.addAttr(other_side_guides, ln="master_guide", at="enum", en=self.master_guide, k=0)
-                    elif attr not in ['visibility', 'translateX', 'translateY', 
-                                      'translateZ', 'rotateX', 'rotateY', 
-                                      'rotateZ', 'scaleX', 'scaleY', 'scaleZ']:
-                        try:
-                            new_attr_name = attr.replace(f"{self.key['side']}", self.side, 1)
-                        except:
-                            pass
-                        
-                        #cmds.addAttr(other_side_guides[-1], ln=f"{new_attr_name}")
-
-                        #cmds.setAttr(f"{other_side_guides[-1]}.{new_attr_name}", l=1, keyable=False, channelBox=True)
-                        print(f"name of new attr: {new_attr_name}")
-                        print(f"proxy obj list: {other_side_guides}")
-                        #cmds.addAttr(other_side_guides,ln=f"{new_attr_name}", proxy=f"{self.key['master_guide']}.{attr}")
-                except:
-                    pass
-        
-        # replace side with opposite for the attr & guide names. 
-        print(f"Within 'copy_mirrored_attrs' the key is: ", self.key["guide_list"])
-        for guide in self.key["guide_list"]:
-            for attr in cmds.listAttr(guide, r=1, ud=1):
-                if "_control_shape" in attr:
-                    new_attr_name = attr.replace(f"{self.key['side']}", self.side)
-                    mirrored_guide = guide.replace(f"{self.key['side']}", self.side)
-                    enum_value = cmds.getAttr(f"{guide}.{attr}", asString=1)
-                    # Then add the attr to mirrored guide!
-                    cmds.addAttr(mirrored_guide, ln=f"{new_attr_name}", at="enum", en=enum_value)
-        '''
+                
+                for ikfk in ["IK"]:
+                    # orientation for the control
+                    control_orientation_list = ["object", "world"]
+                    control_orientation_en = ":".join(control_orientation_list)
+                    cmds.addAttr(guide, ln=f"{guide[5:]}_{ikfk.lower()}_OriType", 
+                                 at="enum", en=control_orientation_en, k=1)
+                
 
 
     def mirror_joints(self):

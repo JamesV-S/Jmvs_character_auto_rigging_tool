@@ -38,6 +38,7 @@ def flatten_list_of_lists(nested_list):
 
 
 def setup(temp_dict, data_guide):
+    print(f"-------- GD SETUPD space_swap == {temp_dict['space_swap']}")
     for key in temp_dict.keys():
 
         # print(f"Alpha keys: {key}")
@@ -61,6 +62,7 @@ def setup(temp_dict, data_guide):
                 # Handle the space_swap attribute specifically 
                 if isinstance(temp_dict[key], list) and all(isinstance(i, list) for i in temp_dict[key]):
                     flattened_value = flatten_list_of_lists(temp_dict[key])
+                    print(f"----------- GD SETUP flattend_value of spaceSwap == {flattened_value}")
                     cmds.addAttr(data_guide, ln=key, at="enum", en=flattened_value, k=1)
                 else:
                     # handle unexpected format

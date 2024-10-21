@@ -249,6 +249,12 @@ class Guides_class():
                     print("Create_guides <(Line 275)> CONTROL SHAPE INDEX: ", f"{guide[6:]}_{ikfk}_control")
                     cmds.addAttr(guide, ln=f"{guide[5:]}_{ikfk.lower()}_control", 
                                  at="enum", en=control_shape_en, k=1)
+                
+                for ikfk in ["IK"]:
+                    control_orientation_list = ["object", "world"]
+                    control_orientation_en = ":".join(control_orientation_list)
+                    cmds.addAttr(guide, ln=f"{guide[5:]}_{ikfk.lower()}_OriType", 
+                                 at="enum", en=control_orientation_en, k=1)
         
         # 9) Return UI data
         # Return a dictionary containing master_guide, guide_connector_list & 
