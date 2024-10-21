@@ -26,7 +26,8 @@ has_orientation = "yes"
 ik_joints = {
     "start_joint": "quadHip",
     "end_joint": "quadAnkle", 
-    "pv_joint": "quadKnee", 
+    "pv_joint": "quadKnee",
+    "calf_joint": "quadCalf", 
     "world_orientation": True
 }
 

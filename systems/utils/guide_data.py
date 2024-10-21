@@ -38,9 +38,9 @@ def flatten_list_of_lists(nested_list):
 
 
 def setup(temp_dict, data_guide):
-    print(f"-------- GD SETUPD space_swap == {temp_dict['space_swap']}")
+    
     for key in temp_dict.keys():
-
+        
         # print(f"Alpha keys: {key}")
 
         if key == "guide_number":

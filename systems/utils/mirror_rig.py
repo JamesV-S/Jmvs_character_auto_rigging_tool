@@ -224,7 +224,7 @@ class mirror_data():
                 self.mirrored_system_to_connect = self.get_mirrored_system_to_connect()
                 
                 # 'systems_to_connect': ['guide_COG'] is wrong & should be ['guide_clavicle_r', 'guide_COG'] from ['guide_clavicle_l', 'guide_COG']
-
+                
                 # create temp dict to store same module data as 'add_module() from ui.py'
                 temp_dictionary = {
                     "module": key["module"], 
@@ -240,6 +240,7 @@ class mirror_data():
                     "ik_joint_list": [],
                     "fk_joint_list": [],
                     "mdl_switch_ctrl_list": [],
+                    "space_swap": self.module.space_swapping,
                     "guide_number": self.guide_number # Might have to include 'number_id' to update properly!
                 }
 

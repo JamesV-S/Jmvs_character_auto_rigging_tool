@@ -15,6 +15,7 @@ class create_ik_sys():
         self.below_root_joints = []
         self.val_joints = val_joints
         self.module = module
+        self.master_guide = master_guide
 
         if 'arm' in self.module: 
             print("IK system has found 'arm' name in the module")
@@ -24,8 +25,16 @@ class create_ik_sys():
         # Call the function: 
         self.ik_systems(ik_joint_list)
         # Group the ctrls & joints into two seperate groups.
+        
         try:
             cmds.group(self.grouped_ctrls, n=f"grp_ik_ctrls_{master_guide}", w=1)
+            
+            #if 'quad' in self.module:
+            #    cmds.group(ik_joint_list[0], n=f"grp_ik_jnts_{master_guide}", w=1)
+            #    cmds.parent(self.driver_joint_list[0], f"grp_ik_jnts_{master_guide}")
+           #     print(f"----------------- @@@@@@@@@@ ----------------- : Checking quad in module: {self.module}")
+           #     print(f" ----------------- IK SYS: self.driver_joint_list[0] is: {self.driver_joint_list[0]}")#  self.driver_joint_list[0], 
+            #else:
             cmds.group(ik_joint_list[0], n=f"grp_ik_jnts_{master_guide}", w=1)
         except IndexError:
             pass
@@ -45,10 +54,17 @@ class create_ik_sys():
                 if self.val_joints["top_joint"] in joint:
                     self.top_joint = joint
                 print(f"IK self.top_joint is :{self.top_joint}")
+            #if 'quad' in self.module:
+            #    if self.val_joints["calf_joint"] in joint:
+            #        self.calf_joint = joint
+
 
         # call helper scripts to create pole vector control(location)
         # - collect other ctrls
         self.collect_other_controls(ik_joint_list)
+        
+        #if 'quad' in self.module:
+           # self.cr_quad_driver_joints(ik_joint_list)
 
         pv_ctrl = self.cr_pv()
         hdl_ctrl = self.cr_ik_handle() 
@@ -90,8 +106,92 @@ class create_ik_sys():
         print(f"IK self.above_root_joint is: {self.above_root_joints}")
 
     
-    def cr_quad_driver_joints(self):
+    def cr_quad_driver_joints(self, ik_joint_list):
+        self.driver_joint_list = []
+        cmds.select(cl=1)
+        for jnt in ik_joint_list:
+            new_jnt_name = jnt.replace('ik', 'dvr')
+            cmds.joint(n=new_jnt_name)
+            cmds.matchTransform(new_jnt_name, jnt)
+            cmds.makeIdentity(new_jnt_name, a=1, t=0, r=1, s=1)
+            self.driver_joint_list.append(new_jnt_name)
+
+
+    def cr_quad_hock_ctrl(self):
         pass
+
+    def cr_quad_func(self):
+
+        if not self.IS_BIPED: #quad leg only
+                if self.IS_LEG:
+                    cmds.group(n=("grp" + self.LEG_OR_ARM + "_hock_ctrl" + 
+                                   self.WCH_SIDE), em=1)
+                    hock_func_grp = ("grp" + self.LEG_OR_ARM + "_hock_ctrl" + 
+                                     self.WCH_SIDE)
+                    
+                    # match grp to ctrl_hock rot & trans
+                    cmds.matchTransform(hock_func_grp, self.hock_ctrl_nm)
+                    
+                    # then match grp to ik_foot's transforms only!
+                    cmds.matchTransform( hock_func_grp, 
+                                        ("ik_" + self.JNT_LMB_HI[3]), rot=0, 
+                                        scl=0, pos=1 )
+                    # prnt grp to driver_calf
+                    cmds.parent(hock_func_grp, ("driver_"+self.JNT_LMB_HI[2]))
+                    
+                    #parent ik_caf_hdl to grp_hock    
+                    cmds.parent(ik_caf_hdl[0], hock_func_grp) 
+                    cmds.select(hock_func_grp)
+                    OPM.OpmCleanTool()
+                    Deslect()
+                
+        def hock_functionality():
+            # Make ctrl_hock's translations drive grp_hock's rotations
+            if not self.IS_BIPED:
+                if self.IS_LEG:
+                    if self.WCH_SIDE[1:] == "Bl":
+                        multiValue = .5
+                    else:
+                        multiValue = -.5
+                else:
+                    multiValue = 2.5      
+            
+            TraAx = "Z" # forward
+            rotAX = "X" # side
+            remainingAX = "Y"
+
+            if not self.IS_BIPED:
+                cmds.shadingNode( "multiplyDivide", au=1, n=("hock_multi" 
+                                    + self.LEG_OR_ARM + self.WCH_SIDE) )
+                hockMulti = ("hock_multi" + self.LEG_OR_ARM + 
+                                self.WCH_SIDE)
+                
+                cmds.connectAttr( (self.hock_ctrl_nm + ".translate"), 
+                                (hockMulti + ".input1"), f=1)
+                
+                if self.IS_LEG:
+                    cmds.connectAttr( (f"{hockMulti}.output{TraAx}"), 
+                                        (f"{hock_func_grp}.rotate{rotAX}"), 
+                                        f=1 )
+                    cmds.connectAttr( (f"{hockMulti}.output{rotAX}"), 
+                                        (f"{hock_func_grp}.rotate{TraAx}"), 
+                                        f=1 )
+                    cmds.setAttr( (f"{hockMulti}.input2{TraAx}"), 
+                                    multiValue )
+                    cmds.setAttr( (f"{hockMulti}.input2{rotAX}"), 
+                                    multiValue*-1) # -1 for left
+                else:
+                    cmds.connectAttr( (f"{hockMulti}.output{TraAx}"), 
+                                    (arm_grp_hok + ".rotate" + remainingAX), 
+                                    f=1 )
+                    cmds.connectAttr( (f"{hockMulti}.output{remainingAX}"),
+                                    (f"{arm_grp_hok}.rotate{TraAx}"), f=1 )
+                    cmds.setAttr((hockMulti + ".input2" + remainingAX), 
+                                    multiValue*-1 )
+                
+        if not self.IS_BIPED:
+            if self.IS_LEG:
+                hock_functionality()
 
     
     def cr_pv(self):
@@ -101,16 +201,45 @@ class create_ik_sys():
 
 
     def cr_ik_handle(self):
-        ctrl_cv = f"ctrl_ik{self.end_joint[6:]}"
+        ctrl_cv = f"ctrl_ik{self.end_joint[6:]}" 
         control_shape.Controls(scale=[1,1,1], guide=self.end_joint[6:], 
             ctrl_name=ctrl_cv, 
             rig_type="ik"
         )
         print(f"create_IK_systems: = {ctrl_cv}")
+        '''
+        if 'quad' in self.module:
+            self.ik_handle = cmds.ikHandle(
+                n=f"hdl_ik{self.end_joint[6:]}", solver="ikRPsolver",
+                sj=self.calf_joint, ee=self.end_joint 
+                )
+            self.driver_handle = cmds.ikHandle(
+                n=f"hdl_driver{self.driver_joint_list[-1][7:]}", solver="ikRPsolver",
+                sj=self.driver_joint_list[0], ee=self.driver_joint_list[-1] 
+                )
+            # cmds.parent(self.driver_handle[0], ctrl_cv)
+            print(f"IK-----IK - driver_handle is: hdl_driver{self.driver_joint_list[-1][7:]}")
+            
+            #self.ik_calf_handle = cmds.ikHandle(
+            #    n=f"hdl_ik{self.calf_joint[6:]}", solver="ikRPsolver",
+            #    sj=self.start_joint, ee=self.calf_joint 
+            #    )
+            print(f"IK-----IK - ik_calf_handle is: hdl_ik{self.calf_joint[6:]}")
+            #self.hock_handle = cmds.ikHandle(
+            #    n=f"hdl_ik{self.end_joint[6:]}", solver="ikSCsolver",
+            #    sj=self.start_joint, ee=self.end_joint 
+            #    )
+            print(f"IK-----IK - hock_handle is: hdl_ik{self.end_joint[6:]}")
+
+           
+        else: 
+        '''
         self.ik_handle = cmds.ikHandle(
             n=f"hdl_ik{self.end_joint[6:]}", solver="ikRPsolver",
             sj=self.start_joint, ee=self.end_joint 
             )
+        
+        
         cmds.poleVectorConstraint(
             f"ctrl_pv{self.pv_joint[6:]}", f"hdl_ik{self.end_joint[6:]}",
             n= f"pvCons{self.end_joint[6:]}")
