@@ -81,9 +81,6 @@ class QtSampler(QWidget):
         self.systems_to_be_made = {}
         self.init_existing_module()
 
-        # Initialise a counter for unique ID
-        #self.unique_id_counter = 0
-
         #self.ui.hand_module_btn.clicked.connect(self.temp_hand_func)
         # Tab 1 - RIG
         # if biped_finger is the chosen then enable the finger number ddbox
