@@ -507,7 +507,7 @@ class QtSampler(QWidget):
             if updated_rig_type == "IKFK" or updated_rig_type == "IK":
                 #print(f"Add space_swap sys {master_guide}")
                 print(f"before calling spaceSwap: {key}")
-                space_swap_mdl = space_swap.cr_spaceSwapping(key, self.ctrl_cog, self.ctrl_root)
+                # space_swap_mdl = space_swap.cr_spaceSwapping(key, self.ctrl_cog, self.ctrl_root)
         
         '''
         # colour the controls: 

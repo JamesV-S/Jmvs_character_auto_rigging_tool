@@ -26,6 +26,7 @@ class create_ik_sys():
         self.ik_systems(ik_joint_list)
         # Group the ctrls & joints into two seperate groups.
         
+        '''
         try:
             cmds.group(self.grouped_ctrls, n=f"grp_ik_ctrls_{master_guide}", w=1)
             
@@ -38,6 +39,7 @@ class create_ik_sys():
             cmds.group(ik_joint_list[0], n=f"grp_ik_jnts_{master_guide}", w=1)
         except IndexError:
             pass
+        '''
 
 
     def ik_systems(self, ik_joint_list):
@@ -54,6 +56,9 @@ class create_ik_sys():
                 if self.val_joints["top_joint"] in joint:
                     self.top_joint = joint
                 print(f"IK self.top_joint is :{self.top_joint}")
+            if 'quad' in self.module:
+                if self.val_joints["calf_joint"] in joint:
+                    self.quad_calf_joint = joint
             #if 'quad' in self.module:
             #    if self.val_joints["calf_joint"] in joint:
             #        self.calf_joint = joint
@@ -63,8 +68,8 @@ class create_ik_sys():
         # - collect other ctrls
         self.collect_other_controls(ik_joint_list)
         
-        #if 'quad' in self.module:
-           # self.cr_quad_driver_joints(ik_joint_list)
+        if 'quad' in self.module:
+            self.cr_quad_driver_joints(ik_joint_list)
 
         pv_ctrl = self.cr_pv()
         hdl_ctrl = self.cr_ik_handle() 
@@ -72,7 +77,16 @@ class create_ik_sys():
         above_ctrls = self.cr_above_root_ctrl()
         if 'arm' in self.module:
             top_ctrl = self.cr_top_ctrl()
-
+        
+        # for quad driver joint to follow the torso:
+        if 'quad' in self.module: # self.top_ctrl_cv
+            utils.connect_attr(f"{self.top_ctrl_cv}.worldMatrix[0]", f"{self.driver_joint_list[0]}.offsetParentMatrix")
+            axis_list = ["X", "Y", "Z"]
+            for x in range(len(axis_list)):
+                cmds.setAttr(f"{self.driver_joint_list[0]}.translate{axis_list[x]}", 0)
+                cmds.setAttr(f"{self.driver_joint_list[0]}.rotate{axis_list[x]}", 0)
+         
+        '''
         # collect other ctrls & organise them. 
         if above_ctrls:
             self.ik_ctrls = [pv_ctrl, hdl_ctrl, root_ctrl] + above_ctrls
@@ -87,10 +101,9 @@ class create_ik_sys():
                 self.grouped_ctrls.append(top_ctrl)
             print(f"ik_system > module: {self.module} & hdl_ctrl = {hdl_ctrl}")
         
-
         # OPM zero out ik ctrls
         OPM.OpmCleanTool(self.ik_ctrls)
-
+        '''
     
     def collect_other_controls(self, ik_joint_list):
         start_index = ik_joint_list.index(self.start_joint)
@@ -115,6 +128,8 @@ class create_ik_sys():
             cmds.matchTransform(new_jnt_name, jnt)
             cmds.makeIdentity(new_jnt_name, a=1, t=0, r=1, s=1)
             self.driver_joint_list.append(new_jnt_name)
+        print(f"IK: Quadruped DRV joint list: {self.driver_joint_list}")
+        # ['jnt_dvr_0_quadHip_L', 'jnt_dvr_0_quadKnee_L', 'jnt_dvr_0_quadCalf_L', 'jnt_dvr_0_quadAnkle_L']
 
 
     def cr_quad_hock_ctrl(self):
@@ -201,12 +216,72 @@ class create_ik_sys():
 
 
     def cr_ik_handle(self):
-        ctrl_cv = f"ctrl_ik{self.end_joint[6:]}" 
-        control_shape.Controls(scale=[1,1,1], guide=self.end_joint[6:], 
-            ctrl_name=ctrl_cv, 
-            rig_type="ik"
-        )
-        print(f"create_IK_systems: = {ctrl_cv}")
+        if 'biped' in self.module:
+            ctrl_ik_end = f"ctrl_ik{self.end_joint[6:]}" 
+            control_shape.Controls(scale=[1,1,1], guide=self.end_joint[6:], 
+                ctrl_name=ctrl_ik_end, 
+                rig_type="ik"
+            )
+            print(f"create_IK_systems: = {ctrl_ik_end}")
+            self.ik_handle = cmds.ikHandle(
+            n=f"hdl_ik{self.end_joint[6:]}", solver="ikRPsolver",
+            sj=self.start_joint, ee=self.end_joint 
+            )
+        
+        
+            cmds.poleVectorConstraint(
+                f"ctrl_pv{self.pv_joint[6:]}", f"hdl_ik{self.end_joint[6:]}",
+                n= f"pvCons{self.end_joint[6:]}")
+            
+            if self.val_joints["world_orientation"] is True:
+                cmds.matchTransform(ctrl_ik_end, f"hdl_ik{self.end_joint[6:]}")
+            else:
+                cmds.matchTransform(ctrl_ik_end, self.end_joint)
+            # Constrain the ik control to the ik handle!
+            cmds.parentConstraint(ctrl_ik_end, f"hdl_ik{self.end_joint[6:]}", mo=1, n=f"pCons_ik_hdl{self.end_joint[6:]}")
+            cmds.addAttr(ctrl_ik_end, ln="handle", at="enum", en="True", k=0)
+            return ctrl_ik_end
+        elif 'quad' in self.module:
+            print(f"IK SYS: cr_ik_hdl for quadruped")
+            # Driver handle: 
+            ctrl_ik_end = f"ctrl_ik{self.end_joint[6:]}" 
+            control_shape.Controls(scale=[1,1,1], guide=self.end_joint[6:], 
+                ctrl_name=ctrl_ik_end, 
+                rig_type="ik"
+            )
+            
+            if self.val_joints["world_orientation"] is True:
+                cmds.matchTransform(ctrl_ik_end, f"jnt_dvr{self.end_joint[6:]}")
+            else:
+                cmds.matchTransform(ctrl_ik_end, self.end_joint)
+
+            self.dvr_hdl = cmds.ikHandle(
+            n=f"hdl_dvr{self.end_joint[6:]}", solver="ikRPsolver",
+            sj=self.driver_joint_list[0], ee=self.driver_joint_list[-1]
+            )
+            # ik handles:
+            self.calf_ik_hdl = cmds.ikHandle(
+            n=f"hdl_ik{self.quad_calf_joint[6:]}", solver="ikRPsolver",
+            sj=self.start_joint, ee=self.quad_calf_joint
+            )
+            hock_ik_hdl_name = f"hdl_ik{self.end_joint[6:]}".replace('Ankle', 'Hock')
+            self.hock_ik_hdl = cmds.ikHandle(
+            n=hock_ik_hdl_name, solver="ikSCsolver",
+            sj=self.quad_calf_joint, ee=self.end_joint
+            )
+
+            cmds.parent(self.dvr_hdl[0], ctrl_ik_end)
+            cmds.parent(self.calf_ik_hdl[0], self.driver_joint_list[2])
+            cmds.parent(self.hock_ik_hdl[0],  self.driver_joint_list[-1])
+
+            # Make leg follow torso - done after the whole systemis built 
+            # becuase i need the top control which comes afer.
+
+            # Make the foot stay level (orient constraint)
+            cmds.orientConstraint()
+
+            cmds.select(cl=1)
+
         '''
         if 'quad' in self.module:
             self.ik_handle = cmds.ikHandle(
@@ -217,7 +292,7 @@ class create_ik_sys():
                 n=f"hdl_driver{self.driver_joint_list[-1][7:]}", solver="ikRPsolver",
                 sj=self.driver_joint_list[0], ee=self.driver_joint_list[-1] 
                 )
-            # cmds.parent(self.driver_handle[0], ctrl_cv)
+            # cmds.parent(self.driver_handle[0], ctrl_ik_end)
             print(f"IK-----IK - driver_handle is: hdl_driver{self.driver_joint_list[-1][7:]}")
             
             #self.ik_calf_handle = cmds.ikHandle(
@@ -230,39 +305,21 @@ class create_ik_sys():
             #    sj=self.start_joint, ee=self.end_joint 
             #    )
             print(f"IK-----IK - hock_handle is: hdl_ik{self.end_joint[6:]}")
-
-           
-        else: 
         '''
-        self.ik_handle = cmds.ikHandle(
-            n=f"hdl_ik{self.end_joint[6:]}", solver="ikRPsolver",
-            sj=self.start_joint, ee=self.end_joint 
-            )
         
         
-        cmds.poleVectorConstraint(
-            f"ctrl_pv{self.pv_joint[6:]}", f"hdl_ik{self.end_joint[6:]}",
-            n= f"pvCons{self.end_joint[6:]}")
-        
-        if self.val_joints["world_orientation"] is True:
-            cmds.matchTransform(ctrl_cv, f"hdl_ik{self.end_joint[6:]}")
-        else:
-            cmds.matchTransform(ctrl_cv, self.end_joint)
-        # Constrain the ik control to the ik handle!
-        cmds.parentConstraint(ctrl_cv, f"hdl_ik{self.end_joint[6:]}", mo=1, n=f"pCons_ik_hdl{self.end_joint[6:]}")
-        cmds.addAttr(ctrl_cv, ln="handle", at="enum", en="True", k=0)
-        return ctrl_cv
+
 
 
     def cr_top_handle_ctrl(self):
-        self.start_ctrl_cv = f"ctrl_ik{self.start_joint[6:]}"
+        self.top_ctrl_cv = f"ctrl_ik{self.start_joint[6:]}"
         control_shape.Controls(scale=1, guide=self.start_joint[6:], 
-            ctrl_name=self.start_ctrl_cv, 
+            ctrl_name=self.top_ctrl_cv, 
             rig_type="ik"
         )
-        cmds.matchTransform(self.start_ctrl_cv, self.start_joint)
-        cmds.parentConstraint(self.start_ctrl_cv, self.start_joint, mo=1, n=f"pCons{self.start_joint[6:]}")
-        return self.start_ctrl_cv
+        cmds.matchTransform(self.top_ctrl_cv, self.start_joint)
+        cmds.parentConstraint(self.top_ctrl_cv, self.start_joint, mo=1, n=f"pCons{self.start_joint[6:]}")
+        return self.top_ctrl_cv
     
     def cr_top_ctrl(self):
         top_ctrl_name = f"ctrl_ik{self.top_joint[6:]}"
@@ -291,7 +348,7 @@ class create_ik_sys():
                 self.to_be_parented.append(ctrl_crv_tmp)
                 cmds.matchTransform(ctrl_crv_tmp, joint)
                 cmds.parentConstraint(ctrl_crv_tmp, joint, mo=1, n= f"pCons{joint[6:]}")
-            cmds.parent(self.start_ctrl_cv, self.to_be_parented[0])
+            cmds.parent(self.top_ctrl_cv, self.to_be_parented[0])
             for ctrl in range(len(self.to_be_parented)):
                 if ctrl == 0:
                     pass
@@ -305,8 +362,10 @@ class create_ik_sys():
     
 
     def get_ctrls(self):
-        return self.ik_ctrls
+        pass
+        # return self.ik_ctrls
 
 
     def get_handle(self):
-        return self.ik_handle
+        pass
+        # return self.ik_handle
