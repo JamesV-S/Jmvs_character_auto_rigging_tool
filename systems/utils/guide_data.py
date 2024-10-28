@@ -79,6 +79,7 @@ def setup(temp_dict, data_guide):
         elif isinstance(temp_dict[key], float):
             #print(f"D float> Adding attribute to: {data_guide}, attribute name: {key}")
             cmds.addAttr(data_guide, ln=key, at="float",k=1)
+            print(f"GUIDE DATA isinstance>FLOAT: : : : : : : : :{data_guide}.{key}, {temp_dict[key]}")
             cmds.setAttr(f"{data_guide}.{key}", temp_dict[key])
         
         elif isinstance(temp_dict[key], int):
@@ -87,7 +88,7 @@ def setup(temp_dict, data_guide):
                 raise RuntimeError(f"{data_guide} does not exist in the scene.")
            #print()
            cmds.addAttr(data_guide, ln=key, at="float",k=1)
-           #cmds.setAttr(f"{data_guide}.{key}", temp_dict[key])
+           cmds.setAttr(f"{data_guide}.{key}", temp_dict[key])
         
         # Lock & hide the standard transform attrs in channel box. 
         for attr in ["tx","ty","tz","rx","ry","rz","sx","sy","sz","v"]:
