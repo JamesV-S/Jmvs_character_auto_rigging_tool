@@ -42,6 +42,11 @@ class Guides_class():
                     master_guide = guide["master_guide"]
                     guide_connector = connect_modules.attach(master_guide, selection)
                     guide_connector_list.append(guide_connector[1])
+
+                    # If the module is finger, match the master guide to the selected guide
+                    if 'finger' in master_guide: # == "root_basic":
+                        print(f"FINGER guide list: : {selection} - NEED the guide i selected!")
+                        cmds.matchTransform(master_guide, selection, pos=1, rot=1, scl=0)
                     
                     # Calling ".prep_attach_jnts" is designed to prepare and organize 
                     # joint relationships in the context of creating blueprint guides.
@@ -103,7 +108,6 @@ class Guides_class():
             elif accessed_module == "root_basic" and "root" in obj:
                 tmp_list.append(obj)
         
-
         # 4) Create master guide for module by looking in each module's variable's
         if "root" in self.module.system:
             master_guide = "root"
@@ -181,6 +185,7 @@ class Guides_class():
         guide_list.append(master_guide)
         #print("1: ", guide_list)
         #print("2: ", len(guide_list))
+        
         print(f"CONNECTING GUIDES create_guides: {guide_list}")
         for i in range(len(guide_list)):
             try:
@@ -189,7 +194,7 @@ class Guides_class():
                 guide_connector_list.append(guide_connector)
             except:
                 pass # ignore last element of the list erroring.
-        
+
         # Guide connectors are grouped under this grp: 
         if "grp_guideConnector_clusters" in cmds.ls("grp_guideConnector_clusters"):
             cmds.parent(guide_connector_list, "grp_guideConnector_clusters")
@@ -207,6 +212,7 @@ class Guides_class():
         cmds.spaceLocator(n=data_guide_name)
         cmds.matchTransform(data_guide_name, master_guide)
         cmds.parent(data_guide_name, master_guide)
+        cmds.setAttr(f"{data_guide_name}.visibility", 0)
         #----------------------------------------------------------------------
 
         # 7) Add attributes
@@ -249,6 +255,8 @@ class Guides_class():
                     print("Create_guides <(Line 275)> CONTROL SHAPE INDEX: ", f"{guide[6:]}_{ikfk}_control")
                     cmds.addAttr(guide, ln=f"{guide[5:]}_{ikfk.lower()}_control", 
                                  at="enum", en=control_shape_en, k=1)
+                    # Need to set the control type attr to the 
+                    # 'default_ctrl_shape' on the module
                 
                 for ikfk in ["IK"]:
                     control_orientation_list = ["object", "world"]
@@ -267,6 +275,7 @@ class Guides_class():
             "guide_number": self.unique_id
         }
         return ui_dict
+       
 '''
 
 for shape in imported[1:]:

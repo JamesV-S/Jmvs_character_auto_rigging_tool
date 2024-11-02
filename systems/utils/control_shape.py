@@ -114,8 +114,6 @@ class Controls():
         if type(self.scale) is int or type(self.scale) is float:
             self.scale = [self.scale, self.scale, self.scale]
         
-        
-        # put this line into a variable so every ctrl in the list has it's control type gotten!
         control_type = cmds.getAttr(f"guide{guide}.{guide}_{rig_type}_control", asString=1)
         
         self.control_ori = cmds.getAttr(f"guide{guide}.{guide}_ik_OriType", asString=1)        

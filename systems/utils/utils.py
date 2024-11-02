@@ -93,6 +93,8 @@ def set_transformations(translation_dict, rotation_dict):
 # set_transformations(system_pos, system_rot)
 
 def guide_curve_connector(first_jnt, second_jnt):
+    print(f"GUIDE CONNECTOR: {first_jnt}")
+    
     fst_point_loc = cmds.xform(first_jnt ,q=1, ws=1, rp=1)
     scnd_point_loc =  cmds.xform(second_jnt ,q=1, ws=1, rp=1)
 

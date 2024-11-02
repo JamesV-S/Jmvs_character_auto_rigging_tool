@@ -86,7 +86,6 @@ def setup(temp_dict, data_guide):
            print(f"E int> Adding attribute to: {data_guide}, attribute name: {key}")
            if not cmds.objExists(data_guide):
                 raise RuntimeError(f"{data_guide} does not exist in the scene.")
-           #print()
            cmds.addAttr(data_guide, ln=key, at="float",k=1)
            cmds.setAttr(f"{data_guide}.{key}", temp_dict[key])
         

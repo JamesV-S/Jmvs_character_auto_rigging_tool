@@ -16,7 +16,10 @@ class create_ik_sys():
         self.val_joints = val_joints
         self.module = module
         self.master_guide = master_guide
-
+        if 'finger' in self.module:
+            self.scale = scale*2
+        else: 
+            self.scale = scale
         # Call the function: 
         self.ik_systems(ik_joint_list)
 
@@ -24,6 +27,10 @@ class create_ik_sys():
         try:
             cmds.group(self.grouped_ctrls, n=f"grp_ik_ctrls_{master_guide}", w=1)
             cmds.group(ik_joint_list[0], n=f"grp_ik_jnts_{master_guide}", w=1)
+            if 'finger' in self.module: 
+                fing_ik_ctrl_ls = [self.hdl_ctrl,self.last_ctrl_name]
+                cmds.parent(self.hdl_ctrl, self.last_ctrl_name)
+                OPM.OpmCleanTool(fing_ik_ctrl_ls)
         except IndexError:
             pass
         
@@ -45,24 +52,23 @@ class create_ik_sys():
             if 'quad' in self.module:
                 if self.val_joints["calf_joint"] in joint:
                     self.quad_calf_joint = joint
-            #if 'quad' in self.module:
-            #    if self.val_joints["calf_joint"] in joint:
-            #        self.calf_joint = joint
-
-
-        # call helper scripts to create pole vector control(location)
-        # - collect other ctrls
+            if 'finger' in self.module:
+                if self.val_joints["last_joint"] in joint:
+                    self.last_joint = joint # bipedPhalDEnd
+        
         self.collect_other_controls(ik_joint_list)
         
         if 'quad' in self.module:
             self.cr_quad_driver_joints(ik_joint_list)
 
         pv_ctrl = self.cr_pv_ctrl()
-        hdl_ctrl = self.cr_ik_handle() 
+        self.hdl_ctrl = self.cr_ik_handle() 
         root_ctrl = self.cr_top_handle_ctrl()
         above_ctrls = self.cr_above_root_ctrl()
         if 'arm' in self.module:
             top_ctrl = self.cr_top_ctrl()
+        #elif 'finger' in self.module:
+         #   self.last_ctrl = self.cr_last_ctrl()
         
         # for quad driver joint to follow the torso:
         if 'quad' in self.module: # self.top_ctrl_cv
@@ -72,19 +78,20 @@ class create_ik_sys():
                 cmds.setAttr(f"{self.driver_joint_list[0]}.translate{axis_list[x]}", 0)
                 cmds.setAttr(f"{self.driver_joint_list[0]}.rotate{axis_list[x]}", 0)
          
-        
         # collect other ctrls & organise them. 
         if above_ctrls:
-            self.ik_ctrls = [pv_ctrl, hdl_ctrl, root_ctrl] + above_ctrls
-            self.grouped_ctrls = [pv_ctrl, hdl_ctrl, above_ctrls[0]]
+            self.ik_ctrls = [pv_ctrl, self.hdl_ctrl, root_ctrl] + above_ctrls
+            self.grouped_ctrls = [pv_ctrl, self.hdl_ctrl, above_ctrls[0]]
         else:
-            
-            self.ik_ctrls = [pv_ctrl, hdl_ctrl, root_ctrl]
-            self.grouped_ctrls = [pv_ctrl, hdl_ctrl, root_ctrl]
+            self.ik_ctrls = [pv_ctrl, self.hdl_ctrl, root_ctrl]
+            self.grouped_ctrls = [pv_ctrl, self.hdl_ctrl, root_ctrl]
             # if the module has the name arm in it: 
             if 'arm' in self.module:
                 self.ik_ctrls.append(top_ctrl)
                 self.grouped_ctrls.append(top_ctrl)
+            if 'finger' in self.module:
+                self.ik_ctrls.append(self.last_ctrl_name)
+                self.grouped_ctrls.append(self.last_ctrl_name)
                     
         # OPM zero out ik ctrls
         OPM.OpmCleanTool(self.ik_ctrls)
@@ -121,12 +128,16 @@ class create_ik_sys():
         pv_ctrl = cr_pole_vector.create_pole_vector(
             self.start_joint, self.pv_joint, self.end_joint)
         cmds.rename(pv_ctrl, f"ctrl_pv{self.pv_joint[6:]}")
+        if 'finger' in self.module:
+            cmds.setAttr(f"ctrl_pv{self.pv_joint[6:]}.scaleX", self.scale*2)
+            cmds.setAttr(f"ctrl_pv{self.pv_joint[6:]}.scaleY", self.scale*2)
+            cmds.setAttr(f"ctrl_pv{self.pv_joint[6:]}.scaleZ", self.scale*2)
         return f"ctrl_pv{self.pv_joint[6:]}"
 
 
     def cr_ik_handle(self):
         ctrl_ik_end = f"ctrl_ik{self.end_joint[6:]}" 
-        control_shape.Controls(scale=[1,1,1], guide=self.end_joint[6:], 
+        control_shape.Controls(scale=self.scale, guide=self.end_joint[6:], 
             ctrl_name=ctrl_ik_end, 
             rig_type="ik"
         )
@@ -149,6 +160,41 @@ class create_ik_sys():
             cmds.parentConstraint(ctrl_ik_end, f"hdl_ik{self.end_joint[6:]}", 
                                   mo=1, n=f"pCons_ik_hdl{self.end_joint[6:]}")
             cmds.addAttr(ctrl_ik_end, ln="handle", at="enum", en="True", k=0)
+
+            if 'finger' in self.module:
+                # self.last_ctrl
+                self.last_ctrl_name = f"ctrl_ik{self.last_joint[6:]}"
+                control_shape.Controls(scale=self.scale, guide=self.last_joint[6:], 
+                                       ctrl_name=self.last_ctrl_name, 
+                                       rig_type="ik"
+                                       )
+                self.sc_handle = cmds.ikHandle(
+                n=f"hdl_ik{self.last_joint[6:]}", solver="ikSCsolver",
+                sj=self.end_joint, ee=self.last_joint 
+                )
+                if self.val_joints["world_orientation"] is False:
+                    cmds.matchTransform(self.last_ctrl_name, self.last_joint)
+                cmds.parentConstraint(self.last_ctrl_name, f"hdl_ik{self.last_joint[6:]}", 
+                                  mo=1, n=f"pCons_ik_hdl{self.last_joint[6:]}")
+        
+                '''
+                def cr_last_ctrl(self):
+                    self.last_ctrl_name = f"ctrl_ik{self.last_joint[6:]}"
+                    last_ctrl = control_shape.Controls(scale=[1,1,1], guide=self.last_joint[6:], 
+                        ctrl_name=self.last_ctrl_name, 
+                        rig_type="ik"
+                    )
+                    ctrl_ori = control_shape.Controls.return_ctrl_ori()
+                    if 'object' in ctrl_ori:
+                        cmds.matchTransform(self.last_ctrl_name, self.last_joint)
+                    else:
+                        cmds.matchTransform(self.last_ctrl_name, self.last_joint)
+                        cmds.makeIdentity(self.last_ctrl_name, a=1, t=0, r=1, s=1)
+                    cmds.parentConstraint(self.last_ctrl_name, self.last_joint, mo=1, n=f"pCons{self.last_joint[6:]}")
+                    return self.last_ctrl_name
+                '''
+
+
 
         elif 'quad' in self.module:          
             # Driver handle:
@@ -178,7 +224,7 @@ class create_ik_sys():
             # Hock functionality:
             
             self.hock_ctrl = f"ctrl_ik{self.quad_calf_joint[6:]}"
-            control_shape.Controls(scale=[1,1,1], guide=f"{self.quad_calf_joint[6:]}", 
+            control_shape.Controls(scale=self.scale, guide=f"{self.quad_calf_joint[6:]}", 
                 ctrl_name=self.hock_ctrl, 
                 rig_type="ik"
             )
@@ -227,7 +273,7 @@ class create_ik_sys():
 
     def cr_top_handle_ctrl(self):
         self.top_ctrl_cv = f"ctrl_ik{self.start_joint[6:]}"
-        control_shape.Controls(scale=1, guide=self.start_joint[6:], 
+        control_shape.Controls(scale=self.scale, guide=self.start_joint[6:], 
             ctrl_name=self.top_ctrl_cv, 
             rig_type="ik"
         )
@@ -238,7 +284,7 @@ class create_ik_sys():
 
     def cr_top_ctrl(self):
         top_ctrl_name = f"ctrl_ik{self.top_joint[6:]}"
-        top_ctrl = control_shape.Controls(scale=[1,1,1], guide=self.top_joint[6:], 
+        top_ctrl = control_shape.Controls(scale=self.scale, guide=self.top_joint[6:], 
             ctrl_name=top_ctrl_name, 
             rig_type="ik"
         )
@@ -250,14 +296,14 @@ class create_ik_sys():
             cmds.makeIdentity(top_ctrl_name, a=1, t=0, r=1, s=1)
         cmds.parentConstraint(top_ctrl_name, self.top_joint, mo=1, n=f"pCons{self.top_joint[6:]}")
         return top_ctrl_name
-
+    
 
     def cr_above_root_ctrl(self):
         self.to_be_parented = []
         if self.above_root_joints:
             for joint in self.above_root_joints:
                 ctrl_crv_tmp = f"ctrl_ik{joint[6:]}"
-                control_shape.Controls(scale=1, guide=joint[6:], 
+                control_shape.Controls(scale=self.scale, guide=joint[6:], 
                     ctrl_name=ctrl_crv_tmp, rig_type="ik"
                 )
                 self.to_be_parented.append(ctrl_crv_tmp)

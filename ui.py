@@ -280,6 +280,15 @@ class QtSampler(QWidget):
                   ]
          
         # create_guides.py is needed! > in the systems folder!
+        '''
+        if module == 'biped_finger':
+            fing_num = self.ui.finger_number_ddbox.value()
+            print(f"number of fingers: {fing_num}")
+            for x in range(fing_num):
+                guides = create_guides.Guides_class(module, offset, module_path.side, to_connect_to=[], 
+                    use_existing_attr=[], orientation=self.orientation_func(), numb_id=self.numb_id)
+        else:
+        '''
         guides = create_guides.Guides_class(module, offset, module_path.side, to_connect_to=[], 
             use_existing_attr=[], orientation=self.orientation_func(), numb_id=self.numb_id)
         guide = guides.collect_guides()
@@ -507,7 +516,7 @@ class QtSampler(QWidget):
             if updated_rig_type == "IKFK" or updated_rig_type == "IK":
                 #print(f"Add space_swap sys {master_guide}")
                 print(f"before calling spaceSwap: {key}")
-                space_swap_mdl = space_swap.cr_spaceSwapping(key, self.ctrl_cog, self.ctrl_root)
+                # space_swap_mdl = space_swap.cr_spaceSwapping(key, self.ctrl_cog, self.ctrl_root)
         
         '''
         # colour the controls: 
