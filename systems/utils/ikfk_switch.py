@@ -22,9 +22,9 @@ def cr_ikfk_switch_sys(rig_joints, mdl_switch_ctrl, fk_ctrls, ik_ctrls, fk_joint
     
     # create reverse node
     rev_node = f"REV_ik{master_guide[6:]}"
-    yh = utils.cr_node_if_not_exists(util_type=1, node_type="reverse", 
-        node_name=rev_node, set_attrs=None
-        )
+    
+    utils.cr_node_if_not_exists(util_type=1, node_type="reverse", 
+                                node_name=rev_node, set_attrs=None)
     
     # Connections for ctrls:
     utils.connect_attr(f"{mdl_switch_ctrl}.{switch_Attr}", f"{rev_node}.inputX")

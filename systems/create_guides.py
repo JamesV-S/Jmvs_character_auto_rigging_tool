@@ -255,8 +255,6 @@ class Guides_class():
                     print("Create_guides <(Line 275)> CONTROL SHAPE INDEX: ", f"{guide[6:]}_{ikfk}_control")
                     cmds.addAttr(guide, ln=f"{guide[5:]}_{ikfk.lower()}_control", 
                                  at="enum", en=control_shape_en, k=1)
-                    # Need to set the control type attr to the 
-                    # 'default_ctrl_shape' on the module
                 
                 for ikfk in ["IK"]:
                     control_orientation_list = ["object", "world"]

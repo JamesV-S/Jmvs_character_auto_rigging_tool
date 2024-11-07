@@ -26,6 +26,3 @@ def run_ui():
     ui.main()
     print("main is run")
 #run_ui()
-
-def Test_func():
-    print("Come on man")
