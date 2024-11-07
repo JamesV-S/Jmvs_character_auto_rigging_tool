@@ -29,7 +29,7 @@ system_rot_yzx = {'bipedPhalProximal': [50.95891725101831, -56.98582204849474, 1
 #Rots dictionary:  {'bipedPhalProximal': [5.910977623767589, -31.083474503917564, -56.62585344811804], 'bipedPhalMiddle': [5.910977623767589, -31.083474503917564, -56.62585344811804], 'bipedPhalDistal': [5.910977623767589, -31.08347450391755, -56.62585344811804], 'bipedPhalDEnd': [5.910977623767589, -31.08347450391755, -56.62585344811804]}
 
 
-# You are able to change the number of fingers you want. But not the number of 
+# You are able to add any number of fingers you want. But not the number of 
 # phalanges because it's a biped finger. 
 
 has_orientation = "yes"
@@ -56,8 +56,6 @@ default_ctrl_shape = {
 }
 
 space_swapping = [["world", "COG", "wrist", "custom"], ["world", "bipedPhalDEnd"], ["world", "bipedPhalProximal"], ["world", "wirst"]]
-
-
 
 
 # {'bipedPhal_proximal': [23.0, -25.00000000000005, -70.00000000000003], 'bipedPhalMiddle': [23.00000000000001, -25.000000000000057, -70.00000000000003], 'bipedPhalDistal': [23.00000000000001, -25.000000000000057, -70.00000000000003], 'bipedPhalDEnd': [23.00000000000001, -25.000000000000057, -70.00000000000003]}

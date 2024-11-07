@@ -29,24 +29,25 @@ TO DO: > Understand why mirrored joints do not wotk with connect_modules.attatch
 
 -----------------------------
 [-] Issues to solve:
-- By haveing guides already in a scene, 'data_guide' works to store the necessary data, 
-and joints are created & stored in modular dictionary's properly.
-HOWEVER, when building the system, everything works except the ctrl's are a 
-cluster of points only visible thru their cvs!
-- Basically the fk ctrls arnt loading properly. 
-They a visible if the guides were created with the same loaded tool
-> Figure out this issue. 
 
-
+when build skeleton, and the joints are mirrored the orientation is just like mirroring. 
+but if i close and re-open the ui and build the skeleton, the parent joint is 
+orientated to it's corresponding guide.
+What are the possible reason's for this issue?
+- well what's the changing factor? reloading the ui. How the data is retrieved. 
+- data when it works: the guide is made & mirrored , that dictionary is just stored and joints are built off it. 
+- data when it doesn't work: the guide already exists and the dictionary comes from the data guide. 
+> compare the 2 dictionary's joint data before building the joints in the ui.create_joints() and 
+in the joints.py file. 
 
 -----------------------------
 To do:
 > 
 
-> the quadleg needs to work better with IK(also, make control orient to the world!) & spaceSwap
+> the quadleg needs to work with spaceSwap
 
 > after the space-swap and other issues r fixed, move onto the neck system, 
-So i can test creating a rig for testing rotomation > Email Malcom to pass a 
+So i can test creating a rig for testing rotomation > Email Malcom  
 > acapture movement. question onto Stephen cpncerning creating a head & arm rig for cg replacments.  
 
 - Joints

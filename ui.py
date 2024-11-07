@@ -345,6 +345,7 @@ class QtSampler(QWidget):
     def remove_module(self):
         module = cmds.ls(sl=1)
         for key in list(self.systems_to_be_made.values()):
+            print(f"remove module 'key' : {key}")
             if module[0] in key['master_guide']:
                 self.systems_to_be_made.pop(module[0])
                 self.created_guides.remove(module[0])
@@ -363,20 +364,16 @@ class QtSampler(QWidget):
         # Not too sure what this is doing, if i'd have to guess it's 
         # adding the joint list to the dictionary...
         
-        
         num = 0
         for key in self.systems_to_be_made.values():
             key["joints"] = rig_jnt_list[num]
             num += 1
-        
         
         mirror_module = mirror_rig.mirror_data(self.systems_to_be_made, self.orientation_func())
         self.systems_to_be_made = mirror_module.get_mirror_data()
         
         connect_modules.attach_jnts(self.systems_to_be_made, system="rig")
        
-        # DON'T DO THAT, YOURE ADDING ALL JOINTS TO EACH DICT!
-        # ROOT, SPINE, LEG ETC HAVE ALL JOINT LISTS INSTEAD OF DESIGNATED ONES!
         #self.hide_guides()
 
     
