@@ -55,8 +55,7 @@ class mirror_data():
                 utils.colour_guide_custom_shape(guide_name) #       shape_list = cmds.listRelatives(custom_crv, shapes=1)
                                                                     #                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
                                                                     # ValueError: No object matches name: guide_0_wrist_R
-                
-
+        
             cmds.xform(imported_guide, t=pos, ro=rot)
             tmp_guide_list.append(imported_guide)
 
