@@ -40,6 +40,15 @@ What are the possible reason's for this issue?
 > compare the 2 dictionary's joint data before building the joints in the ui.create_joints() and 
 in the joints.py file. 
 
+=> if the _R module is in the scene then the mirror guide isn't called, and then the issue happens. 
+=> I tested with another _L arm in the scene with mirror set to 'YES', reloaded the ui & run build skeleton & the newly created '_R' worked fine. 
+==> Issue arrises when the '_R' already exists and create joints is called!. 
+=> I've narrowed down the issue to joints.py
+
+!!!!!!
+SOLUTION: > NEED TO EDIT JOINTS.py that checks for '_R' and 
+changes the orientation of the parent joint to match the other's orientation!
+!!!!!!
 -----------------------------
 To do:
 > 

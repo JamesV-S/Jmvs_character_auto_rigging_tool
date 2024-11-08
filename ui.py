@@ -218,6 +218,7 @@ class QtSampler(QWidget):
         for dict in temp_dict.values():
             master_guide = dict["master_guide"]
             self.created_guides.append(master_guide)
+            print(f"guide_data, created_guides == {self.created_guides}")
             self.systems_to_be_made[master_guide] = dict
             if not dict["space_swap"] == []:
                 if 'arm' in dict['module']:
@@ -358,12 +359,10 @@ class QtSampler(QWidget):
     def create_joints(self):
         # master_guides: ['guide_root', 'master_biped_arm_l_1']
         print(f"The systems to be made are:>> {self.systems_to_be_made}")
-               
+        
         rig_jnt_list = joints.get_joint_list(self.created_guides, system="rig")
-        
-        # Not too sure what this is doing, if i'd have to guess it's 
-        # adding the joint list to the dictionary...
-        
+             
+        # adding the joint list to the dictionary
         num = 0
         for key in self.systems_to_be_made.values():
             key["joints"] = rig_jnt_list[num]
