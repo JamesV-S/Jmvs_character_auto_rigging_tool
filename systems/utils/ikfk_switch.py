@@ -47,7 +47,7 @@ def cr_ikfk_switch_sys(rig_joints, mdl_switch_ctrl, fk_ctrls, ik_ctrls, fk_joint
         if 'ctrl_fk' in ctrl:
             utils.connect_attr(f"{mdl_switch_ctrl}.{switch_Attr}", f"{ctrl}.visibility")
         elif 'ctrl_ik' in ctrl or 'ctrl_pv' in ctrl:      
-            utils.connect_attr(f"{rev_node}.output{axis_val}", f"{ctrl}.visibility")
+            utils.connect_attr(f"{rev_node}.outputX", f"{ctrl}.visibility")
         
     
     # create joint connections:
@@ -58,7 +58,7 @@ def cr_ikfk_switch_sys(rig_joints, mdl_switch_ctrl, fk_ctrls, ik_ctrls, fk_joint
         else:
             cmds.warning(f"{fk_joint_list[x]} doesn't contain jnt_fk joints!")
         if "jnt_ik" in ik_joint_list[x]:
-            utils.connect_attr(f"{rev_node}.output{axis_val}", f"{rig_jnt_Pcons[0]}.{ik_joint_list[x]}W1")
+            utils.connect_attr(f"{rev_node}.outputX", f"{rig_jnt_Pcons[0]}.{ik_joint_list[x]}W1")
           
         else:
             cmds.warning(f"{ik_joint_list[x]} doesn't contain jnt_ik joints!")

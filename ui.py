@@ -27,7 +27,8 @@ from systems import (
 )
 
 from systems.utils import (
-    connect_modules, 
+    connect_modules,
+    mdl_foll_connection,
     utils, 
     mirror_rig,
     guide_data,
@@ -35,7 +36,6 @@ from systems.utils import (
     ikfk_switch, 
     space_swap,
     OPM
-    
 )
 
 # Reload Modules
@@ -52,7 +52,7 @@ importlib.reload(ikfk_switch)
 importlib.reload(squash_stretch)
 importlib.reload(space_swap)
 importlib.reload(OPM)
-
+importlib.reload(mdl_foll_connection)
 
 mayaMainWindowPtr = omui.MQtUtil.mainWindow()
 mayaMainWindow = wrapInstance(int(mayaMainWindowPtr), QWidget)
@@ -422,7 +422,7 @@ class QtSampler(QWidget):
                     # create fk joints, system & control, then constrain to rig_joints!
                     print(f"Build 'fk' joints! {master_guide}")
                     fk_joint_list = joints.joint(master_guide, system="fk")
-                    fk_module = fk.create_fk_sys(fk_joint_list, master_guide, 
+                    fk_module = fk.create_fk_sys( key["module"], fk_joint_list, master_guide, 
                                                  key['guide_scale'], delete_end=0)
                     fk_ctrls = fk_module.get_ctrls()
                     print(f"list 1: {fk_joint_list}, list 2: {key['joints']}")
@@ -457,7 +457,7 @@ class QtSampler(QWidget):
                     
                     print(f"Build 'ikfk' joints! {master_guide}")
                     fk_joint_list = joints.joint(master_guide, system="fk")
-                    fk_module = fk.create_fk_sys(fk_joint_list, master_guide, 
+                    fk_module = fk.create_fk_sys( key["module"], fk_joint_list, master_guide, 
                                                  key['guide_scale'], delete_end=0)
                     fk_ctrls = fk_module.get_ctrls()
 
@@ -497,10 +497,21 @@ class QtSampler(QWidget):
                         print(f"Build squahs_stretch system! {master_guide}")
                         squash_stretch_instance = []
                         squash_stretch.cr_squash_stretch(key, module.ik_joints, rig_type)
-
+                
+                '''system_group.grpSetup(self.ui.rig_master_name.text())''' # What does this do?
         
-        '''system_group.grpSetup(self.ui.rig_master_name.text())''' # What does this do?
-        
+        for key in self.systems_to_be_made.values():
+            if "root" in key["module"]:
+                pass
+            elif "spine" in key["module"]:
+                print("This module is SPINE")
+                cmds.parent(key["fk_ctrl_list"][-1], "ctrl_COG")
+                OPM.OpmCleanTool(key["fk_ctrl_list"][-1])
+            else:
+                print(f"YEEEEAH >> follow connection for: {key['module']}")
+                print(f"Fol_connections: mdl = {key['module']}  > sys_to_connect = {key['systems_to_connect']}" )
+                # Fol_connections: mdl = biped_arm  > sys_to_connect = ['guide_0_clavicle_L', 'guide_0_spine_4']
+                mdl_foll_connection.connecting_sys_to_connect(key["module"], key["systems_to_connect"], self.ctrl_root, key["side"])
 
         # Connect systems & add space_swapping!
         for key in self.systems_to_be_made.values():
@@ -513,16 +524,22 @@ class QtSampler(QWidget):
                 #print(f"Add space_swap sys {master_guide}")
                 print(f"before calling spaceSwap: {key}")
                 space_swap_mdl = space_swap.cr_spaceSwapping(key, self.ctrl_cog, self.ctrl_root)
-        
         '''
+        for key in self.systems_to_be_made.values():
+            if "root" in key["module"]:
+                pass
+            elif "L" in key["side"]:
+                print(f"Should be > Arm or leg: {key['module']}, > fk_ctrls: {key['fk_ctrl_list']},  ik_ctrls: {key['ik_ctrl_list']}, > MAKE RED")
+            elif "R" in key["side"]:
+                print(f"Should be > Arm or leg: {key['module']}, > fk_ctrls: {key['fk_ctrl_list']},  ik_ctrls: {key['ik_ctrl_list']}, > MAKE BLUE")
+            elif None in key["side"]:
+                print(f"Should be > spine: {key['module']}, > fk_ctrls: {key['fk_ctrl_list']},  ik_ctrls: {key['ik_ctrl_list']}, > MAKE YELLOW")
+        
         # colour the controls: 
         colour_dict = {"L_colour":[], "C_colour":[], "R_colour":[]} # C stands for centre so yellow. 
         
         ctrl_list = cmds.ls("ctrl_*", type="transform")
         utils.colour_conrols(ctrl_list, colour_dict)
-
-        system_group.hierarchy_parenting(self.systems_to_be_made)
-
         cmds.select(cl=1)
         '''
 

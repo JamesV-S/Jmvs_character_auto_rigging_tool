@@ -6,10 +6,10 @@ importlib.reload(control_shape)
 importlib.reload(OPM)
 
 class create_fk_sys():
-    def __init__(self, joint_list, master_guide, scale, delete_end):
+    def __init__(self, module, joint_list, master_guide, scale, delete_end):
 
         print(f"FK ::::::::::: joint_list ; {joint_list}, master_guide: {master_guide}, scale: {scale}, delete_end:{delete_end}")
-
+        self.module = module
         self.scale = scale
         # Call the function
         self.fk_system(joint_list, delete_end)
