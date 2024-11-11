@@ -84,8 +84,9 @@ class QtSampler(QWidget):
         #self.ui.hand_module_btn.clicked.connect(self.temp_hand_func)
         # Tab 1 - RIG
         # if biped_finger is the chosen then enable the finger number ddbox
-        self.ui.finger_number_ddbox.setDisabled(True)
-        self.ui.finger_lbl.setDisabled(True)
+        self.ui.neck_num_SpinBox.setMinimum(3)
+        # self.ui.neck_num_SpinBox.setDisabled(True)
+        # self.ui.neck_num_lbl.setDisabled(True)
         
         # Access the blueprints_toolbtn
         parent_widget = self.ui.findChild(QtWidgets.QWidget, "tab_rig")
@@ -241,8 +242,6 @@ class QtSampler(QWidget):
         importlib.reload(module_path)
         
         #----------------------------------------------------------------------
-        #module_match_dict = {"biped_arm.py": ""}
-
         print("existing MODULE", module," ///// ","module_path: ", module_path, "print from ui in add_module()" )
         
         # Search for existing modules of the same type in the scene
@@ -279,19 +278,53 @@ class QtSampler(QWidget):
                   self.ui.offset_Yaxes_spinbx.value(), 
                   self.ui.offset_Zaxes_spinbx.value()
                   ]
-         
-        # create_guides.py is needed! > in the systems folder!
-        '''
-        if module == 'biped_finger':
-            fing_num = self.ui.finger_number_ddbox.value()
-            print(f"number of fingers: {fing_num}")
-            for x in range(fing_num):
-                guides = create_guides.Guides_class(module, offset, module_path.side, to_connect_to=[], 
-                    use_existing_attr=[], orientation=self.orientation_func(), numb_id=self.numb_id)
-        else:
-        '''
-        guides = create_guides.Guides_class(module, offset, module_path.side, to_connect_to=[], 
-            use_existing_attr=[], orientation=self.orientation_func(), numb_id=self.numb_id)
+        
+
+        if 'neck' in module:
+            self.neck_jnt_num = self.ui.neck_num_SpinBox.value()
+            
+            offsetY = 10
+            
+            if self.neck_jnt_num > 3:
+                
+                module_path.system = [f"neck_{i}" for i in range(self.neck_jnt_num)]
+                
+                for i in range(3, self.neck_jnt_num):
+                    last_pos = module_path.system_pos_xyz[f"neck_{i-1}"]
+                    # X orientation
+                    # add new postion with the offset on Y axis!. 
+                    module_path.system_pos_xyz[f"neck_{i}"] = [last_pos[0], last_pos[1]+offsetY, last_pos[2]]
+                    # Rotation is the same :
+                    module_path.system_rot_xyz[f"neck_{i}"] = module_path.system_rot_xyz[f"neck_{i-1}"]
+                    
+                    # Y orientation
+                    module_path.system_pos_yzx[f"neck_{i}"] = [last_pos[0], last_pos[1]+offsetY, last_pos[2]]
+                    module_path.system_rot_yzx[f"neck_{i}"] = module_path.system_rot_xyz[f"neck_{i-1}"]
+                # print(f"¬>¬>¬>¬> module_path.system_pos_xyz: (In IF) {module_path.system_pos_xyz}")
+            neck_sys_dict = {
+                "nck_sys": module_path.system, 
+                "nck_pos_xyz": module_path.system_pos_xyz, 
+                "nck_rot_xyz": module_path.system_rot_xyz, 
+                "nck_pos_yzx": module_path.system_pos_yzx, 
+                "nck_rot_yzx": module_path.system_rot_yzx
+                }     
+            #------------------------------------------------------------------
+            print(f"¬¬¬¬ module_path.system (after update): {module_path.system}")
+            print(f"¬>¬>¬>¬> module_path.system_pos_xyz: {module_path.system_pos_xyz}")
+            
+            '''
+            Create a dict with 'module_path.system' 
+            & 'module_path.system_pos_xyz' 
+            & 'module_path.system_rot_xyz'
+            To pass onto the create_guides because the original module is the 
+            one being read for then neck only. 
+            '''
+
+            guides = create_guides.Guides_class(module, offset, module_path.side, to_connect_to=[], 
+                use_existing_attr=[], orientation=self.orientation_func(), numb_id=self.numb_id, neck_dict=neck_sys_dict)
+        else:    
+            guides = create_guides.Guides_class(module, offset, module_path.side, to_connect_to=[], 
+                use_existing_attr=[], orientation=self.orientation_func(), numb_id=self.numb_id)
         guide = guides.collect_guides()
         
         print(f"GUIIDE RETURNED DICT: {guide}")

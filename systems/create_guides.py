@@ -10,17 +10,23 @@ importlib.reload(system_custom_attr)
 scale = 1
 
 class Guides_class():
-    def __init__(self, accessed_module, offset, side, to_connect_to, use_existing_attr, orientation, numb_id):
+    def __init__(self, accessed_module, offset, side, 
+                 to_connect_to, use_existing_attr, orientation, numb_id,
+                 neck_dict=None):
         self.module = importlib.import_module(f"systems.modules.{accessed_module}")
         # Reload the module for any updates!
         importlib.reload(self.module)
        
         # [if] statement for "self.create_guide" variable {if == "hand"}
         # else:
-
         self.unique_id = numb_id
-
-        print("If you are seeing this, its is coming from 'create_guides.Guides_class, innit def!'")
+        self.neck_dict = neck_dict
+        if "neck_0" in self.module.system:
+            print(f"¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬CREATING GUIDES FOR NECKKK")
+            print(f"¬¬¬ {self.neck_dict['nck_sys']}")
+        #if "neck_0" in accessed_module: 
+         #   self.create_guide = self.The_guides(accessed_module, offset, side, use_existing_attr, orientation)
+        #else:
         self.create_guide = self.The_guides(accessed_module, offset, side, use_existing_attr, orientation)
     
     def collect_guides(self):
@@ -44,8 +50,7 @@ class Guides_class():
                     guide_connector_list.append(guide_connector[1])
 
                     # If the module is finger, match the master guide to the selected guide
-                    if 'finger' in master_guide: # == "root_basic":
-                        print(f"FINGER guide list: : {selection} - NEED the guide i selected!")
+                    if 'finger' in master_guide or 'neck' in master_guide:
                         cmds.matchTransform(master_guide, selection, pos=1, rot=1, scl=0)
                     
                     # Calling ".prep_attach_jnts" is designed to prepare and organize 
@@ -84,19 +89,26 @@ class Guides_class():
             side = self.module.side
 
         # Orientation:
-        if self.module.has_orientation == "None": # root_basic
+        if self.module.has_orientation == "None": # root_basic          
             pos_dict = self.module.system_pos
             rot_dict = self.module.system_rot
-            print("ORIENTATION IS NONE ###")
         else:
             if orientation == "XYZ":
                 print("ORIENTATION IS 'xyz' ###")
-                pos_dict = self.module.system_pos_xyz
-                rot_dict = self.module.system_rot_xyz
+                if "neck_0" in self.module.system:
+                    pos_dict = self.neck_dict["nck_pos_xyz"]
+                    rot_dict = self.neck_dict["nck_rot_xyz"]
+                else:
+                    pos_dict = self.module.system_pos_xyz
+                    rot_dict = self.module.system_rot_xyz
             elif orientation == "YZX":
                 print("ORIENTATION IS 'yzx' ###")
-                pos_dict = self.module.system_pos_yzx
-                rot_dict = self.module.system_rot_yzx
+                if "neck_0" in self.module:
+                    pos_dict = self.neck_dict["nck_pos_yzx"]
+                    rot_dict = self.neck_dict["nck_rot_yzx"]
+                else:
+                    pos_dict = self.module.system_pos_yzx
+                    rot_dict = self.module.system_rot_yzx
 
         tmp_list = []
         module_list = cmds.ls("data*")
@@ -111,19 +123,6 @@ class Guides_class():
         # 4) Create master guide for module by looking in each module's variable's
         if "root" in self.module.system:
             master_guide = "root"
-        # set the master guides for the fingers on "biped_finger" module 
-        elif "biped_phal_proximal" in self.module.system:
-            master_guide = "biped_phal_proximal"
-        elif "thumb_phal_proximal" in self.module.system:
-            master_guide = "thumb_phal_proximal"
-        elif "index_phal_proximal" in self.module.system:
-            master_guide = "index_phal_proximal"
-        elif "mid_phal_proximal" in self.module.system:
-            master_guide = "mid_phal_proximal"
-        elif "ring_phal_proximal" in self.module.system:
-            master_guide = "ring_phal_proximal"
-        elif "pinky_phal_proximal" in self.module.system:
-            master_guide = "pinky_phal_proximal"
         else:
             master_guide = f"master_{self.unique_id}_{accessed_module}{side}"
             control_shape.controlTypes(f"master_{self.unique_id}_{accessed_module}{side}", "octagon")
@@ -133,6 +132,8 @@ class Guides_class():
             cmds.setAttr(f"{master_guide}.overrideEnabled", 1)
             cmds.setAttr(f"{master_guide}.overrideColor", 9)
             cmds.scale(8, 8, 8, master_guide)
+            #cmds.makeIdentity(master_guide, t=0, r=0, s=1)
+            
             
             # Position the new master guide with the given offset
             pos = pos_dict[self.module.system[0]]
@@ -140,9 +141,16 @@ class Guides_class():
             cmds.xform(master_guide, ws=1, t=[pos[0]+offset[0], pos[1]+offset[1], 
                                             pos[2]+offset[2]])
             cmds.xform(master_guide, ws=1, ro=[rot[0], rot[1], rot[2]])
+            
+            
         
         # 5) Guide creation loop
-        for x in self.module.system:
+        if "neck_0" in self.module.system:
+            system_module = self.neck_dict["nck_sys"]
+        else:
+            system_module = self.module.system
+
+        for x in system_module:
           #  try: 
             if "root" in x:
                 imported = cmds.file(ROOT_FILE, i=1, rnn=1)
@@ -163,8 +171,8 @@ class Guides_class():
             
             if "root" in x and root_exists is True:
                 master_guide = guide
-            elif "biped_phal_proximal" in self.module.system:
-                master_guide = guide
+            #elif "biped_phal_proximal" in system_module:
+            #    master_guide = guide
             else:
                 print("print else <<<<<")
                 guide_list.append(guide)
@@ -204,7 +212,7 @@ class Guides_class():
         
         #----------------------------------------------------------------------
         # Create  data guide
-        if "root" in self.module.system: # or "proximal" in self.module.system:
+        if "root" in system_module: # or "proximal" in self.module.system:
             data_guide_name = f"data_{master_guide}"
         else:
             print("ERRRRRRRRRRRRRRRRRRRRRRRROOOOOOOR: ", master_guide)
@@ -261,7 +269,8 @@ class Guides_class():
                     control_orientation_en = ":".join(control_orientation_list)
                     cmds.addAttr(guide, ln=f"{guide[5:]}_{ikfk.lower()}_OriType", 
                                  at="enum", en=control_orientation_en, k=1)
-        
+        # freeze the scale of the master_guide
+        # cmds.makeIdentity(master_guide, t=0, r=0, s=1)
         # 9) Return UI data
         # Return a dictionary containing master_guide, guide_connector_list & 
         # ui_guide_list for further use in the ui

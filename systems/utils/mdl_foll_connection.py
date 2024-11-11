@@ -22,7 +22,7 @@ class connecting_sys_to_connect():
         self.create_nodes()
         self.connect_nodes()
 
-        
+
     def group(self):
         self.grp = cmds.group(n=f"grp_Foll{self.mdl}{self.jnt_follow.replace('jnt_rig', '')}{self.side}", em=1)
         cmds.parent(self.grp, 'ctrl_root')
