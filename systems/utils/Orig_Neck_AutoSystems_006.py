@@ -281,6 +281,7 @@ class jmvs_Neck_systems():
         cmds.setAttr( self.ctrlLs[-1] + '.Neck_Bend_Mult', 0.5 )
         cmds.setAttr( self.ctrlLs[-1] + '.Neck_Twist_Mult', 0.5 )
 
+
     def node_connections(self):
         # Connecting coming from ctrl to Neck_02, jnt_att & Negation
         # self.attJntsLs = ['jnt_att_neck_1', 'jnt_att_neck_2', 'jnt_att_head']
