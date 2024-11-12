@@ -10,7 +10,6 @@ importlib.reload(add_pref)
 importlib.reload(OPM)
 
 
-
 def ctrl_root_support(mult_node, rt_obj):
     # Connect rt_obj(world[0]) to MultMatrix,
     # Connect root_ctrl(inverse[0]) to MultMatrix
