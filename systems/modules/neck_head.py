@@ -1,19 +1,19 @@
-system = ["neck_0", "neck_1", "neck_2"]
+system = ["neck_1", "neck_2", "neck_3"]
 # XYZ
-system_pos_xyz = {'neck_0': [0.0, 240, 0.0], 
-                  'neck_1': [0.0, 250, 0.0], 
-                  'neck_2': [0.0, 260, 0.0]}
-system_rot_xyz = {'neck_0': [0.0, 0.0, 90.0], 
-                  'neck_1': [0.0, 0.0, 90.0], 
-                  'neck_2': [0.0, 0.0, 90.0]}
+system_pos_xyz = {'neck_1': [0.0, 240, 0.0], 
+                  'neck_2': [0.0, 250, 0.0], 
+                  'neck_3': [0.0, 260, 0.0]}
+system_rot_xyz = {'neck_1': [0.0, 0.0, 90.0], 
+                  'neck_2': [0.0, 0.0, 90.0], 
+                  'neck_3': [0.0, 0.0, 90.0]}
 
 # YZX
-system_pos_yzx = {'neck_0': [0.0, 240, 0.0], 
-                  'neck_1': [0.0, 250, 0.0], 
-                  'neck_2': [0.0, 260, 0.0]}
-system_rot_yzx = {'neck_0': [0.0, 0.0, 0.0], 
-                  'neck_1': [0.0, 0.0, 0.0], 
-                  'neck_2': [0.0, 0.0, 0.0]}
+system_pos_yzx = {'neck_1': [0.0, 240, 0.0], 
+                  'neck_2': [0.0, 250, 0.0], 
+                  'neck_3': [0.0, 260, 0.0]}
+system_rot_yzx = {'neck_1': [0.0, 0.0, 0.0], 
+                  'neck_2': [0.0, 0.0, 0.0], 
+                  'neck_3': [0.0, 0.0, 0.0]}
 
 # Have a module that has name of guides: 'system' each with their own
 

@@ -437,7 +437,7 @@ class QtSampler(QWidget):
                     print(f"IN NECK module: {self.neck_jnt_num}")
                     fk_neck_sys = neck_twistBend_sys.neck_sys(
                         guide_list=key["guide_list"], jnt_rig_list=key["joints"], 
-                        neck_amount=self.neck_jnt_num, orientation=self.orientation_func())
+                        neck_amount=self.neck_jnt_num, scale=key['guide_scale'], orientation=self.orientation_func())
                     # fk_ctrls = fk_neck_sys.get_ctrls()
             else:
                 if rig_type == "FK":

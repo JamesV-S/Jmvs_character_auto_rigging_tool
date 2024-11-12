@@ -20,7 +20,7 @@ def create_list_from_integer(value):
     return my_list
 
 class neck_sys():
-    def __init__(self, guide_list, jnt_rig_list, neck_amount, orientation):
+    def __init__(self, guide_list, jnt_rig_list, neck_amount, scale, orientation):
         
         # originally, locators already exist and the joints & system's are 
         # built off of that. 
@@ -31,6 +31,7 @@ class neck_sys():
         self.guide_list = guide_list[:-1]
         self.guide_list.reverse()
 
+        self.scale = scale
         self.jnt_rig_list = jnt_rig_list
         self.neck_head_amnt = neck_amount
         self.orientation = orientation
@@ -46,12 +47,13 @@ class neck_sys():
         '''
 
         self.jntAtt_match = self.guide_list[:-1]
+        self.first_guide = self.guide_list[0]
 
-        # variables to store # 
         self.neck_amnt = self.neck_head_amnt-1
         self.ctrl_amnt = self.neck_head_amnt
-        self.neck_guide_list = self.guide_list[-1]
+        
         self.twist_neg_amnt = self.neck_head_amnt-1
+
         self.head_guide = self.guide_list[-1]
         
         print(f"NECK_SYS <¬¬¬> neck_amnt: {self.neck_amnt}, ctrl_amnt: {self.ctrl_amnt}, twist_neg_amnt: {self.twist_neg_amnt}, head_guide: {self.head_guide}")
@@ -86,14 +88,34 @@ class neck_sys():
 
         self.create_att_nod_Twistneg()
 
+    # Build the ctrl_att & jnt_att + twistneg_joint in the correct hierarchy!
     def create_att_nod_Twistneg(self):
         numLS = create_list_from_integer(self.neck_amnt)
-        for i in range(self.neck_amnt):            
-            name_att_jnt = f"{self.pref_list[0]}_{self.neck_guide_list[6:-2]}_{numLS[i]}"
-            print(f"NName of att joint: {name_att_jnt}")
-            cmds.joint(n=name_att_jnt)
-            cmds.matchTransform(name_att_jnt, self.jntAtt_match[i], pos=1, rot=1, scl=0)
-            cmds.makeIdentity(name_att_jnt, a=1, t=0, r=1, s=0)
+
+        for i in range(self.neck_amnt): # 2 wth 3 from ui          
+            jnt_att_neck = f"{self.pref_list[0]}_{self.first_guide[6:-2]}_{numLS[i]}"
+            print(f"NName of att joint: {jnt_att_neck}")
+            cmds.joint(n=jnt_att_neck)
+            print(f"jnt_att_match_to: {self.jntAtt_match[i]}")
+            cmds.matchTransform(jnt_att_neck, self.jntAtt_match[i], pos=1, rot=1, scl=0)
+            cmds.makeIdentity(jnt_att_neck, a=1, t=0, r=1, s=0)
+
+            #-------------
+            self.ctrl_att_neck = f"{self.pref_list[1]}_{self.first_guide[6:-2]}_{numLS[i]}"
+            print(f"NECK_ATT: guide for CTRL > {self.ctrl_att_neck}")
+            control_module = control_shape.Controls(self.scale, guide=f"{self.jntAtt_match[i][5:]}", 
+                    ctrl_name=self.ctrl_att_neck, rig_type="fk" 
+                    )
+            cmds.matchTransform(self.ctrl_att_neck, self.jntAtt_match[i], pos=1, rot=1, scl=0)
+            cmds.parent(self.ctrl_att_neck, jnt_att_neck)
+
+            #-------------
+            jnt_TwistNeg_name = f"{self.pref_list[2]}_{self.first_guide[6:-2]}_{numLS[i]}"
+            cmds.joint(n=jnt_TwistNeg_name)
+            cmds.matchTransform(jnt_TwistNeg_name, self.jntAtt_match[i])
+            cmds.makeIdentity(jnt_TwistNeg_name, a=1, t=0, r=1, s=0)
+
+
 
     def get_ctrls(self):
         return self.fk_ctrls
