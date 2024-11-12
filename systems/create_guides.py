@@ -10,7 +10,7 @@ importlib.reload(system_custom_attr)
 scale = 1
 
 class Guides_class():
-    def __init__(self, accessed_module, offset, side, 
+    def __init__(self, accessed_module, side, 
                  to_connect_to, use_existing_attr, orientation, numb_id,
                  neck_dict=None):
         self.module = importlib.import_module(f"systems.modules.{accessed_module}")
@@ -25,15 +25,15 @@ class Guides_class():
             print(f"¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬CREATING GUIDES FOR NECKKK")
             print(f"¬¬¬ {self.neck_dict['nck_sys']}")
         #if "neck_0" in accessed_module: 
-         #   self.create_guide = self.The_guides(accessed_module, offset, side, use_existing_attr, orientation)
+         #   self.create_guide = self.The_guides(accessed_module, side, use_existing_attr, orientation)
         #else:
-        self.create_guide = self.The_guides(accessed_module, offset, side, use_existing_attr, orientation)
+        self.create_guide = self.The_guides(accessed_module, side, use_existing_attr, orientation)
     
     def collect_guides(self):
         print("This print is from 'collect_guides() in class'")
         return self.create_guide
 
-    def The_guides(self, accessed_module, offset, side, use_existing_attr, orientation):
+    def The_guides(self, accessed_module, side, use_existing_attr, orientation):
         print("This print is from 'The_guides() in class'")
         guide_connector_list = []
         self.system_to_connect = []
@@ -44,7 +44,7 @@ class Guides_class():
                 if "master" in selection[0]:
                     cmds.warning("unable to attatch a new module to a master control, please SELECT a guide!")
                 elif "master" not in selection[0]:
-                    guide = self.creation(accessed_module, offset, side, guide_connector_list, use_existing_attr, orientation)
+                    guide = self.creation(accessed_module, side, guide_connector_list, use_existing_attr, orientation)
                     master_guide = guide["master_guide"]
                     guide_connector = connect_modules.attach(master_guide, selection)
                     guide_connector_list.append(guide_connector[1])
@@ -61,11 +61,11 @@ class Guides_class():
            
         else:
             print(">> Recognised this module is root_basic!")
-            guide = self.creation(accessed_module, offset, side, guide_connector_list, use_existing_attr, orientation)
+            guide = self.creation(accessed_module, side, guide_connector_list, use_existing_attr, orientation)
             guide.update({"system_to_connect": []})
             return guide
         
-    def creation(self, accessed_module, offset, side, guide_connector_list, use_existing_attr, orientation):
+    def creation(self, accessed_module, side, guide_connector_list, use_existing_attr, orientation):
         
         print("IN CREATION FUNC, THE ORIENTATION ARG IS: ", orientation)
         
@@ -103,7 +103,7 @@ class Guides_class():
                     rot_dict = self.module.system_rot_xyz
             elif orientation == "YZX":
                 print("ORIENTATION IS 'yzx' ###")
-                if "neck_0" in self.module:
+                if "neck_0" in self.module.system:
                     pos_dict = self.neck_dict["nck_pos_yzx"]
                     rot_dict = self.neck_dict["nck_rot_yzx"]
                 else:
@@ -134,16 +134,12 @@ class Guides_class():
             cmds.scale(8, 8, 8, master_guide)
             #cmds.makeIdentity(master_guide, t=0, r=0, s=1)
             
-            
-            # Position the new master guide with the given offset
+            # Position the new master guide
             pos = pos_dict[self.module.system[0]]
             rot = rot_dict[self.module.system[0]]
-            cmds.xform(master_guide, ws=1, t=[pos[0]+offset[0], pos[1]+offset[1], 
-                                            pos[2]+offset[2]])
+            cmds.xform(master_guide, ws=1, t=[pos[0], pos[1], pos[2]])
             cmds.xform(master_guide, ws=1, ro=[rot[0], rot[1], rot[2]])
             
-            
-        
         # 5) Guide creation loop
         if "neck_0" in self.module.system:
             system_module = self.neck_dict["nck_sys"]
@@ -177,11 +173,10 @@ class Guides_class():
                 print("print else <<<<<")
                 guide_list.append(guide)
             
-           
             # Use the selected dict's to set location and rotation
             pos = pos_dict[x]
             rot = rot_dict[x]
-            cmds.xform(guide, ws=1, t=[pos[0]+offset[0], pos[1]+offset[1], pos[2]+offset[2]])
+            cmds.xform(guide, ws=1, t=[pos[0], pos[1], pos[2]])
             cmds.xform(guide, ws=1, ro=[rot[0], rot[1], rot[2]])
             
             # Add a custom attr to each guide to specify its original type

@@ -35,7 +35,8 @@ from systems.utils import (
     arrow_ctrl,
     ikfk_switch, 
     space_swap,
-    OPM
+    OPM,
+    neck_twistBend_sys
 )
 
 # Reload Modules
@@ -53,6 +54,7 @@ importlib.reload(squash_stretch)
 importlib.reload(space_swap)
 importlib.reload(OPM)
 importlib.reload(mdl_foll_connection)
+importlib.reload(neck_twistBend_sys)
 
 mayaMainWindowPtr = omui.MQtUtil.mainWindow()
 mayaMainWindow = wrapInstance(int(mayaMainWindowPtr), QWidget)
@@ -127,7 +129,7 @@ class QtSampler(QWidget):
     # functions, connected to above commands   
     def initUI(self):
         loader = QUiLoader()
-        UI_VERSION = "002"
+        UI_VERSION = "003"
         # Constructing the UI File Path
         UI_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
                                "interface", f"Jmvs_character_auto_rigger_{UI_VERSION}.ui")
@@ -170,18 +172,22 @@ class QtSampler(QWidget):
         # Set the menu to the blueprints_toolbtn
         self.blueprints_toolbtn.setMenu(menu)
     
+
     def blueprints_menu_func(self):
         # Define the functionality for blueprints_toolbtn here
         print("blueprints menu button clicked")
     
+
     def load_biped_basic_blueprint(self):
         # Define the functionality for Biped basic button here 
         print("Biped basic button clicked")
     
+
     def load_quad_basic_blueprint(self):
         # Define the functionality for Quad basic button here
         print("Quad basic button clicked")
-       
+
+
     def orientation_func(self):
         clicked_orientation = self.ui.orientation_ddbox.currentText()
         if clicked_orientation == 'xyz':
@@ -190,6 +196,7 @@ class QtSampler(QWidget):
             self.orientation = "YZX"
         print("ORIENTATION CLICKED IS: ",  self.orientation)
         return self.orientation
+
 
     def update_dropdown(self):
         #  function updates the dropdown box named "module_picker_ddbox" in the user interface.
@@ -268,23 +275,15 @@ class QtSampler(QWidget):
             self.unique_id_counter = max(existing_ids) + 1
         else:
             self.unique_id_counter = 0 
-
+        
+        # Number bueprint id
         self.numb_id = self.unique_id_counter
         print(f"Assigned unique ID: {self.numb_id}")
         
-        #----------------------------------------------------------------------
-        # self.numb_id = 0
-        offset = [self.ui.offset_Xaxes_spinbx.value(), 
-                  self.ui.offset_Yaxes_spinbx.value(), 
-                  self.ui.offset_Zaxes_spinbx.value()
-                  ]
-        
-
+        self.neck_jnt_num = self.ui.neck_num_SpinBox.value()
+        print(f"NECK module: {self.neck_jnt_num}")
         if 'neck' in module:
-            self.neck_jnt_num = self.ui.neck_num_SpinBox.value()
-            
             offsetY = 10
-            
             if self.neck_jnt_num > 3:
                 
                 module_path.system = [f"neck_{i}" for i in range(self.neck_jnt_num)]
@@ -299,8 +298,8 @@ class QtSampler(QWidget):
                     
                     # Y orientation
                     module_path.system_pos_yzx[f"neck_{i}"] = [last_pos[0], last_pos[1]+offsetY, last_pos[2]]
-                    module_path.system_rot_yzx[f"neck_{i}"] = module_path.system_rot_xyz[f"neck_{i-1}"]
-                # print(f"¬>¬>¬>¬> module_path.system_pos_xyz: (In IF) {module_path.system_pos_xyz}")
+                    module_path.system_rot_yzx[f"neck_{i}"] = module_path.system_rot_yzx[f"neck_{i-1}"]
+                    
             neck_sys_dict = {
                 "nck_sys": module_path.system, 
                 "nck_pos_xyz": module_path.system_pos_xyz, 
@@ -308,22 +307,10 @@ class QtSampler(QWidget):
                 "nck_pos_yzx": module_path.system_pos_yzx, 
                 "nck_rot_yzx": module_path.system_rot_yzx
                 }     
-            #------------------------------------------------------------------
-            print(f"¬¬¬¬ module_path.system (after update): {module_path.system}")
-            print(f"¬>¬>¬>¬> module_path.system_pos_xyz: {module_path.system_pos_xyz}")
-            
-            '''
-            Create a dict with 'module_path.system' 
-            & 'module_path.system_pos_xyz' 
-            & 'module_path.system_rot_xyz'
-            To pass onto the create_guides because the original module is the 
-            one being read for then neck only. 
-            '''
-
-            guides = create_guides.Guides_class(module, offset, module_path.side, to_connect_to=[], 
+            guides = create_guides.Guides_class(module, module_path.side, to_connect_to=[], 
                 use_existing_attr=[], orientation=self.orientation_func(), numb_id=self.numb_id, neck_dict=neck_sys_dict)
         else:    
-            guides = create_guides.Guides_class(module, offset, module_path.side, to_connect_to=[], 
+            guides = create_guides.Guides_class(module, module_path.side, to_connect_to=[], 
                 use_existing_attr=[], orientation=self.orientation_func(), numb_id=self.numb_id)
         guide = guides.collect_guides()
         
@@ -367,15 +354,7 @@ class QtSampler(QWidget):
             # Add the attributes to the data locator!
             guide_data.setup(temp_dictionary, data_guide)
 
-            # if statement id add_hand.isChecked() on the ui later on. 
-        
-        # Reset the offset spin boxes to 0 to prepare for the necxt module adition
-        self.ui.offset_Xaxes_spinbx.setValue(0)
-        self.ui.offset_Yaxes_spinbx.setValue(0)
-        self.ui.offset_Zaxes_spinbx.setValue(0)
-         # clear the selection
-        cmds.select(cl=1)
-    
+
     def remove_module(self):
         module = cmds.ls(sl=1)
         for key in list(self.systems_to_be_made.values()):
@@ -384,6 +363,7 @@ class QtSampler(QWidget):
                 self.systems_to_be_made.pop(module[0])
                 self.created_guides.remove(module[0])
                 cmds.delete(module[0], key['guide_connectors'])
+
 
     def temp_hand_func(self):
         print("button hand!!!!!!!!!")
@@ -411,6 +391,8 @@ class QtSampler(QWidget):
     
     def create_rig(self):
         # gather master_guide, rig_type = ikfk, (don't need orientation tbh - but u never know)
+        self.neck_jnt_num = self.ui.neck_num_SpinBox.value()
+        print(f"NECK amount value: {self.neck_jnt_num}")
         for key in self.systems_to_be_made.values():
             pass
             master_guide = key['master_guide']
@@ -449,7 +431,14 @@ class QtSampler(QWidget):
                 # 'joints': ['jnt_rig_0_root', 'jnt_rig_0_COG']
                 cmds.parentConstraint(self.ctrl_root, key['joints'][0])
                 cmds.parentConstraint(self.ctrl_cog, key['joints'][1])
-                            
+
+            elif key["module"] == "neck_head":
+                if rig_type == "FK":
+                    print(f"IN NECK module: {self.neck_jnt_num}")
+                    fk_neck_sys = neck_twistBend_sys.neck_sys(
+                        guide_list=key["guide_list"], jnt_rig_list=key["joints"], 
+                        neck_amount=self.neck_jnt_num, orientation=self.orientation_func())
+                    # fk_ctrls = fk_neck_sys.get_ctrls()
             else:
                 if rig_type == "FK":
                     # create fk joints, system & control, then constrain to rig_joints!
@@ -543,8 +532,7 @@ class QtSampler(QWidget):
             else:
                 print(f"YEEEEAH >> follow connection for: {key['module']}")
                 print(f"Fol_connections: mdl = {key['module']}  > sys_to_connect = {key['systems_to_connect']}" )
-                # Fol_connections: mdl = biped_arm  > sys_to_connect = ['guide_0_clavicle_L', 'guide_0_spine_4']
-                mdl_foll_connection.connecting_sys_to_connect(key["module"], key["systems_to_connect"], self.ctrl_root, key["side"])
+                # mdl_foll_connection.connecting_sys_to_connect(key["module"], key["systems_to_connect"], self.ctrl_root, key["side"])
 
         # Connect systems & add space_swapping!
         for key in self.systems_to_be_made.values():
