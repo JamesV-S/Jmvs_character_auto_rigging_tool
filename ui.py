@@ -245,8 +245,6 @@ class QtSampler(QWidget):
                 print(f"data NECK guides: {self.data_of_neck_joints}")
             
 
-
-
     def add_module(self):
         # Get the selected module from the UI
         module = self.ui.module_picker_ddbox.currentText()
