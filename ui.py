@@ -117,6 +117,9 @@ class QtSampler(QWidget):
         self.ui.orientation_ddbox.currentIndexChanged.connect(self.orientation_func)
         self.ui.build_skeleton_btn.clicked.connect(self.create_joints)
         self.ui.Create_systems_btn.clicked.connect(self.create_rig)
+
+        # Neck base 
+        self.data_of_neck_joints = 3
         
         # Tab 2 - SKINNING
         tab2_image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -237,7 +240,6 @@ class QtSampler(QWidget):
                 dict.update({"space_swap": sublist})
                 print(f"updated space_swap key: {dict['space_swap']}")
             # making sure the neck joint value is correct when ui is reloaded.
-            self.data_of_neck_joints = 3
             if "neck_head" in dict["module"]:
                 self.data_of_neck_joints = dict['guide_list'][0][-1:]
                 print(f"data NECK guides: {self.data_of_neck_joints}")

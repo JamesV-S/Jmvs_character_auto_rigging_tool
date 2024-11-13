@@ -88,6 +88,7 @@ class neck_sys():
 
         self.cr_att_jnt_and_ctrl()
         self.end_guide_att()
+        
         print(f"^^¬^^ Neck controls: {self.ctrl_att_neck}")
         print(f"^^¬^^ END Neck controls: {self.ctrl_att_head}")
 
@@ -120,6 +121,9 @@ class neck_sys():
             cmds.matchTransform(jnt_TwistNeg_name, self.jntAtt_match[i])
             cmds.makeIdentity(jnt_TwistNeg_name, a=1, t=0, r=1, s=0)
             
+            cmds.parentConstraint( jnt_att_neck, self.ctrl_att_neck, w=1, mo=0 )
+           
+
     def end_guide_att(self):
         bend_neg_name =  "jnt_BendNeg"
 
@@ -145,7 +149,11 @@ class neck_sys():
                     )
         cmds.matchTransform(self.ctrl_att_head, self.head_guide, pos=1, rot=1, scl=0)
         cmds.parent(self.ctrl_att_head, jnt_bendNeg_end)
-
+    
+    # rog joints alr exist
+    def connecting_(self):
+        pass
+        
 
     def get_ctrls(self):
         return self.fk_ctrls

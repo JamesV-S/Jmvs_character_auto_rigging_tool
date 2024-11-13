@@ -175,7 +175,6 @@ class Guides_class():
                 guide_list.append(guide)
             
             # Use the selected dict's to set location and rotation
-            print(f"$$$$$$$$$$$$$ Cr_Guides > {self.neck_dict['nck_sys']}, {pos_dict}")
             pos = pos_dict[x]
             rot = rot_dict[x]
             cmds.xform(guide, ws=1, t=[pos[0], pos[1], pos[2]])
