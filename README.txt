@@ -32,10 +32,12 @@ TO DO: > Understand why mirrored joints do not wotk with connect_modules.attatch
 
 -----------------------------
 To do:
-=> Add make joints follow rig properly. > found in old autolimb! > check autospine differencen too!
 => Head/neck module (change number of neck joints
 [either as an option or be able to add guides into the added module]), & head bend system!
 > the quadleg needs to work with spaceSwap
+
+=> Have the back & forth work by having a data locator that reads the state of the ui, 
+detect the state of the module and depending on the button chosen
 
 > after the space-swap and other issues r fixed, move onto the neck system, 
 So i can test creating a rig for testing rotomation > Email Malcom  
