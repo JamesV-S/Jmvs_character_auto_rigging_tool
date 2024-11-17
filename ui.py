@@ -117,6 +117,9 @@ class QtSampler(QWidget):
         self.ui.orientation_ddbox.currentIndexChanged.connect(self.orientation_func)
         self.ui.build_skeleton_btn.clicked.connect(self.create_joints)
         self.ui.Create_systems_btn.clicked.connect(self.create_rig)
+
+        # Neck base 
+        self.data_of_neck_joints = 3
         
         # Tab 2 - SKINNING
         tab2_image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -236,7 +239,11 @@ class QtSampler(QWidget):
                 print(f"OLD space_swap key: {dict['space_swap']}")
                 dict.update({"space_swap": sublist})
                 print(f"updated space_swap key: {dict['space_swap']}")
-
+            # making sure the neck joint value is correct when ui is reloaded.
+            if "neck_head" in dict["module"]:
+                self.data_of_neck_joints = dict['guide_list'][0][-1:]
+                print(f"data NECK guides: {self.data_of_neck_joints}")
+            
 
     def add_module(self):
         # Get the selected module from the UI
@@ -280,19 +287,31 @@ class QtSampler(QWidget):
         self.numb_id = self.unique_id_counter
         print(f"Assigned unique ID: {self.numb_id}")
         
-        self.neck_jnt_num = self.ui.neck_num_SpinBox.value()
+        if self.data_of_neck_joints > 3:
+            self.neck_jnt_num = self.data_of_neck_joints
+        else:
+            self.neck_jnt_num = self.ui.neck_num_SpinBox.value()
+
         print(f"NECK module: {self.neck_jnt_num}")
+       
         if 'neck' in module:
             offsetY = 10
             if self.neck_jnt_num > 3:
-                
-                module_path.system = [f"neck_{i}" for i in range(self.neck_jnt_num)]
-                
-                for i in range(3, self.neck_jnt_num):
+       
+                # ['range(1, self.neck_jnt_num+1)'] is important , start at one and extra [+1] 
+                # is needed to it adds the rigth amount trust me
+                # 4 neck joints would look like: range(1, 4+1)
+                module_path.system = [f"neck_{i}" for i in range(1, self.neck_jnt_num+1)]
+               
+                # # Start from 4 because neck_3 is already defined
+                for i in range(4, self.neck_jnt_num + 1):
                     last_pos = module_path.system_pos_xyz[f"neck_{i-1}"]
+                    
+                    print(f"^^^AA^^^ {last_pos}")
                     # X orientation
                     # add new postion with the offset on Y axis!. 
-                    module_path.system_pos_xyz[f"neck_{i}"] = [last_pos[0], last_pos[1]+offsetY, last_pos[2]]
+                    module_path.system_pos_xyz[f"neck_{i}"] = [last_pos[0], last_pos[1] + offsetY, last_pos[2]]
+                    
                     # Rotation is the same :
                     module_path.system_rot_xyz[f"neck_{i}"] = module_path.system_rot_xyz[f"neck_{i-1}"]
                     
@@ -306,7 +325,8 @@ class QtSampler(QWidget):
                 "nck_rot_xyz": module_path.system_rot_xyz, 
                 "nck_pos_yzx": module_path.system_pos_yzx, 
                 "nck_rot_yzx": module_path.system_rot_yzx
-                }     
+                }
+            print(f"^^^^^^ nck_sys: {neck_sys_dict['nck_sys']}, nck_pos_xyz: {neck_sys_dict['nck_pos_xyz']}, nck_rot_xyz: {neck_sys_dict['nck_rot_xyz']}") 
             guides = create_guides.Guides_class(module, module_path.side, to_connect_to=[], 
                 use_existing_attr=[], orientation=self.orientation_func(), numb_id=self.numb_id, neck_dict=neck_sys_dict)
         else:    

@@ -21,10 +21,10 @@ class Guides_class():
         # else:
         self.unique_id = numb_id
         self.neck_dict = neck_dict
-        if "neck_0" in self.module.system:
+        if "neck_1" in self.module.system:
             print(f"¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬CREATING GUIDES FOR NECKKK")
             print(f"¬¬¬ {self.neck_dict['nck_sys']}")
-        #if "neck_0" in accessed_module: 
+        #if "neck_1" in accessed_module: 
          #   self.create_guide = self.The_guides(accessed_module, side, use_existing_attr, orientation)
         #else:
         self.create_guide = self.The_guides(accessed_module, side, use_existing_attr, orientation)
@@ -95,7 +95,7 @@ class Guides_class():
         else:
             if orientation == "XYZ":
                 print("ORIENTATION IS 'xyz' ###")
-                if "neck_0" in self.module.system:
+                if "neck_1" in self.module.system:
                     pos_dict = self.neck_dict["nck_pos_xyz"]
                     rot_dict = self.neck_dict["nck_rot_xyz"]
                 else:
@@ -103,7 +103,7 @@ class Guides_class():
                     rot_dict = self.module.system_rot_xyz
             elif orientation == "YZX":
                 print("ORIENTATION IS 'yzx' ###")
-                if "neck_0" in self.module.system:
+                if "neck_1" in self.module.system:
                     pos_dict = self.neck_dict["nck_pos_yzx"]
                     rot_dict = self.neck_dict["nck_rot_yzx"]
                 else:
@@ -141,7 +141,8 @@ class Guides_class():
             cmds.xform(master_guide, ws=1, ro=[rot[0], rot[1], rot[2]])
             
         # 5) Guide creation loop
-        if "neck_0" in self.module.system:
+        if "neck_1" in self.module.system:
+            print(f"$$$$$$$$$$$$$ Cr_Guides > {self.neck_dict['nck_sys']}")
             system_module = self.neck_dict["nck_sys"]
         else:
             system_module = self.module.system
