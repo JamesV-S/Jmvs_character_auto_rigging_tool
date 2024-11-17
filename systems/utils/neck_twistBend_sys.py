@@ -1,9 +1,11 @@
 
 import maya.cmds as cmds
-from systems.utils import control_shape, OPM
+from systems.utils import control_shape, OPM, utils
 import importlib
 importlib.reload(control_shape)
 importlib.reload(OPM)
+importlib.reload(utils)
+
 # importlib.reload(customAttr)
 
 def override_color_(clr_num):
@@ -88,6 +90,8 @@ class neck_sys():
 
         self.cr_att_jnt_and_ctrl()
         self.end_guide_att()
+        self.add_attr()
+        self.add_nodes()
         
         print(f"^^¬^^ Neck controls: {self.ctrl_att_neck}")
         print(f"^^¬^^ END Neck controls: {self.ctrl_att_head}")
@@ -149,11 +153,68 @@ class neck_sys():
                     )
         cmds.matchTransform(self.ctrl_att_head, self.head_guide, pos=1, rot=1, scl=0)
         cmds.parent(self.ctrl_att_head, jnt_bendNeg_end)
-    
-    # rog joints alr exist
-    def connecting_(self):
+
+    def add_attr(self):
+        # create the custom attrib's on head control
+        utils.add_locked_attrib(ctrl=self.ctrl_att_head, en=["NECK_SYS"])
+        utils.add_float_attrib(ctrl=self.ctrl_att_head, flt=["Neck_Twist_Mult"], 
+                               val=[0,1], limited=True)
+        utils.add_float_attrib(ctrl=self.ctrl_att_head, flt=["Neck_Bend_Mult"], 
+                               val=[0,1], limited=True)
+        cmds.setAttr( f"{self.ctrl_att_head}.Neck_Twist_Mult", 0.5 )
+        cmds.setAttr( f"{self.ctrl_att_head}.Neck_Bend_Mult", 0.5 )
+
+
+    def add_nodes(self):
         pass
+        N_root_AttMd = f"MD_att_RT_{self.first_guide[6:-2]}"
+        print(f"neck_root > {N_root_AttMd}") # MD_neck_0_neck_root
+        utils.cr_node_if_not_exists(util_type=1, node_type="multiplyDivide", 
+                                    node_name=N_root_AttMd, set_attrs=None)
+        utils.connect_attr(f"{self.ctrl_att_head}.rotate{self.twist_axis}", 
+                           f"{N_root_AttMd}.input2{self.twist_axis}")
         
+        N_root_NegMd = f"MD_neg_RT_{self.first_guide[6:-2]}"
+        utils.cr_node_if_not_exists(util_type=1, node_type="multiplyDivide", 
+                                node_name=N_root_NegMd, set_attrs=None)
+        
+        minTws = f"UC_minus_twist_{self.first_guide[6:-2]}"
+        utils.cr_node_if_not_exists(util_type=1, node_type="unitConversion", 
+                                node_name=minTws, set_attrs={"conversionFactor": -1})
+        
+        # # to UnitConv & Minus & to Mult
+        utils.connect_attr(f"{self.ctrl_att_head}.Neck_Twist_Mult", 
+                           f"{minTws}.input")
+        utils.connect_attr(f"{minTws}.output", 
+                           f"{N_root_NegMd}.input1{self.twist_axis}")
+        
+        utils.connect_attr(f"{self.ctrl_att_head}.Neck_Twist_Mult", 
+                           f"{N_root_AttMd}.input1{self.twist_axis}")
+        utils.connect_attr(f"{self.ctrl_att_head}.rotate{self.twist_axis}", 
+                           f"{N_root_NegMd}.input2{self.twist_axis}")
+
+        # cmds.connectAttr( (self.ctrlLs[-1] + ".Neck_Twist_Mult"), (minTws + ".input"), f=1 )
+        # cmds.connectAttr( (minTws + ".output"), (f"{N_root_NegMd}.input1{self.twistAxis}"), f=1 )
+        # cmds.connectAttr( (self.ctrlLs[-1] + ".Neck_Twist_Mult"), (f"{N_root_AttMd}.input1{self.twistAxis}"), f=1 )
+        # cmds.connectAttr( (self.ctrlLs[-1] + ".rotate" + self.twistAxis), (f"{N_root_NegMd}.input2{self.twistAxis}"), f=1 )
+        
+        '''
+        # Connect up to the att jnt!
+        utils.connect_attr(f"{N_root_AttMd}.output{self.twist_axis}", 
+                           f"{minTws}.rotate")
+        cmds.connectAttr( (f"{N_root_AttMd}.output{self.twistAxis}"), (f"{self.attJntsLs[-2]}.rotate{self.twistAxis}"), f=1 )
+        
+        # Connect to the Neg twist for same jnt
+        cmds.connectAttr( (f"{N_root_NegMd}.output{self.twistAxis}"), (f"{self.TwistNeg[-2]}.rotate{self.twistAxis}"), f=1 )
+        '''
+
+        '''
+        N_root_AttMd = cmds.shadingNode("multiplyDivide", au=1, n="neck_root" + "_att_MD")
+        cmds.connectAttr( (f"{self.ctrlLs[-1]}.rotate{self.twistAxis}"), (f"{N_root_AttMd}.input2{self.twistAxis}"), f=1 )
+        N_root_NegMd = cmds.shadingNode("multiplyDivide", au=1, n="neck_root" + "_neg_MD")
+        minTws = cmds.shadingNode("unitConversion", au=1, n="neck_twist" + "_minus_UC")
+        cmds.setAttr( minTws + ".conversionFactor", -1 )
+        '''
 
     def get_ctrls(self):
         return self.fk_ctrls
