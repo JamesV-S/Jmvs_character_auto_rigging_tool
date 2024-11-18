@@ -141,11 +141,11 @@ class neck_sys():
         self.jnt_att_list.append(jnt_att_end)
 
         #-------------
-        jnt_bendNeg_end = f"{bend_neg_name}_{self.head_guide[6:]}"
-        print(f"Neck_sys. bendNeg end_joint: {jnt_bendNeg_end}")
-        cmds.joint( n= jnt_bendNeg_end )
-        cmds.matchTransform(jnt_bendNeg_end, self.head_guide, pos=1, rot=1, scl=0)
-        cmds.makeIdentity(jnt_bendNeg_end, a=1, t=0, r=1, s=0)
+        self.jnt_bendNeg_end = f"{bend_neg_name}_{self.head_guide[6:]}"
+        print(f"Neck_sys. bendNeg end_joint: {self.jnt_bendNeg_end}")
+        cmds.joint( n= self.jnt_bendNeg_end )
+        cmds.matchTransform(self.jnt_bendNeg_end, self.head_guide, pos=1, rot=1, scl=0)
+        cmds.makeIdentity(self.jnt_bendNeg_end, a=1, t=0, r=1, s=0)
         cmds.select(cl=1)
 
         #-------------
@@ -154,7 +154,7 @@ class neck_sys():
                     ctrl_name=self.ctrl_att_head, rig_type="fk" 
                     )
         cmds.matchTransform(self.ctrl_att_head, self.head_guide, pos=1, rot=1, scl=0)
-        cmds.parent(self.ctrl_att_head, jnt_bendNeg_end)
+        cmds.parent(self.ctrl_att_head, self.jnt_bendNeg_end)
 
 
     def add_attr(self):
@@ -280,16 +280,25 @@ class neck_sys():
         for x in range(2):
             utils.connect_attr(f"{self.ctrl_att_head}.rotate{self.bend_axis[x]}", f"{N_root_AttMd}.input2{self.bend_axis[x]}")
             utils.connect_attr(f"{self.ctrl_att_head}.Neck_Bend_Mult", f"{N_root_AttMd}.input1{self.bend_axis[x]}")
-            cmds.setAttr(f"{bend_ratio}.input2{[self.bend_axis[x]]}", divisible_value)
+            print(f"HERE BEND EXIS ===== {bend_ratio}.input2{self.bend_axis[x]}")
+            cmds.setAttr(f"{bend_ratio}.input2{self.bend_axis[x]}", divisible_value)
             utils.connect_attr(f"{N_root_AttMd}.output{self.bend_axis[x]}", f"{bend_ratio}.input1{self.bend_axis[x]}")
 
         # Connect bend_ratio to all neck joints 
         # just_neck_list
-        
-                
+        for x in range(self.neck_amnt):
+            utils.connect_attr(f"{bend_ratio}.output{self.bend_axis[0]}", f"{just_neck_list[x]}.rotate{self.bend_axis[0]}")
+            utils.connect_attr(f"{bend_ratio}.output{self.bend_axis[1]}", f"{just_neck_list[x]}.rotate{self.bend_axis[1]}")
 
-        
-
+        # for Bending neg: minus the value from 'N_root_AttMd' & 
+        # put into the jnt_bend_Neg with 2 pma(sum) node into the right bending axis for the jnt_bend_neg!
+        bend_UC = [cmds.shadingNode("unitConversion", au=1, n=f"UC_{self.first_guide[6:-2]}_bend_{self.bend_axis[i]}_min") for i in range(2)]
+        Axis_pma = [cmds.shadingNode("plusMinusAverage", au=1, n=f"pma_{self.first_guide[6:-2]}_bendNeg_{self.bend_axis[i]}") for i in range(2)]
+        for i in range(2):
+            cmds.setAttr( bend_UC[i] + ".conversionFactor", -1 )
+            utils.connect_attr(f"{N_root_AttMd}.output{self.bend_axis[i]}", f"{bend_UC[i]}.input")
+            utils.connect_attr(f"{bend_UC[i]}.output", f"{Axis_pma[i]}.input1D[0]")
+            utils.connect_attr(f"{Axis_pma[i]}.output1D", f"{self.jnt_bendNeg_end}.rotate{self.bend_axis[i]}")
 
     def get_ctrls(self):
         return self.fk_ctrls

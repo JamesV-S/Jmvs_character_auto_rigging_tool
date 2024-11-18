@@ -2,16 +2,73 @@
 import maya.cmds as cmds 
 import importlib
 # module imports----------------------------------------------------------
-import BQ_Almb_removePref_mdl as rmv_pref
-import BQ_Almb_addPref_mdl as add_pref
-import OPM
-import cr_enum_float_attrib_mdl as customAttr
 
-# Reload the modules
-importlib.reload(rmv_pref)
-importlib.reload(add_pref)
-importlib.reload(OPM)
-importlib.reload(customAttr)
+
+def OpmCleanTool():
+    
+    print("Is it working? aka OPM")
+
+    TRANSFORM_NODETYPES = ["transform", "joint"]
+
+    def has_non_default_locked_attributes(node):
+        locked_attributes = []
+        for attribute in ["translate", "rotate", "scale", "jointOrient"]:
+            default_value = 1 if attribute == "scale" else 0
+            for axis in "XYZ":
+                if cmds.attributeQuery(attribute + axis, node=node, exists=True):
+                    attribute_name = "{}.{}{}".format(node, attribute, axis)
+                    current_value = cmds.getAttr(attribute_name)
+                    if cmds.getAttr(attribute_name, lock=True) and current_value != default_value:
+                        return True
+
+
+    def reset_transforms(node):
+        for attribute in ["translate", "rotate", "scale", "jointOrient"]:
+            value = 1 if attribute == "scale" else 0
+            for axis in "XYZ":
+                if cmds.attributeQuery(attribute + axis, node=node, exists=True):
+                    attribute_name = "{}.{}{}".format(node, attribute, axis)
+                    if not cmds.getAttr(attribute_name, lock=True):
+                        cmds.setAttr(attribute_name, value)
+
+
+    def bake_transform_to_offset_parent_matrix(node):
+        if cmds.nodeType(node) not in TRANSFORM_NODETYPES:
+            raise ValueError("Node {} is not a transform node".format(node))
+
+        if has_non_default_locked_attributes(node):
+            raise RuntimeError("Node {} has at least one non default locked attribute(s)".format(node))
+
+        local_matrix = om.MMatrix(cmds.xform(node, q=True, m=True, ws=False))
+        offset_parent_matrix = om.MMatrix(cmds.getAttr(node + ".offsetParentMatrix"))
+        baked_matrix = local_matrix * offset_parent_matrix
+        cmds.setAttr(node + ".offsetParentMatrix", baked_matrix, type="matrix")
+
+        reset_transforms(node)
+
+    def bake_transform_to_offset_parent_matrix_selection():
+        print("New opm import strat")
+        for node in cmds.ls(sl=True):
+            bake_transform_to_offset_parent_matrix(node)
+
+    bake_transform_to_offset_parent_matrix_selection()
+
+
+def enum_attrib(ctrl, ln, en, flt):
+             
+    dividerNN = "------------" 
+    atrrType = "enum"
+    MaxVal = 1
+    MinVal = 0
+
+    # Divivder 
+    cmds.addAttr(ctrl, longName=ln, niceName=dividerNN, attributeType=atrrType, enumName=en, k=True)
+    cmds.setAttr( ctrl + '.' + ln, lock=True, keyable=False, channelBox=True)
+
+    # Float
+    cmds.addAttr(ctrl, longName=flt, at='double', min=MinVal, max=MaxVal, dv=MinVal )
+    cmds.setAttr(ctrl + '.' + flt, e=1, k=1 )
+
 
 def override_color_(clr_num):
     sel = cmds.ls(selection=True)
@@ -21,13 +78,16 @@ def override_color_(clr_num):
         cmds.setAttr (node + ".overrideEnabled" ,True)
         cmds.setAttr (node + ".overrideColor" , clr_num)  
 
+
 def Deslect():
     cmds.select(cl=1)
+
 
 def create_list_from_integer(value):
     # Create a list of string representations of integers from 1 to value
     my_list = [str(i) for i in range(1, value + 1)]
     return my_list
+
 
 class jmvs_Neck_systems():
     def __init__(self):
@@ -61,8 +121,8 @@ class jmvs_Neck_systems():
         self.TwistNegAmnt = len(self.locHi[:-1])
         self.locHead = self.locHi[-1]
 
-        self.twistAxis = "Y"
-        self.bendAxis = ["X", "Z"]
+        self.twistAxis = "X"
+        self.bendAxis = ["Y", "Z"]
 
         if self.neckAmnt < 5:
             self.divisibleList =  [ 2, 4, 8, 16, 32, 64 ]
@@ -275,7 +335,7 @@ class jmvs_Neck_systems():
         cmds.parent(self.rigNames[0], self.sknNames[0], "skeleton")
 
         # create the custom attrib's on head control
-        customAttr.enum_attrib(self.ctrlLs[-1], 'neck_Dvdr', 'NECK_FOLL', 'Neck_Twist_Mult')
+        enum_attrib(self.ctrlLs[-1], 'neck_Dvdr', 'NECK_FOLL', 'Neck_Twist_Mult')
         cmds.addAttr(self.ctrlLs[-1], longName='Neck_Bend_Mult', at='double', min=0, max=1, dv=0 )
         cmds.setAttr(self.ctrlLs[-1] + '.Neck_Bend_Mult', e=1, k=1 )
         cmds.setAttr( self.ctrlLs[-1] + '.Neck_Bend_Mult', 0.5 )
@@ -289,7 +349,7 @@ class jmvs_Neck_systems():
         cmds.select("jnt_TwistNeg_neck_*")
         self.TwistNeg = cmds.ls(sl=1, type="joint")
         self.TwistNeg.append("jnt_BendNeg_head")
-        print(self.TwistNeg)
+        print(f"twist_neg = {self.TwistNeg}")
         Deslect()
 
         #cmds.setAttr( self.ctrlLs[-1] + ".rotateX", 90 )
@@ -311,8 +371,11 @@ class jmvs_Neck_systems():
         cmds.connectAttr( (self.ctrlLs[-1] + ".rotate" + self.twistAxis), (f"{N_root_NegMd}.input2{self.twistAxis}"), f=1 )
         
         # Connect up to the att jnt!
+        print(f"att_Jnts_Ls = {self.attJntsLs}")
+        print(f"att_Jnts_Ls[-2] = {self.attJntsLs[-2]}")
         cmds.connectAttr( (f"{N_root_AttMd}.output{self.twistAxis}"), (f"{self.attJntsLs[-2]}.rotate{self.twistAxis}"), f=1 )
         
+        print(f"twist_neg[-2] = {self.TwistNeg[-2]}")
         # Connect to the Neg twist for same jnt
         cmds.connectAttr( (f"{N_root_NegMd}.output{self.twistAxis}"), (f"{self.TwistNeg[-2]}.rotate{self.twistAxis}"), f=1 )
         
@@ -340,11 +403,15 @@ class jmvs_Neck_systems():
         
         full_neck_list = self.attJntsLs[:-1] # removing head jnt 
         neck_children = full_neck_list[:-1] # removing root neck jnt
+         # ['jnt_att_neck_1', 'jnt_att_neck_2']
         neck_children.reverse() # reverse the order because working from head to bottom of neck 
+        print(f"neck_children = {neck_children}")
 
-        full_NEG_list = self.TwistNeg[:-1] # removing head jnt 
+        full_NEG_list = self.TwistNeg[:-1] # removing head jnt
+        
         NEG_children = full_NEG_list[:-1] # removing root neck jnt
         NEG_children.reverse()
+        print(f"NEG_children = {NEG_children}")
         
         
         # len(neck_children) = number of neck children to work on
@@ -395,7 +462,10 @@ class jmvs_Neck_systems():
         
         # connect bend_ratio to all neck joints!   
         # ['jnt_att_neck_1', 'jnt_att_neck_2']
+        print(f" >> self.attJntsLs = {self.attJntsLs}")
+        # ['jnt_att_neck_1', 'jnt_att_neck_2', 'jnt_att_neck_3', 'jnt_att_head']
         just_neck_jnts = self.attJntsLs[:self.neckAmnt]
+        print(f"just_neck_jnts = {just_neck_jnts}")
         print("only neck joints:", just_neck_jnts )
         for i in range(self.neckAmnt):
             cmds.connectAttr( (bend_Ratio + ".output" + self.bendAxis[0]), (just_neck_jnts[i] + ".rotate" + self.bendAxis[0]))
@@ -412,8 +482,9 @@ class jmvs_Neck_systems():
             cmds.connectAttr( (N_root_AttMd + ".output" + self.bendAxis[i]), (bend_UC[i] + ".input"), f=1 )
             cmds.connectAttr( (bend_UC[i] + ".output"), (Axis_pma[i] + ".input1D[0]"), f=1 )
             cmds.connectAttr( (Axis_pma[i] + ".output1D"), (self.TwistNeg[-1] + ".rotate" + self.bendAxis[i]), f=1 )
-        '''
-        '''
+                                                        # '^jnt_BendNeg_head^'
+        
+        
 jmvs_Neck_systems()
 
 
