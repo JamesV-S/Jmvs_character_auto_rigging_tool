@@ -66,7 +66,7 @@ class Guides_class():
             return guide
         
     def creation(self, accessed_module, side, guide_connector_list, use_existing_attr, orientation):
-        
+        print(f"CR_GDS side :: {side}")
         print("IN CREATION FUNC, THE ORIENTATION ARG IS: ", orientation)
         
         # 1) Setup & initialisation
@@ -83,10 +83,10 @@ class Guides_class():
         # guide_pref = f"guide_{number_id}"
         
         # 2) Determine Side
-        if self.module.side == "None":
+        if side == "None":
             side = ""
-        else:
-            side = self.module.side
+
+        ''' If `side` = _R change the pos/rot dict accordingly. '''
 
         # Orientation:
         if self.module.has_orientation == "None": # root_basic          

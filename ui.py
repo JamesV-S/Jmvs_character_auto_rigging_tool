@@ -117,6 +117,8 @@ class QtSampler(QWidget):
         self.ui.orientation_ddbox.currentIndexChanged.connect(self.orientation_func)
         self.ui.build_skeleton_btn.clicked.connect(self.create_joints)
         self.ui.Create_systems_btn.clicked.connect(self.create_rig)
+        # whichside_ddbox
+        self.ui.whichside_ddbox.currentIndexChanged.connect(self.side_func)
 
         # Neck base 
         self.data_of_neck_joints = 3
@@ -199,7 +201,13 @@ class QtSampler(QWidget):
             self.orientation = "YZX"
         print("ORIENTATION CLICKED IS: ",  self.orientation)
         return self.orientation
+    
 
+    def side_func(self):
+        self.side = f"_{self.ui.whichside_ddbox.currentText()}"
+        print(f"side clicked: {self.side}")
+        return self.side
+        
 
     def update_dropdown(self):
         #  function updates the dropdown box named "module_picker_ddbox" in the user interface.
@@ -287,6 +295,15 @@ class QtSampler(QWidget):
         self.numb_id = self.unique_id_counter
         print(f"Assigned unique ID: {self.numb_id}")
         
+        #----------------------------------------------------------------------
+        # Handle the side chosen
+        side_to_use = ''
+        if self.side_func() == "_R":
+            side_to_use = "_R"
+        else:
+            side_to_use = module_path.side
+
+        #----------------------------------------------------------------------
         if self.data_of_neck_joints > 3:
             self.neck_jnt_num = self.data_of_neck_joints
         else:
@@ -327,13 +344,24 @@ class QtSampler(QWidget):
                 "nck_rot_yzx": module_path.system_rot_yzx
                 }
             print(f"^^^^^^ nck_sys: {neck_sys_dict['nck_sys']}, nck_pos_xyz: {neck_sys_dict['nck_pos_xyz']}, nck_rot_xyz: {neck_sys_dict['nck_rot_xyz']}") 
-            guides = create_guides.Guides_class(module, module_path.side, to_connect_to=[], 
+            guides = create_guides.Guides_class(module, side_to_use, to_connect_to=[], 
                 use_existing_attr=[], orientation=self.orientation_func(), numb_id=self.numb_id, neck_dict=neck_sys_dict)
-        else:    
-            guides = create_guides.Guides_class(module, module_path.side, to_connect_to=[], 
+        else:
+
+            guides = create_guides.Guides_class(module, side_to_use, to_connect_to=[], 
                 use_existing_attr=[], orientation=self.orientation_func(), numb_id=self.numb_id)
         guide = guides.collect_guides()
-        
+        print(f"UI guide :::::: {guide}")
+        #----------------------------------------------------------------------
+        # if the side is '_R' then mirror the guides by putting it into a grp
+        if not 'biped_finger' in module:
+            if self.side_func() == "_R": 
+                temp_mirror_guides_gp =  cmds.group(em=1, n=f"grp_tmp_mirror_guides")
+                cmds.parent(guide["master_guide"], temp_mirror_guides_gp)
+                cmds.setAttr(f"{temp_mirror_guides_gp}.scaleX", -1)
+                cmds.parent(guide["master_guide"], w=1)
+                cmds.delete(temp_mirror_guides_gp)
+
         print(f"GUIIDE RETURNED DICT: {guide}")
         # If guides are succesfully created, this extracts important elements like these:
         if guide:
@@ -355,7 +383,7 @@ class QtSampler(QWidget):
                 "guide_list": guide_list, 
                 "guide_scale": module_path.guide_scale, 
                 "joints": [], 
-                "side": module_path.side, 
+                "side": side_to_use, 
                 "guide_connectors": guide_connector_list, 
                 "systems_to_connect": systems_to_connect,
                 "ik_ctrl_list": [],
