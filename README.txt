@@ -29,6 +29,7 @@ TO DO: > Understand why mirrored joints do not wotk with connect_modules.attatch
 
 -----------------------------
 [-] Issues to solve:
+> making the neck_fk_ctrls follow the spine doesn't work becuase of it's strange hierarchy, so skip it for now. 
 
 -----------------------------
 To do:

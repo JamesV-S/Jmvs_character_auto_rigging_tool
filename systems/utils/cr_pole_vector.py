@@ -5,10 +5,11 @@ import math
 import os
 
 def create_pole_vector(top_joint, pv_joint, end_joint):
-    
+        '''
         PV_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
                                 "..", "imports","pv_ctrl_import.abc")
         print(f"pv_control import path: {PV_FILE}")
+        '''
         
         start = cmds.xform(top_joint, q=1,ws=1,t=1)
         mid = cmds.xform(pv_joint, q=1,ws=1,t=1)
@@ -50,9 +51,10 @@ def create_pole_vector(top_joint, pv_joint, end_joint):
 
         rot = matrixFn.eulerRotation()
 
-        imported = cmds.file(PV_FILE, i=1, namespace="imp_pv", rnn=1)
-        cmds.scale(1, 1, 1, imported)
-        pv_ctrl = cmds.rename(imported[0], f"ctrl_arw_import")
+        # imported = cmds.file(PV_FILE, i=1, namespace="imp_pv", rnn=1)
+        imported = cmds.spaceLocator()
+        cmds.scale(4, 4, 4, imported)
+        pv_ctrl = cmds.rename(imported[0], f"ctrl_pv_import")
         # loc = cmds.spaceLocator() # pv
 
         cmds.xform(pv_ctrl, ws=1,t=(finalV.x, finalV.y, finalV.z))

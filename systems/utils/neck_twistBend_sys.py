@@ -86,17 +86,17 @@ class neck_sys():
             self.divisibleList = [ 1.5, 3, 6, 12, 24, 48 ]
             print("USING FOR LOWER NUMBERS")
 
-        self.pref_list = ["jnt_att", "ctrl_att"]
+        self.pref_list = ["jnt_att", "ctrl_fk"]
 
         self.cr_att_jnt_and_ctrl()
         self.end_guide_att()
         self.add_attr()
         self.add_nodes()
         
-        print(f"^^¬^^ Neck controls: {self.ctrl_att_neck}")
-        print(f"^^¬^^ END Neck controls: {self.ctrl_att_head}")
+        print(f"^^¬^^ Neck controls: {self.ctrl_fk_neck}")
+        print(f"^^¬^^ END Neck controls: {self.ctrl_fk_head}")
 
-    # Build the ctrl_att & jnt_att + twistneg_joint in the correct hierarchy!
+    # Build the ctrl_fk & jnt_att + twistneg_joint in the correct hierarchy!
     def cr_att_jnt_and_ctrl(self):
         numLS = create_list_from_integer(self.neck_amnt)
         twist_neg_name = "jnt_TwistNeg"
@@ -112,14 +112,14 @@ class neck_sys():
             cmds.makeIdentity(jnt_att_neck, a=1, t=0, r=1, s=0)
             self.jnt_att_list.append(jnt_att_neck)
             #-------------
-            self.ctrl_att_neck = f"{self.pref_list[1]}_{self.first_guide[6:-2]}_{numLS[i]}"
-            print(f"NECK_ATT: guide for CTRL > {self.ctrl_att_neck}")
+            self.ctrl_fk_neck = f"{self.pref_list[1]}_{self.first_guide[6:-2]}_{numLS[i]}"
+            print(f"NECK_ATT: guide for CTRL > {self.ctrl_fk_neck}")
             control_module = control_shape.Controls(self.scale, guide=f"{self.jntAtt_match[i][5:]}", 
-                    ctrl_name=self.ctrl_att_neck, rig_type="fk" 
+                    ctrl_name=self.ctrl_fk_neck, rig_type="fk" 
                     )
-            cmds.matchTransform(self.ctrl_att_neck, self.jntAtt_match[i], pos=1, rot=1, scl=0)
-            cmds.parent(self.ctrl_att_neck, jnt_att_neck)
-            ctrl_neck_list.append(self.ctrl_att_neck)
+            cmds.matchTransform(self.ctrl_fk_neck, self.jntAtt_match[i], pos=1, rot=1, scl=0)
+            cmds.parent(self.ctrl_fk_neck, jnt_att_neck)
+            ctrl_neck_list.append(self.ctrl_fk_neck)
 
             #-------------
             self.jnt_TwistNeg = f"{twist_neg_name}_{self.first_guide[6:-2]}_{numLS[i]}"
@@ -149,35 +149,35 @@ class neck_sys():
         cmds.select(cl=1)
 
         #-------------
-        self.ctrl_att_head = f"{self.pref_list[1]}_{self.head_guide[6:]}"
+        self.ctrl_fk_head = f"{self.pref_list[1]}_{self.head_guide[6:]}"
         control_module = control_shape.Controls(self.scale, guide=f"{self.head_guide[5:]}", 
-                    ctrl_name=self.ctrl_att_head, rig_type="fk" 
+                    ctrl_name=self.ctrl_fk_head, rig_type="fk" 
                     )
-        cmds.matchTransform(self.ctrl_att_head, self.head_guide, pos=1, rot=1, scl=0)
-        cmds.parent(self.ctrl_att_head, self.jnt_bendNeg_end)
+        cmds.matchTransform(self.ctrl_fk_head, self.head_guide, pos=1, rot=1, scl=0)
+        cmds.parent(self.ctrl_fk_head, self.jnt_bendNeg_end)
 
 
     def add_attr(self):
         # create the custom attrib's on head control
-        utils.add_locked_attrib(ctrl=self.ctrl_att_head, en=["NECK_SYS"])
-        utils.add_float_attrib(ctrl=self.ctrl_att_head, flt=["Neck_Twist_Mult"], 
+        utils.add_locked_attrib(ctrl=self.ctrl_fk_head, en=["NECK_SYS"])
+        utils.add_float_attrib(ctrl=self.ctrl_fk_head, flt=["Neck_Twist_Mult"], 
                                val=[0,0.95], limited=True)
-        utils.add_float_attrib(ctrl=self.ctrl_att_head, flt=["Neck_Bend_Mult"], 
+        utils.add_float_attrib(ctrl=self.ctrl_fk_head, flt=["Neck_Bend_Mult"], 
                                val=[0,1], limited=True)
-        cmds.setAttr( f"{self.ctrl_att_head}.Neck_Twist_Mult", 0.5 )
-        cmds.setAttr( f"{self.ctrl_att_head}.Neck_Bend_Mult", 0.5 )
+        cmds.setAttr( f"{self.ctrl_fk_head}.Neck_Twist_Mult", 0.5 )
+        cmds.setAttr( f"{self.ctrl_fk_head}.Neck_Bend_Mult", 0.5 )
 
 
     def add_nodes(self):
         # self.jnt_twistNeg_list = []
         
-        cmds.setAttr(f"{self.ctrl_att_head}.rotateX", 90)
+        cmds.setAttr(f"{self.ctrl_fk_head}.rotateX", 90)
 
         N_root_AttMd = f"MD_att_RT_{self.first_guide[6:-2]}"
         print(f"neck_root > {N_root_AttMd}") # MD_neck_0_neck_root
         utils.cr_node_if_not_exists(util_type=1, node_type="multiplyDivide", 
                                     node_name=N_root_AttMd, set_attrs=None)
-        utils.connect_attr(f"{self.ctrl_att_head}.rotate{self.twist_axis}", 
+        utils.connect_attr(f"{self.ctrl_fk_head}.rotate{self.twist_axis}", 
                            f"{N_root_AttMd}.input2{self.twist_axis}")
         
         N_root_NegMd = f"MD_neg_RT_{self.first_guide[6:-2]}"
@@ -189,14 +189,14 @@ class neck_sys():
                                 node_name=minTws, set_attrs={"conversionFactor": -1})
         
         # to UnitConv & Minus & to Mult
-        utils.connect_attr(f"{self.ctrl_att_head}.Neck_Twist_Mult", 
+        utils.connect_attr(f"{self.ctrl_fk_head}.Neck_Twist_Mult", 
                             f"{minTws}.input")
         utils.connect_attr(f"{minTws}.output", 
                             f"{N_root_NegMd}.input1{self.twist_axis}")
         
-        utils.connect_attr(f"{self.ctrl_att_head}.Neck_Twist_Mult", 
+        utils.connect_attr(f"{self.ctrl_fk_head}.Neck_Twist_Mult", 
                             f"{N_root_AttMd}.input1{self.twist_axis}")
-        utils.connect_attr(f"{self.ctrl_att_head}.rotate{self.twist_axis}", 
+        utils.connect_attr(f"{self.ctrl_fk_head}.rotate{self.twist_axis}", 
                             f"{N_root_NegMd}.input2{self.twist_axis}")
 
 
@@ -278,8 +278,8 @@ class neck_sys():
         
         # begin with the 'N_root_AttMd'+ connect bending axes to it!
         for x in range(2):
-            utils.connect_attr(f"{self.ctrl_att_head}.rotate{self.bend_axis[x]}", f"{N_root_AttMd}.input2{self.bend_axis[x]}")
-            utils.connect_attr(f"{self.ctrl_att_head}.Neck_Bend_Mult", f"{N_root_AttMd}.input1{self.bend_axis[x]}")
+            utils.connect_attr(f"{self.ctrl_fk_head}.rotate{self.bend_axis[x]}", f"{N_root_AttMd}.input2{self.bend_axis[x]}")
+            utils.connect_attr(f"{self.ctrl_fk_head}.Neck_Bend_Mult", f"{N_root_AttMd}.input1{self.bend_axis[x]}")
             print(f"HERE BEND EXIS ===== {bend_ratio}.input2{self.bend_axis[x]}")
             cmds.setAttr(f"{bend_ratio}.input2{self.bend_axis[x]}", divisible_value)
             utils.connect_attr(f"{N_root_AttMd}.output{self.bend_axis[x]}", f"{bend_ratio}.input1{self.bend_axis[x]}")

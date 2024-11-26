@@ -499,6 +499,7 @@ class QtSampler(QWidget):
                     utils.constraint_from_lists_1to1(fk_joint_list, key["joints"],mo=1)
                     key.update({"fk_joint_list": fk_joint_list, "fk_ctrl_list": fk_ctrls})
                     # ------------------
+                    '''
                     # ikfk blend arrow ctrl or COG 
                     mdl_switch_ctrl = arrow_ctrl.cr_arrow_control(
                         module_name=key['module'], master_guide=key['master_guide'], 
@@ -506,6 +507,7 @@ class QtSampler(QWidget):
                         )
                     key.update({"mdl_switch_ctrl_list": mdl_switch_ctrl})
                     print("looking for update::::::::::::::::::::::: ", key)
+                    '''
                 elif rig_type == "IK":
                     print(f"Build 'ik' joints! {master_guide}")
                     ik_joint_list = joints.joint(master_guide, system="ik")
@@ -515,6 +517,7 @@ class QtSampler(QWidget):
                     utils.constraint_from_lists_1to1(ik_joint_list, key["joints"],mo=1)
                     key.update({"ik_joint_list": ik_joint_list, "ik_ctrl_list": ik_ctrls})
                     # ------------------
+                    ''' if the 
                     # ikfk blend arrow ctrl or COG 
                     mdl_switch_ctrl = arrow_ctrl.cr_arrow_control(
                         module_name=key['module'], master_guide=key['master_guide'], 
@@ -522,6 +525,7 @@ class QtSampler(QWidget):
                         )
                     key.update({"mdl_switch_ctrl_list": mdl_switch_ctrl})
                     print("looking for update::::::::::::::::::::::: ", key)
+                    '''
                     
                 elif rig_type == "IKFK":
                     
@@ -563,6 +567,12 @@ class QtSampler(QWidget):
                         f"{master_guide}.{master_guide}_squash_stretch", asString=1
                         )
                     if squash_stretch_attr == "Yes":
+                        if not cmds.objExists(f"ctrl_mdl_{key['master_guide'][7:]}"): # ctrl_mdl_0_biped_arm_L
+                            mdl_switch_ctrl = arrow_ctrl.cr_arrow_control(
+                                module_name=key['module'], master_guide=key['master_guide'], 
+                                side=key['side']
+                                )
+                            key.update({"mdl_switch_ctrl_list": mdl_switch_ctrl})
                         # call squash & stretch system!
                         print(f"Build squahs_stretch system! {master_guide}")
                         squash_stretch_instance = []
@@ -578,9 +588,12 @@ class QtSampler(QWidget):
                 cmds.parent(key["fk_ctrl_list"][-1], "ctrl_COG")
                 OPM.OpmCleanTool(key["fk_ctrl_list"][-1])
             else:
-                print(f"YEEEEAH >> follow connection for: {key['module']}")
-                print(f"Fol_connections: mdl = {key['module']}  > sys_to_connect = {key['systems_to_connect']}" )
-                # mdl_foll_connection.connecting_sys_to_connect(key["module"], key["systems_to_connect"], self.ctrl_root, key["side"])
+                rig_type = cmds.getAttr(f"{key['master_guide']}.{key['master_guide']}_rig_type", asString=1)
+                if "neck_head" not in {key['module']}:
+                    if rig_type == "FK" or rig_type == "IKFK":
+                        print(f"YEEEEAH >> follow connection for: {key['module']}")
+                        print(f"Fol_connections: mdl = {key['module']}  > sys_to_connect = {key['systems_to_connect']}" )
+                        mdl_foll_connection.connecting_sys_to_connect(key["master_guide"], key["systems_to_connect"], self.ctrl_root, key["side"])
 
         # Connect systems & add space_swapping!
         for key in self.systems_to_be_made.values():
@@ -590,6 +603,13 @@ class QtSampler(QWidget):
                 systems_to_connect = key["systems_to_connect"]
                 # connect_modules.connect_polished(systems_to_connect)
             if updated_rig_type == "IKFK" or updated_rig_type == "IK":
+                print(f"SACE_SWAP >>>>>::::: ctrl_mdl_{key['master_guide'][7:]}")
+                if not cmds.objExists(f"ctrl_mdl_{key['master_guide'][7:]}"): # ctrl_mdl_0_biped_arm_L
+                    mdl_switch_ctrl = arrow_ctrl.cr_arrow_control(
+                        module_name=key['module'], master_guide=key['master_guide'], 
+                        side=key['side']
+                        )
+                    key.update({"mdl_switch_ctrl_list": mdl_switch_ctrl})
                 #print(f"Add space_swap sys {master_guide}")
                 print(f"before calling spaceSwap: {key}")
                 space_swap_mdl = space_swap.cr_spaceSwapping(key, self.ctrl_cog, self.ctrl_root)
