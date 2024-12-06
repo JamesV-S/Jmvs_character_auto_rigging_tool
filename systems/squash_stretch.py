@@ -128,11 +128,11 @@ class cr_squash_stretch():
         # Connect to the joints:
         # connect to joint scale
         
-        cmds.connectAttr(f"{self.blend_colours_2}.outputR",f"{self.start_joint}.scaleX")
-        cmds.connectAttr(f"{self.blend_colours_2}.outputR",f"{self.pv_joint}.scaleX")
+        utils.connect_attr(f"{self.blend_colours_2}.outputR",f"{self.start_joint}.scaleX")
+        utils.connect_attr(f"{self.blend_colours_2}.outputR",f"{self.pv_joint}.scaleX")
 
-        cmds.connectAttr(f"{self.blend_colours_2}.outputG",f"{self.start_joint}.scaleY")
-        cmds.connectAttr(f"{self.blend_colours_2}.outputG",f"{self.pv_joint}.scaleY")
-        cmds.connectAttr(f"{self.blend_colours_2}.outputG",f"{self.start_joint}.scaleZ")
-        cmds.connectAttr(f"{self.blend_colours_2}.outputG",f"{self.pv_joint}.scaleZ")
+        utils.connect_attr(f"{self.blend_colours_2}.outputG",f"{self.start_joint}.scaleY")
+        utils.connect_attr(f"{self.blend_colours_2}.outputG",f"{self.pv_joint}.scaleY")
+        utils.connect_attr(f"{self.blend_colours_2}.outputG",f"{self.start_joint}.scaleZ")
+        utils.connect_attr(f"{self.blend_colours_2}.outputG",f"{self.pv_joint}.scaleZ")
         

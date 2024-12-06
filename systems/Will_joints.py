@@ -2,15 +2,15 @@
 import maya.cmds as cmds
 
 def get_joint_list(skeleton_roots, system):
-    jnts_list = []
+    joints_list = []
     print(f"JOINTS, skeleton_roots == {skeleton_roots}")
     for top_skeleton_joint in skeleton_roots:
         # Implement name check for unique naming
         # The name concerning the guides list provided, so there are no duplicates! 
         joint_list = joint(top_skeleton_joint, system)
-        jnts_list.append(joint_list)
+        joints_list.append(joint_list)
     
-    return jnts_list
+    return joints_list
 
 def joint(top_skeleton_joint, system):
     prefix = "jnt"
@@ -28,11 +28,6 @@ def joint(top_skeleton_joint, system):
     # If top_skeleton_joint contains "root" append it to the list
     if "root" in top_skeleton_joint:
         list.append(top_skeleton_joint)
-    # Do the same for the finger master's
-    '''
-    elif "proximal" in top_skeleton_joint:
-        list.append(top_skeleton_joint)
-    '''
     list.reverse()
 
     # determine the side from attr on guide!
@@ -65,41 +60,6 @@ def joint(top_skeleton_joint, system):
         cmds.makeIdentity(jnt_name, a=1, t=0, r=1, s=1)
         cmds.makeIdentity(jnt_name, a=1, t=0, )
         jnt_names.append(jnt_name)
-    
-    '''
-    orientation_attrib = cmds.getAttr(f"{top_skeleton_joint}.module_orientation",  asString=1)
-    print(f"CREATE JOINT attrib <((((((()))))))> {orientation_attrib}")
-    # if mirroring it:
-    
-    if orientation_attrib == "XYZ": # used to be 'Yes'
-        sao_axis = f"xdown" # xdown
-        orientation = "xyz"
-        print("JNT Orientation <((((((()))))))> XYZ ")
-    elif orientation_attrib == "YZX":
-        sao_axis = f"yup" # xup
-        orientation = "yzx"
-        print("JNT Orientation <((((((()))))))> YZX ")
-    '''
-
-    # if side == "_R":
-      #   pass # cmds.joint(jnt_names[1:], edit=1, zso=1, oj=orientation, sao=sao_axis, ch=1)
-        
-    # I'm matching the joint's to the guides instead ofg orientaing them!
-    '''
-    orientation_attrib = cmds.getAttr(f"{top_skeleton_joint}.module_orientation", asString=1)
-    print(f"ZZZZZZZZZZZZZZZZZZZ what's the name {top_skeleton_joint}.module_orientation")
-    print(f"ORI Attr is >> {orientation_attrib}") 
-    
-    # if mirroring it:
-    if orientation_attrib == "XYZ": # used to be 'Yes'
-        sao_axis = f"{orientation}down" # xdown
-    else:
-        sao_axis = f"{orientation}up" # xup
-
-    # Orient the joint
-    # Y tf orient the joint if it's matching the guides??
-    cmds.joint(f"{jnt_tag}{list_ctrls[0]}", edit=1, zso=1, oj=orientation, sao=sao_axis, ch=1)
-    '''
 
     # Orient endjoint to world
     cmds.joint(f"{jnt_tag}{name_list_ctrls[-1]}", edit=1, zso=1, oj="none", ch=1)

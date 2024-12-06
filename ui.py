@@ -19,21 +19,20 @@ import subprocess
 import platform
 
 from systems import (
+    Will_fk,
+    Will_ik,
+    jnts,
     create_guides,
-    joints, 
-    fk, 
-    ik, 
     squash_stretch    
 )
 
+from systems.WD_Lessons_system import Will_ikfk_switch, mirror_guides_jnts
 from systems.utils import (
     connect_modules,
     mdl_foll_connection,
     utils, 
-    mirror_rig,
     guide_data,
     arrow_ctrl,
-    ikfk_switch, 
     space_swap,
     OPM,
     neck_twistBend_sys
@@ -41,15 +40,15 @@ from systems.utils import (
 
 # Reload Modules
 importlib.reload(create_guides)
-importlib.reload(joints)
+importlib.reload(jnts)
 importlib.reload(connect_modules)
 importlib.reload(utils)
-importlib.reload(mirror_rig)
+importlib.reload(mirror_guides_jnts)
 importlib.reload(guide_data)
-importlib.reload(fk)
-importlib.reload(ik)
+importlib.reload(Will_fk)
+importlib.reload(Will_ik)
 importlib.reload(arrow_ctrl)
-importlib.reload(ikfk_switch)
+importlib.reload(Will_ikfk_switch)
 importlib.reload(squash_stretch)
 importlib.reload(space_swap)
 importlib.reload(OPM)
@@ -265,7 +264,6 @@ class QtSampler(QWidget):
         
         #----------------------------------------------------------------------
         print("existing MODULE", module," ///// ","module_path: ", module_path, "print from ui in add_module()" )
-        
         # Search for existing modules of the same type in the scene
 
         # if module has no side : f"master_*_{module}"
@@ -413,15 +411,11 @@ class QtSampler(QWidget):
                 cmds.delete(module[0], key['guide_connectors'])
 
 
-    def temp_hand_func(self):
-        print("button hand!!!!!!!!!")
-    
-
     def create_joints(self):
         # master_guides: ['guide_root', 'master_biped_arm_l_1']
         print(f"The systems to be made are:>> {self.systems_to_be_made}")
         
-        rig_jnt_list = joints.get_joint_list(self.created_guides, system="rig")
+        rig_jnt_list = jnts.get_joint_list(self.created_guides, system="rig")
              
         # adding the joint list to the dictionary
         num = 0
@@ -429,8 +423,8 @@ class QtSampler(QWidget):
             key["joints"] = rig_jnt_list[num]
             num += 1
         
-        mirror_module = mirror_rig.mirror_data(self.systems_to_be_made, self.orientation_func())
-        self.systems_to_be_made = mirror_module.get_mirror_data()
+        mirror_module = mirror_guides_jnts.MirroredSys(self.systems_to_be_made, self.orientation_func())
+        self.systems_to_be_made = mirror_module.get_mirror_results()
         
         connect_modules.attach_jnts(self.systems_to_be_made, system="rig")
        
@@ -491,8 +485,8 @@ class QtSampler(QWidget):
                 if rig_type == "FK":
                     # create fk joints, system & control, then constrain to rig_joints!
                     print(f"Build 'fk' joints! {master_guide}")
-                    fk_joint_list = joints.joint(master_guide, system="fk")
-                    fk_module = fk.create_fk_sys( key["module"], fk_joint_list, master_guide, 
+                    fk_joint_list = jnts.joint(master_guide, system="fk")
+                    fk_module = Will_fk.create_fk_sys( key["module"], fk_joint_list, master_guide, 
                                                  key['guide_scale'], delete_end=0)
                     fk_ctrls = fk_module.get_ctrls()
                     print(f"list 1: {fk_joint_list}, list 2: {key['joints']}")
@@ -510,33 +504,24 @@ class QtSampler(QWidget):
                     '''
                 elif rig_type == "IK":
                     print(f"Build 'ik' joints! {master_guide}")
-                    ik_joint_list = joints.joint(master_guide, system="ik")
-                    ik_module = ik.create_ik_sys(key["module"], ik_joint_list, master_guide, 
+                    ik_joint_list = jnts.joint(master_guide, system="ik")
+                    ik_module = Will_ik.create_ik_sys(key["module"], ik_joint_list, master_guide, 
                                                  key['guide_scale'], module.ik_joints)
                     ik_ctrls = ik_module.get_ctrls()
                     utils.constraint_from_lists_1to1(ik_joint_list, key["joints"],mo=1)
                     key.update({"ik_joint_list": ik_joint_list, "ik_ctrl_list": ik_ctrls})
-                    # ------------------
-                    ''' if the 
-                    # ikfk blend arrow ctrl or COG 
-                    mdl_switch_ctrl = arrow_ctrl.cr_arrow_control(
-                        module_name=key['module'], master_guide=key['master_guide'], 
-                        side=key['side']
-                        )
-                    key.update({"mdl_switch_ctrl_list": mdl_switch_ctrl})
-                    print("looking for update::::::::::::::::::::::: ", key)
-                    '''
+                    
                     
                 elif rig_type == "IKFK":
                     
                     print(f"Build 'ikfk' joints! {master_guide}")
-                    fk_joint_list = joints.joint(master_guide, system="fk")
-                    fk_module = fk.create_fk_sys( key["module"], fk_joint_list, master_guide, 
+                    fk_joint_list = jnts.joint(master_guide, system="fk")
+                    fk_module = Will_fk.create_fk_sys( key["module"], fk_joint_list, master_guide, 
                                                  key['guide_scale'], delete_end=0)
                     fk_ctrls = fk_module.get_ctrls()
 
-                    ik_joint_list = joints.joint(master_guide, system="ik")
-                    ik_module = ik.create_ik_sys(key["module"], ik_joint_list, master_guide, 
+                    ik_joint_list = jnts.joint(master_guide, system="ik")
+                    ik_module = Will_ik.create_ik_sys(key["module"], ik_joint_list, master_guide, 
                                                  key['guide_scale'], module.ik_joints)
                     ik_ctrls = ik_module.get_ctrls()
             
@@ -553,7 +538,7 @@ class QtSampler(QWidget):
                     print("looking for update::::::::::::::::::::::: ", key)
                     # ------------------
                     # ikfk blend system
-                    ikfk_switch.cr_ikfk_switch_sys(
+                    Will_ikfk_switch.cr_ikfk_switch_sys(
                         rig_joints=key["joints"], mdl_switch_ctrl=mdl_switch_ctrl,
                         fk_ctrls=fk_ctrls, ik_ctrls=ik_ctrls, fk_joint_list=key['fk_joint_list'], 
                         ik_joint_list=key['ik_joint_list'], master_guide=master_guide)
@@ -613,27 +598,6 @@ class QtSampler(QWidget):
                 #print(f"Add space_swap sys {master_guide}")
                 print(f"before calling spaceSwap: {key}")
                 space_swap_mdl = space_swap.cr_spaceSwapping(key, self.ctrl_cog, self.ctrl_root)
-        '''
-        for key in self.systems_to_be_made.values():
-            if "root" in key["module"]:
-                pass
-            elif "L" in key["side"]:
-                print(f"Should be > Arm or leg: {key['module']}, > fk_ctrls: {key['fk_ctrl_list']},  ik_ctrls: {key['ik_ctrl_list']}, > MAKE RED")
-            elif "R" in key["side"]:
-                print(f"Should be > Arm or leg: {key['module']}, > fk_ctrls: {key['fk_ctrl_list']},  ik_ctrls: {key['ik_ctrl_list']}, > MAKE BLUE")
-            elif None in key["side"]:
-                print(f"Should be > spine: {key['module']}, > fk_ctrls: {key['fk_ctrl_list']},  ik_ctrls: {key['ik_ctrl_list']}, > MAKE YELLOW")
-        
-        # colour the controls: 
-        colour_dict = {"L_colour":[], "C_colour":[], "R_colour":[]} # C stands for centre so yellow. 
-        
-        ctrl_list = cmds.ls("ctrl_*", type="transform")
-        utils.colour_conrols(ctrl_list, colour_dict)
-        cmds.select(cl=1)
-        '''
-
-    def polish_rig(self):
-        pass
 
     def hide_guides(self):
         for key in self.systems_to_be_made.values():
