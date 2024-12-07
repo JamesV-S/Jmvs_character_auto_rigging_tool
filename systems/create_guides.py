@@ -236,8 +236,6 @@ class Guides_class():
         cmds.addAttr(master_guide, ln="module_side", at="enum", en=side, k=0)
         cmds.addAttr(master_guide, ln="master_guide", at="enum", en=master_guide, k=0)
         cmds.addAttr(master_guide, ln="module_orientation", at="enum", en=orientation, k=0)
-        
-        
         # Adding the proxy 
         for item in ["is_master", "base_module", "module_side", "master_guide", "module_orientation"]:
             cmds.addAttr(guide_list[:-1],ln=f"{item}", proxy=f"{guide_list[-1]}.{item}")
