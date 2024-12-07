@@ -26,11 +26,12 @@ from systems import (
     squash_stretch    
 )
 
-from systems.WD_Lessons_system import Will_ikfk_switch, mirror_guides_jnts
 from systems.utils import (
     connect_modules,
     mdl_foll_connection,
-    utils, 
+    utils,
+    mirror_guides_jnts,
+    ikfk_switch,
     guide_data,
     arrow_ctrl,
     space_swap,
@@ -48,7 +49,7 @@ importlib.reload(guide_data)
 importlib.reload(Will_fk)
 importlib.reload(Will_ik)
 importlib.reload(arrow_ctrl)
-importlib.reload(Will_ikfk_switch)
+importlib.reload(ikfk_switch)
 importlib.reload(squash_stretch)
 importlib.reload(space_swap)
 importlib.reload(OPM)
@@ -209,7 +210,7 @@ class QtSampler(QWidget):
         
 
     def update_dropdown(self):
-        #  function updates the dropdown box named "module_picker_ddbox" in the user interface.
+        # function updates the dropdown box named "module_picker_ddbox" in the user interface.
         # get the module path: the list comprehension splits each filename at the dots, 
         # removes the extension(last part after the dot) and rejoins the remaining parts.
         # Generating a list of module names without their extensions. 
@@ -415,7 +416,7 @@ class QtSampler(QWidget):
         # master_guides: ['guide_root', 'master_biped_arm_l_1']
         print(f"The systems to be made are:>> {self.systems_to_be_made}")
         
-        rig_jnt_list = jnts.get_joint_list(self.created_guides, system="rig")
+        rig_jnt_list = jnts.collect_jnt_hi(self.created_guides, system="rig")
              
         # adding the joint list to the dictionary
         num = 0
@@ -425,9 +426,7 @@ class QtSampler(QWidget):
         
         mirror_module = mirror_guides_jnts.MirroredSys(self.systems_to_be_made, self.orientation_func())
         self.systems_to_be_made = mirror_module.get_mirror_results()
-        
         connect_modules.attach_jnts(self.systems_to_be_made, system="rig")
-       
         #self.hide_guides()
 
     
@@ -538,10 +537,10 @@ class QtSampler(QWidget):
                     print("looking for update::::::::::::::::::::::: ", key)
                     # ------------------
                     # ikfk blend system
-                    Will_ikfk_switch.cr_ikfk_switch_sys(
-                        rig_joints=key["joints"], mdl_switch_ctrl=mdl_switch_ctrl,
-                        fk_ctrls=fk_ctrls, ik_ctrls=ik_ctrls, fk_joint_list=key['fk_joint_list'], 
-                        ik_joint_list=key['ik_joint_list'], master_guide=master_guide)
+                    ikfk_switch.setup_ikfk_switch(
+                        skel_jnts=key["joints"], switch_ctrl=mdl_switch_ctrl,
+                        fk_ctrls=fk_ctrls, ik_ctrls=ik_ctrls, fk_jnt_names=key['fk_joint_list'], 
+                        ik_jnt_names=key['ik_joint_list'], guide_id=master_guide)
 
                 else:
                     cmds.error(f"Fat ERROR: 'rig_type' attr cannot be found!")
