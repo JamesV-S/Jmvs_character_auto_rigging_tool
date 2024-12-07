@@ -43,7 +43,7 @@ class Guides_class():
         if not "root_basic" in accessed_module:
             if selection:
                 if "master" in selection[0]:
-                    cmds.warning("unable to attatch a new module to a master control, please SELECT a guide!")
+                    print("> CR_guides, can't attatch a new mdl to a master ctrl bruh")
                 elif "master" not in selection[0]:
                     guide = self.creation(accessed_module, side, guide_connector_list, use_existing_attr, orientation)
                     master_guide = guide["master_guide"]
@@ -54,7 +54,7 @@ class Guides_class():
                     if 'finger' in master_guide or 'neck' in master_guide:
                         cmds.matchTransform(master_guide, selection, pos=1, rot=1, scl=0)
                     
-                    # Calling ".prep_attach_jnts" is designed to prepare and organize 
+                    # Calling WD ".prep_attach_jnts" is designed to prepare and organize 
                     # joint relationships in the context of creating blueprint guides.
                     self.system_to_connect = connect_modules.prep_attach_jnts(master_guide, selection, need_child=True)
                     guide.update({"system_to_connect": self.system_to_connect})
