@@ -2,7 +2,11 @@
 import maya.cmds as cmds
 import importlib
 import os
-from systems.utils import (connect_modules, utils, control_shape, system_custom_attr)  
+from systems.utils import (utils, system_custom_attr) 
+
+# to change:
+from systems.utils.WD_lessons_utils import (control_shape, connect_modules)
+
 importlib.reload(connect_modules)
 importlib.reload(utils)
 importlib.reload(control_shape)
@@ -212,7 +216,8 @@ class Guides_class():
         else:
             print("ERRRRRRRRRRRRRRRRRRRRRRRROOOOOOOR: ", master_guide)
             data_guide_name = master_guide.replace("master_", f"data_")
-        cmds.spaceLocator(n=data_guide_name)
+        cmds.group(n=data_guide_name, em=1)
+        #cmds.spaceLocator(n=data_guide_name)
         cmds.matchTransform(data_guide_name, master_guide)
         cmds.parent(data_guide_name, master_guide)
         cmds.setAttr(f"{data_guide_name}.visibility", 0)
@@ -239,33 +244,6 @@ class Guides_class():
             for guide in guide_list[:-1]:
                 cmds.setAttr(f"{guide}.{item}",k=0)
         
-        # 8) control shape attributes
-        # for each guide it adds attributes for control shapes, associated with ik & fk systems. 
-        
-        for guide in ui_guide_list:
-            # Ignore the these:
-            if "root" in guide or "COG" in guide or "master" in guide: 
-                pass
-            else:
-                for ikfk in ["FK", "IK"]:
-                    print("for ikfk in []: ", ikfk)
-                    control_shape_instance = control_shape.controlShapeList()
-                    control_shape_instance.return_filtered_list(type=ikfk, object=guide)
-                    
-                    control_shape_list = control_shape_instance.return_list()
-                    print("ctrl_shape_list : ", control_shape_list)                    
-                    control_shape_en = ":".join(control_shape_list)
-                    print("Create_guides <(Line 275)> CONTROL SHAPE INDEX: ", f"{guide[6:]}_{ikfk}_control")
-                    cmds.addAttr(guide, ln=f"{guide[5:]}_{ikfk.lower()}_control", 
-                                 at="enum", en=control_shape_en, k=1)
-                
-                for ikfk in ["IK"]:
-                    control_orientation_list = ["object", "world"]
-                    control_orientation_en = ":".join(control_orientation_list)
-                    cmds.addAttr(guide, ln=f"{guide[5:]}_{ikfk.lower()}_OriType", 
-                                 at="enum", en=control_orientation_en, k=1)
-        # freeze the scale of the master_guide
-        # cmds.makeIdentity(master_guide, t=0, r=0, s=1)
         # 9) Return UI data
         # Return a dictionary containing master_guide, guide_connector_list & 
         # ui_guide_list for further use in the ui
@@ -277,10 +255,4 @@ class Guides_class():
             "guide_number": self.unique_id
         }
         return ui_dict
-       
-'''
 
-for shape in imported[1:]:
-    shape = shape.split("|")[-1]
-    cmds.rename(shape, f"{guide}_shape_#")
-    '''

@@ -5,7 +5,7 @@ import sys
 import os
 
 from systems.utils import (OPM)
-importlib.reload
+importlib.reload(OPM)
 
 def cr_arrow_control(module_name, master_guide, side):
     print(f"module name: {module_name}, master guide name: {master_guide}, side: {side}")

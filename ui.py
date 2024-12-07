@@ -25,16 +25,19 @@ from systems import (
 )
 
 from systems.utils import (
-    connect_modules,
     ikfk_switch,
     mdl_foll_connection,
     utils,
     mirror_guides_jnts,
-    guide_data,
     arrow_ctrl,
     space_swap,
     OPM,
     neck_twistBend_sys
+)
+
+from systems.utils.WD_lessons_utils import(
+    connect_modules,
+    guide_data
 )
 
 # Reload Modules
