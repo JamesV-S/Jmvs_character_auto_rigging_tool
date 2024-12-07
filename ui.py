@@ -11,12 +11,9 @@ from shiboken6 import wrapInstance
 from PySide6 import QtUiTools, QtWidgets, QtCore
 from functools import partial # if you want to include args with UI method calls                   
 
-
 import os.path
 import importlib
 import sys
-import subprocess
-import platform
 
 from systems import (
     Will_fk,
