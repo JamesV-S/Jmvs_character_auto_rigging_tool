@@ -26,10 +26,10 @@ from systems import (
 
 from systems.utils import (
     connect_modules,
+    ikfk_switch,
     mdl_foll_connection,
     utils,
     mirror_guides_jnts,
-    ikfk_switch,
     guide_data,
     arrow_ctrl,
     space_swap,
@@ -270,10 +270,10 @@ class QtSampler(QWidget):
         mes_guide_list = []
         for section in config.sections():
             print(f"processing section: {section}")
+            # produce the ini module. 
             '''
             part = {key: float(value) for key, value in config[section].items()
                      if key != 'parent_hierachy'}'''
-            # if `parent_hierachy` is not specified, it defaults to `True`
 
 
     def new_rig_module(self):

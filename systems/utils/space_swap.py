@@ -38,15 +38,15 @@ class cr_spaceSwapping():
         
         rig_type = cmds.getAttr(f"{self.key['master_guide']}.{self.key['master_guide']}_rig_type", asString=1)
         if rig_type == "IKFK" or rig_type == "IK":
-            # self.space_space_locators = self.create_locators() # swappos locators!
-            loc_master_list = self.create_locators(self.master_space_name) # ['swappos_world_biped_arm_0_L', 
+            # self.space_space_locators = self.cr_locs() # swappos locators!
+            loc_master_list = self.cr_locs(self.master_space_name) # ['swappos_world_biped_arm_0_L', 
             # 'swappos_COG_biped_arm_0_L', 'swappos_shoulder_biped_arm_0_L', 'swappos_custom_biped_arm_0_L']
 
             print(f"loc_master_list is : {loc_master_list}")
-            loc_pv_list = self.create_locators(self.pv_space_names)
-            loc_start_list = self.create_locators(self.start_space_names)
+            loc_pv_list = self.cr_locs(self.pv_space_names)
+            loc_start_list = self.cr_locs(self.start_space_names)
             if 'arm' in self.key['module']:
-                loc_top_list = self.create_locators(self.top_space_name)
+                loc_top_list = self.cr_locs(self.top_space_name)
             
             if 'quad' in self.key['module']:
                 self.master_space_ctrl = [item for item in self.ik_ctrl_list if 'quadWrist' in item or 'quadAnkle' in item][0]
@@ -84,7 +84,7 @@ class cr_spaceSwapping():
             if 'arm' in self.key['module']:
                 self.cr_nodes_and_connect(ctrl=self.top_ctrl, locator_ls=loc_top_list)
 
-    def create_locators(self, space_loc_names):
+    def cr_locs(self, space_loc_names):
         self.custom_loc_name_id = f"{self.key['module']}_{int(self.key['guide_number'])}{self.key['side']}"
         print(f"swappos names: {self.custom_loc_name_id}")
         created_loc_list = []

@@ -2,9 +2,9 @@ import maya.cmds as cmds
 import importlib
 import os
 
-from systems import joints
+from systems import Will_joints
 from systems.utils import (utils, control_shape, guide_data, system_custom_attr)
-importlib.reload(joints)
+importlib.reload(Will_joints)
 importlib.reload(utils)
 importlib.reload(control_shape)
 importlib.reload(guide_data)
@@ -15,7 +15,6 @@ class mirror_data():
         self.data_to_be_checked = systems_to_be_made
         print("MIRROR CLASS IS CALLED!!!!")
         # print(f"class Mirror_data: systems_to_be_made = {self.data_to_be_checked}")
-
         self.orientation = orientation
         self.mirror_data()
 
@@ -176,7 +175,7 @@ class mirror_data():
             mirror_to_side = ("_L", "_R")
         self.side # "_R"
         print("***********the none_mirrored_joints", [self.master_guide])
-        joint_list = joints.get_joint_list([self.master_guide], system="rig")
+        joint_list = Will_joints.get_joint_list([self.master_guide], system="rig")
         cmds.select(cl=1)
         return joint_list
 
@@ -226,7 +225,6 @@ class mirror_data():
                 f"{key['master_guide']}.{key['master_guide']}_mirror_jnts", 
                 asString=1
             )
-            
 
             if mirror_attribute == "Yes": # Yes mirror joint
                 print("RUNNING THE MIRROR DATA FUNCTION!")

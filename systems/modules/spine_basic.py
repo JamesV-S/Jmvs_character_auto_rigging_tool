@@ -23,18 +23,6 @@ system_rot_yzx = {'spine_1': [7.667038985618099, 0.0, 0.0],
                   'spine_4': [-13.212290179161894, 0.0, 0.0], 
                   'spine_5': [9.331941466846782, 0.0, 0.0]}
 
-''' Because how I'm writing it in the create_guides.py I won't need this:
-axis_orientation = "xyz"
-if axis_orientation == "xyz":
-    system_pos = system_pos_xyz
-    system_rot = system_rot_xyz
-    print[f"xyz orientation"]
-if axis_orientation == "yzx":
-    system_pos = system_pos_yzx
-    system_rot = system_rot_yzx
-    print[f"yzx orientation"]
-'''
-
 has_orientation = "yes"
 
 ik_joints = {
@@ -47,7 +35,3 @@ side = "None"
 space_swapping = []
 guide_scale = 1
 available_rig_types = ["FK", "IK", "IKFK"]
-default_ctrl_shape = {
-    "fk_wrist": "circle",
-    "ik_wrist": "cube"
-}

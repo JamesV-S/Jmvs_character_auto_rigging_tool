@@ -18,14 +18,13 @@ system_rot_yzx = {'neck_1': [0.0, 0.0, 0.0],
                   'neck_3': [0.0, 0.0, 0.0]}
 
 # Have a module that has name of guides: 'system' each with their own
-
 has_orientation = "yes"
 
 ik_joints = {
     "start_joint": system[0],
     "end_joint": system[-1], 
     "pv_joint": None,
-    "top_joint": system[0], 
+    "top_joint": system[0],
     "world_orientation": False
 }
 

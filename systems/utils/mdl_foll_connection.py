@@ -14,9 +14,7 @@ class connecting_sys_to_connect():
         self.ctrl_root = ctrl_root
         self.side = side
         self.jnt_follow = sys_to_connect[1].replace('guide', 'jnt_rig')
-
         self.fk_ctrl_follower = sys_to_connect[0].replace('guide', 'ctrl_fk')
-        
         print( f"jnt follow: {self.jnt_follow}, fk_ctrl: {self.fk_ctrl_follower}" )
         self.group()
         self.create_nodes()
