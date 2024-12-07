@@ -14,6 +14,7 @@ from functools import partial # if you want to include args with UI method calls
 import os.path
 import importlib
 import sys
+import configparser
 
 from systems import (
     fk_sys,
@@ -249,6 +250,31 @@ class QtSampler(QWidget):
                 self.data_of_neck_joints = dict['guide_list'][0][-1:]
                 print(f"data NECK guides: {self.data_of_neck_joints}")
             
+    def import_ini_module(self):
+        # CTRL_ROOT_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "systems", 
+                                       # "imports","ctrl_root_import.abc")
+        config = configparser.ConfigParser()
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        ini_list = ['finger_measurements_Max.ini']# ['leg_measurements_Max.ini'] #, 'leg_measurements_Max.ini', 'arm_measurements_Max.ini', 'head_measurements_Max.ini', 'head_measurements_Jae.ini']# ['leg_measurements_Max.ini']# ['leg_measurements_Max.ini'] #, 'leg_measurements_Max.ini', 'arm_measurements_Max.ini', 'head_measurements_Max.ini', 'head_measurements_Jae.ini']# ['leg_measurements_Max.ini'] #, 'leg_measurements_Max.ini', 'arm_measurements_Max.ini', 'head_measurements_Max.ini', 'head_measurements_Jae.ini']# ['leg_measurements_Max.ini'] #, 'leg_measurements_Max.ini', 'arm_measurements_Max.ini', 'head_measurements_Max.ini', 'head_measurements_Jae.ini']# ['leg_measurements_Max.ini']# ['leg_measurements_Max.ini'] #, 'leg_measurements_Max.ini', 'arm_measurements_Max.ini', 'head_measurements_Max.ini', 'head_measurements_Jae.ini']# ['leg_measurements_Max.ini']
+            # 
+        ini_name = self.ui.module_picker_ddbox.currentText()
+        # create the .ini fole path then read
+        for ini in ini_name:
+            config_file = os.path.join(current_dir, 'systems', 'config', ini)
+            config.read(config_file)        
+        print(config.sections())
+        # output = ['limb', 'hand', 'handknuWidth', ...]
+        
+        '''Method to load all avalable ini_files'''
+        # get the boolean val for parent_hierarchy read on the .ini file
+        mes_guide_list = []
+        for section in config.sections():
+            print(f"processing section: {section}")
+            '''
+            part = {key: float(value) for key, value in config[section].items()
+                     if key != 'parent_hierachy'}'''
+            # if `parent_hierachy` is not specified, it defaults to `True`
+
 
     def new_rig_module(self):
         # Get the selected module from the UI
@@ -413,16 +439,18 @@ class QtSampler(QWidget):
         # master_guides: ['guide_root', 'master_biped_arm_l_1']
         print(f"The systems to be made are:>> {self.systems_to_be_made}")
         
-        rig_jnt_list = jnts.collect_jnt_hi(self.created_guides, system="rig")
+        rig_jnt_list = jnts.collect_jnt_hi(self.created_guides, "rig")
              
         # adding the joint list to the dictionary
         num = 0
         for key in self.systems_to_be_made.values():
             key["joints"] = rig_jnt_list[num]
             num += 1
-        
+
+        ''' Need to update with config
         mirror_module = mirror_guides_jnts.MirroredSys(self.systems_to_be_made)
         self.systems_to_be_made = mirror_module.get_mirror_results()
+        '''
         connect_modules.attach_jnts(self.systems_to_be_made, system="rig")
         #self.hide_guides()
 
@@ -481,10 +509,10 @@ class QtSampler(QWidget):
                 if rig_type == "FK":
                     # create fk joints, system & control, then constrain to rig_joints!
                     print(f"Build 'fk' joints! {master_guide}")
-                    fk_joint_list = jnts.cr_jnts_from_hi(master_guide, system="fk")
+                    fk_joint_list = jnts.cr_jnts(master_guide, "fk")
                     fk_module = fk_sys.Cr_Fk_Sys( key["module"], fk_joint_list, master_guide, 
-                                                 key['guide_scale'], delete_end=0)
-                    fk_ctrls = fk_module.get_ctrls()
+                                                 key['guide_scale'], 0)
+                    fk_ctrls = fk_module.get_controls()
                     print(f"list 1: {fk_joint_list}, list 2: {key['joints']}")
                     utils.constraint_from_lists_1to1(fk_joint_list, key["joints"],mo=1)
                     key.update({"fk_joint_list": fk_joint_list, "fk_ctrl_list": fk_ctrls})
@@ -500,7 +528,7 @@ class QtSampler(QWidget):
                     '''
                 elif rig_type == "IK":
                     print(f"Build 'ik' joints! {master_guide}")
-                    ik_joint_list = jnts.cr_jnts_from_hi(master_guide, system="ik")
+                    ik_joint_list = jnts.cr_jnts(master_guide, "ik")
                     ik_module = ik_sys.create_ik_sys(key["module"], ik_joint_list, master_guide, 
                                                  key['guide_scale'], module.ik_joints)
                     ik_ctrls = ik_module.get_ctrls()
@@ -511,12 +539,12 @@ class QtSampler(QWidget):
                 elif rig_type == "IKFK":
                     
                     print(f"Build 'ikfk' joints! {master_guide}")
-                    fk_joint_list = jnts.cr_jnts_from_hi(master_guide, system="fk")
+                    fk_joint_list = jnts.cr_jnts(master_guide, "fk")
                     fk_module = fk_sys.Cr_Fk_Sys( key["module"], fk_joint_list, master_guide, 
-                                                 key['guide_scale'], delete_end=0)
-                    fk_ctrls = fk_module.get_ctrls()
+                                                 key['guide_scale'], 0)
+                    fk_ctrls = fk_module.get_controls()
 
-                    ik_joint_list = jnts.cr_jnts_from_hi(master_guide, system="ik")
+                    ik_joint_list = jnts.cr_jnts(master_guide, "ik")
                     ik_module = ik_sys.create_ik_sys(key["module"], ik_joint_list, master_guide, 
                                                  key['guide_scale'], module.ik_joints)
                     ik_ctrls = ik_module.get_ctrls()

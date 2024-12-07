@@ -21,8 +21,10 @@ class MirroredSys:
         current_side = self.current_item["side"]
         self.opposite_side = "_R" if current_side == "_L" else "_L" if current_side == "_R" else ""
 
-    def generate_mirror_guides(self):
-        guide_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "imports", "guide_shape.abc")
+    def cr_mirror_guides(self):
+        guide_file_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), 
+            "..", "imports", "guide_shape.abc")
         print(f"Guide Shape File Path: {guide_file_path}")
         mirror_guides = []
 
@@ -32,7 +34,8 @@ class MirroredSys:
 
             if "master" in guide:
                 guide_name = f"master_{guide[7:-2]}{self.opposite_side}"
-                new_guide = control_shape.controlTypes(guide_name, [5, 5, 5]).create_octagon()
+                new_guide = control_shape.controlTypes(
+                    guide_name, [5, 5, 5]).create_octagon()
                 cmds.setAttr(f"{guide_name}.overrideEnabled", 1)
                 cmds.setAttr(f"{guide_name}.overrideColor", 9)
                 cmds.scale(8, 8, 8, guide_name)
@@ -55,7 +58,7 @@ class MirroredSys:
         for item in self.orig_data.values():
             self.current_item = item
             self.determine_opposite_side()
-            self.generate_mirror_guides()
+            self.cr_mirror_guides()
 
     def get_mirror_results(self):
         return self.orig_data

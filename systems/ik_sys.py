@@ -45,7 +45,7 @@ class create_ik_sys():
                 self.pv_joint = joint
             elif self.jnt_valid["end_joint"] in joint:
                 self.end_joint = joint
-            if 'arm' in self.module and self.jnt_valid["first_joint"] in joint:
+            if 'arm' in self.module and self.jnt_valid["top_joint"] in joint:
                     self.first_joint = joint
             if 'quad' in self.module and self.jnt_valid["calf_joint"] in joint:
                     self.quad_calf_joint = joint

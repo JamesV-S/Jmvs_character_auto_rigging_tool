@@ -31,22 +31,12 @@ ik_joints = {
     "calf_joint": "quadCalf"    
 }
 
-twist_joint= {
-    "start": "quadHip",
-    "end": "quadAnkle", 
-}
-
 # If axis_orientation = a specific axis, use that specified system_pos
 side = "_L"
 stretch = True
 
 guide_scale = 1
 available_rig_types = ["FK", "IK", "IKFK"] # Add ribbon in future!
-default_ctrl_shape = {
-    "fk_wrist": "circle", 
-    "ik_wrist": "cube"
-} # Have fk as circle, ik as cube & ribbon as octagon. 
-
 
  # Need to split it up: Clav, PV, master[wrist]
 space_swapping = [["world", "COG", "quadHip", "custom"], ["world", "quadAnkle"], ["world", "spine"]]

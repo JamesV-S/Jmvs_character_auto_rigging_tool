@@ -24,17 +24,21 @@ class Cr_Fk_Sys:
             control = control_shape.Controls(
                 self.size,
                 guide=joint[6:],
-                ctrl_name=f"ctrl_fk_{joint[6:]}",
+                ctrl_name=f"ctrl_fk{joint[6:]}",
                 rig_type="fk")
-            cmds.matchTransform(f"ctrl_fk_{joint[6:]}", joint)
-            if remove_end and cmds.listRelatives(joint, children=True) is None:
-                cmds.delete(f"ctrl_fk_{joint[6:]}")
-            elif "root" in joint:
-                cmds.delete(f"ctrl_fk_{joint[6:]}")
-            else:
-                self.fk_controls.append(f"ctrl_fk_{joint[6:]}")
-                joint_controls.append(joint)
+            if 'arm' in self.module_name:
+                cmds.scale(1*.01,1*.01,1*.01, f"ctrl_fk{joint[6:]}")
+                cmds.makeIdentity(f"ctrl_fk{joint[6:]}.rotateZ", r=0, s=0, t=0)
+            cmds.matchTransform(f"ctrl_fk{joint[6:]}", joint)
 
+            if remove_end and cmds.listRelatives(joint, children=True) is None:
+                cmds.delete(f"ctrl_fk{joint[6:]}")
+            elif "root" in joint:
+                cmds.delete(f"ctrl_fk{joint[6:]}")
+            else:
+                self.fk_controls.append(f"ctrl_fk{joint[6:]}")
+                joint_controls.append(joint)
+        
         utils.parent_controls(self.fk_controls)
         for ctrl in self.fk_controls:
             OPM.OpmCleanTool(ctrl)

@@ -43,19 +43,4 @@ space_swapping = [["world", "COG", "hip", "custom"], ["world", "ankle"], ["world
 
 guide_scale = 1
 available_rig_types = ["FK", "IK", "IKFK"] # Add ribbon in future!
-reverse_foot = True
-rev_locators = {  # items foot_ctrl, ankle, ball, toe must be the same
-    "foot_ctrl": system[2],
-    "ankle": system[2],
-    "ball": system[3],
-    "toe": system[4],
-    "heel": "heel",
-    "bank_in": "bank_in",
-    "bank_out": "bank_out",
-}
-default_ctrl_shape = {
-    "fk_ball": "circle", 
-    "ik_ball": "cube"
-} # Have fk as circle, ik as cube & ribbon as octogan. 
-
 space_swap = ["world", "COG", "hips", "custom"] # Custom being whatever i want it to be

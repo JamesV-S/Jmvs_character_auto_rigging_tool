@@ -1,5 +1,7 @@
+
 import importlib
 import maya.cmds as cmds
+import os
 
 class controlShapeList():
     def __init__(self):
@@ -45,21 +47,22 @@ class controlTypes():
     def __init__(self, name, ctrl_type):
         self.ctrl_name = name
         #module = f"self.create_{ctrl_type}()"
-        #eval(module)
-        
+
         self.ctrl_curve = None
         method = getattr(self, f"create_{ctrl_type}", None)
         if callable(method):
             self.ctrl_curve = method()
-        
-        '''
-        if ctrl_type == "cube":
-            print("------IMAGINE MAKING CUBE FROM TYPE!------")
-            # self.create_cube()
-            '''
        
         
     def create_circle(self):
+        '''GUIDE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
+                                "..", "imports","ctrl_square_circle_import.abc")
+        C:\Docs\maya\scripts\Jmvs_character_auto_rigging_tool\systems\imports
+        imported = cmds.file(GUIDE_FILE, i=1, namespace="rect_circle_import", rnn=1)
+        self.ctrl_curve = cmds.rename(imported[0], self.ctrl_name)# cmds.circle(n=self.ctrl_name, r=1, nr=(1, 0, 0))[0]
+        cmds.setAttr(f"{self.ctrl_curve}.rotateZ", 90)
+        cmds.makeIdentity(f"{self.ctrl_curve}.rotateZ", r=1, s=0, t=0)
+        '''
         self.ctrl_curve = cmds.circle(n=self.ctrl_name, r=1, nr=(1, 0, 0))[0]
         return self.ctrl_name
         

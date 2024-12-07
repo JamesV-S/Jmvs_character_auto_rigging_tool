@@ -29,23 +29,10 @@ ik_joints = {
     "world_orientation": False
 }
 
-twist_joint= {
-    "start": "shoulder",
-    "end": "wrist", 
-}
-
 # If axis_orientation = a specific axis, use that specified system_pos
 side = "_L"
 stretch = True
 
-guide_scale = 1
+guide_scale = .01
 available_rig_types = ["FK", "IK", "IKFK"] # Add ribbon in future!
-default_ctrl_shape = {
-    "fk_wrist": "circle", 
-    "ik_wrist": "cube"
-} # Have fk as circle, ik as cube & ribbon as octagon. 
-
-
- # Need to split it up: Clav, PV, master(wrist)
-# space_swapping = [["world", "COG", "shoulder", "custom"], ["world", "wrist"], ["world", "James"]]
 space_swapping = [["world", "COG", "shoulder", "custom"], ["world", "wrist"], ["world", "clavicle"], ["world", "spine"]]
