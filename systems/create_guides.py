@@ -1,3 +1,4 @@
+
 import maya.cmds as cmds
 import importlib
 import os
@@ -126,8 +127,6 @@ class Guides_class():
         else:
             master_guide = f"master_{self.unique_id}_{accessed_module}{side}"
             control_shape.controlTypes(f"master_{self.unique_id}_{accessed_module}{side}", "octagon")
-            # master_guide = control_shape.Controls(scale=(1, 1, 1), guide="", ctrl_name=f"master_{self.unique_id}_{accessed_module}{side}", rig_type= "", ctrl_type="octagon")
-            #master_guide = str(master_guide) # master_guide is not a string, but rather an instance of an controlTypes class.
             print("hmmmm: ", master_guide)
             cmds.setAttr(f"{master_guide}.overrideEnabled", 1)
             cmds.setAttr(f"{master_guide}.overrideColor", 9)
@@ -225,7 +224,7 @@ class Guides_class():
         # In this case it's getting the '["IK", "FK", "IKFK"]' varible for the custom attribiutes!
         
         # custom_attribute = self.add_custom_attr(guide_list, master_guide, use_existing_attr, accessed_module)
-        system_custom_attr.cstm_attr(guide_list, master_guide, use_existing_attr, accessed_module, self.available_rig_modules_type)
+        system_custom_attr.buildCustomAttr(guide_list, master_guide, use_existing_attr, accessed_module, self.available_rig_modules_type)
         
         cmds.addAttr(master_guide, ln="is_master", at="enum", en="True", k=0)
         cmds.addAttr(master_guide, ln="base_module", at="enum", en=accessed_module, k=0) # mdl_attr

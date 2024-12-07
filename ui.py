@@ -16,8 +16,8 @@ import importlib
 import sys
 
 from systems import (
-    Will_fk,
-    Will_ik,
+    fk_sys,
+    ik_sys,
     jnts,
     create_guides,
     squash_stretch    
@@ -43,8 +43,8 @@ importlib.reload(connect_modules)
 importlib.reload(utils)
 importlib.reload(mirror_guides_jnts)
 importlib.reload(guide_data)
-importlib.reload(Will_fk)
-importlib.reload(Will_ik)
+importlib.reload(fk_sys)
+importlib.reload(ik_sys)
 importlib.reload(arrow_ctrl)
 importlib.reload(ikfk_switch)
 importlib.reload(squash_stretch)
@@ -109,7 +109,7 @@ class QtSampler(QWidget):
                                        "interface","logo_cog.jpeg")
         self.ui.image_lbl.setPixmap(QPixmap(tab1_image_path))
 
-        self.ui.add_mdl_btn.clicked.connect(self.add_module)
+        self.ui.add_mdl_btn.clicked.connect(self.new_rig_module)
         self.ui.remove_mdl_btn.clicked.connect(self.remove_module)
         self.ui.orientation_ddbox.currentIndexChanged.connect(self.orientation_func)
         self.ui.build_skeleton_btn.clicked.connect(self.create_joints)
@@ -250,7 +250,7 @@ class QtSampler(QWidget):
                 print(f"data NECK guides: {self.data_of_neck_joints}")
             
 
-    def add_module(self):
+    def new_rig_module(self):
         # Get the selected module from the UI
         module = self.ui.module_picker_ddbox.currentText()
         
@@ -261,7 +261,7 @@ class QtSampler(QWidget):
         importlib.reload(module_path)
         
         #----------------------------------------------------------------------
-        print("existing MODULE", module," ///// ","module_path: ", module_path, "print from ui in add_module()" )
+        print("existing MODULE", module," ///// ","module_path: ", module_path, "print from ui in new_rig_module()" )
         # Search for existing modules of the same type in the scene
 
         # if module has no side : f"master_*_{module}"
@@ -370,7 +370,7 @@ class QtSampler(QWidget):
             
             # Append the 'master_guide' to a list of created guides 
             self.created_guides.append(master_guide)
-            print(f"ADD_MODULE, created_guides == {self.created_guides}")
+            print(f"new_rig_module, created_guides == {self.created_guides}")
             # create a temp dict to store details abt the module and its guides... 
             
             temp_dictionary = {
@@ -421,7 +421,7 @@ class QtSampler(QWidget):
             key["joints"] = rig_jnt_list[num]
             num += 1
         
-        mirror_module = mirror_guides_jnts.MirroredSys(self.systems_to_be_made, self.orientation_func())
+        mirror_module = mirror_guides_jnts.MirroredSys(self.systems_to_be_made)
         self.systems_to_be_made = mirror_module.get_mirror_results()
         connect_modules.attach_jnts(self.systems_to_be_made, system="rig")
         #self.hide_guides()
@@ -482,7 +482,7 @@ class QtSampler(QWidget):
                     # create fk joints, system & control, then constrain to rig_joints!
                     print(f"Build 'fk' joints! {master_guide}")
                     fk_joint_list = jnts.joint(master_guide, system="fk")
-                    fk_module = Will_fk.create_fk_sys( key["module"], fk_joint_list, master_guide, 
+                    fk_module = fk_sys.create_fk_sys( key["module"], fk_joint_list, master_guide, 
                                                  key['guide_scale'], delete_end=0)
                     fk_ctrls = fk_module.get_ctrls()
                     print(f"list 1: {fk_joint_list}, list 2: {key['joints']}")
@@ -501,7 +501,7 @@ class QtSampler(QWidget):
                 elif rig_type == "IK":
                     print(f"Build 'ik' joints! {master_guide}")
                     ik_joint_list = jnts.joint(master_guide, system="ik")
-                    ik_module = Will_ik.create_ik_sys(key["module"], ik_joint_list, master_guide, 
+                    ik_module = ik_sys.create_ik_sys(key["module"], ik_joint_list, master_guide, 
                                                  key['guide_scale'], module.ik_joints)
                     ik_ctrls = ik_module.get_ctrls()
                     utils.constraint_from_lists_1to1(ik_joint_list, key["joints"],mo=1)
@@ -512,12 +512,12 @@ class QtSampler(QWidget):
                     
                     print(f"Build 'ikfk' joints! {master_guide}")
                     fk_joint_list = jnts.joint(master_guide, system="fk")
-                    fk_module = Will_fk.create_fk_sys( key["module"], fk_joint_list, master_guide, 
+                    fk_module = fk_sys.create_fk_sys( key["module"], fk_joint_list, master_guide, 
                                                  key['guide_scale'], delete_end=0)
                     fk_ctrls = fk_module.get_ctrls()
 
                     ik_joint_list = jnts.joint(master_guide, system="ik")
-                    ik_module = Will_ik.create_ik_sys(key["module"], ik_joint_list, master_guide, 
+                    ik_module = ik_sys.create_ik_sys(key["module"], ik_joint_list, master_guide, 
                                                  key['guide_scale'], module.ik_joints)
                     ik_ctrls = ik_module.get_ctrls()
             
@@ -559,8 +559,6 @@ class QtSampler(QWidget):
                         squash_stretch_instance = []
                         squash_stretch.cr_squash_stretch(key, module.ik_joints, rig_type)
                 
-                '''system_group.grpSetup(self.ui.rig_master_name.text())''' # What does this do?
-        
         for key in self.systems_to_be_made.values():
             if "root" in key["module"]:
                 pass
@@ -581,8 +579,8 @@ class QtSampler(QWidget):
             updated_rig_type = cmds.getAttr(f"{key['master_guide']}.{key['master_guide']}_rig_type", asString=1)
             if key["systems_to_connect"]:
                 #print(f"connect modules after systems! {master_guide}")
-                systems_to_connect = key["systems_to_connect"]
-                # connect_modules.connect_polished(systems_to_connect)
+                # systems_to_connect = key["systems_to_connect"]
+                pass
             if updated_rig_type == "IKFK" or updated_rig_type == "IK":
                 print(f"SACE_SWAP >>>>>::::: ctrl_mdl_{key['master_guide'][7:]}")
                 if not cmds.objExists(f"ctrl_mdl_{key['master_guide'][7:]}"): # ctrl_mdl_0_biped_arm_L
@@ -591,9 +589,8 @@ class QtSampler(QWidget):
                         side=key['side']
                         )
                     key.update({"mdl_switch_ctrl_list": mdl_switch_ctrl})
-                #print(f"Add space_swap sys {master_guide}")
                 print(f"before calling spaceSwap: {key}")
-                space_swap_mdl = space_swap.cr_spaceSwapping(key, self.ctrl_cog, self.ctrl_root)
+                space_swap.cr_spaceSwapping(key, self.ctrl_cog, self.ctrl_root)
 
     def hide_guides(self):
         for key in self.systems_to_be_made.values():
