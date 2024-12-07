@@ -33,6 +33,6 @@ ik_joints = {
 side = "_L"
 stretch = True
 
-guide_scale = .01
+guide_scale = 1
 available_rig_types = ["FK", "IK", "IKFK"] # Add ribbon in future!
 space_swapping = [["world", "COG", "shoulder", "custom"], ["world", "wrist"], ["world", "clavicle"], ["world", "spine"]]

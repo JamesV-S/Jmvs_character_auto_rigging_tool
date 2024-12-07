@@ -26,9 +26,11 @@ class Cr_Fk_Sys:
                 guide=joint[6:],
                 ctrl_name=f"ctrl_fk{joint[6:]}",
                 rig_type="fk")
+            '''
             if 'arm' in self.module_name:
                 cmds.scale(1*.01,1*.01,1*.01, f"ctrl_fk{joint[6:]}")
                 cmds.makeIdentity(f"ctrl_fk{joint[6:]}.rotateZ", r=0, s=0, t=0)
+            '''
             cmds.matchTransform(f"ctrl_fk{joint[6:]}", joint)
 
             if remove_end and cmds.listRelatives(joint, children=True) is None:
