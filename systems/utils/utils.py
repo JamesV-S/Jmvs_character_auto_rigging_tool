@@ -205,6 +205,9 @@ def cr_node_if_not_exists(util_type, node_type, node_name, set_attrs=None):
             for attr, value in set_attrs.items():
                 cmds.setAttr(f"{node_name}.{attr}", value)
 
+def parent_controls(fk_ctrls):
+        for i in range(len(fk_ctrls) - 1):
+            cmds.parent(fk_ctrls[i], fk_ctrls[i + 1])
 
 def connect_attr(source_attr, target_attr):
     connections = cmds.listConnections(target_attr, destination=False ,source=True)
@@ -277,4 +280,8 @@ def custom_enum_attr(ctrl, enm_lng_nm, CtrlEnmOptions):
             print(f"{target}.{enm_lng_nm}")
             cmds.setAttr( f"{target}.{enm_lng_nm}", e=1, k=1 )
 #custom_enum_attr( "James", "Thuki:Arron:Harv")
+
+def constrain_to_joints(joint_controls, fk_jnts):
+    for i, ctrl in enumerate(fk_jnts):
+        cmds.parentConstraint(ctrl, joint_controls[i], name=f"constraint_{ctrl}")
         

@@ -1,6 +1,6 @@
 import maya.cmds as cmds
 
-class cstmAttr:
+class buildCustomAttr:
     def __init__(self, system, master_guide, use_existing_attr, accessed_module, rig_type):
         # gather the args and apply to self.var to share globally. 
         self.system = system

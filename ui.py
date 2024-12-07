@@ -481,8 +481,8 @@ class QtSampler(QWidget):
                 if rig_type == "FK":
                     # create fk joints, system & control, then constrain to rig_joints!
                     print(f"Build 'fk' joints! {master_guide}")
-                    fk_joint_list = jnts.joint(master_guide, system="fk")
-                    fk_module = fk_sys.create_fk_sys( key["module"], fk_joint_list, master_guide, 
+                    fk_joint_list = jnts.cr_jnts_from_hi(master_guide, system="fk")
+                    fk_module = fk_sys.Cr_Fk_Sys( key["module"], fk_joint_list, master_guide, 
                                                  key['guide_scale'], delete_end=0)
                     fk_ctrls = fk_module.get_ctrls()
                     print(f"list 1: {fk_joint_list}, list 2: {key['joints']}")
@@ -500,7 +500,7 @@ class QtSampler(QWidget):
                     '''
                 elif rig_type == "IK":
                     print(f"Build 'ik' joints! {master_guide}")
-                    ik_joint_list = jnts.joint(master_guide, system="ik")
+                    ik_joint_list = jnts.cr_jnts_from_hi(master_guide, system="ik")
                     ik_module = ik_sys.create_ik_sys(key["module"], ik_joint_list, master_guide, 
                                                  key['guide_scale'], module.ik_joints)
                     ik_ctrls = ik_module.get_ctrls()
@@ -511,12 +511,12 @@ class QtSampler(QWidget):
                 elif rig_type == "IKFK":
                     
                     print(f"Build 'ikfk' joints! {master_guide}")
-                    fk_joint_list = jnts.joint(master_guide, system="fk")
-                    fk_module = fk_sys.create_fk_sys( key["module"], fk_joint_list, master_guide, 
+                    fk_joint_list = jnts.cr_jnts_from_hi(master_guide, system="fk")
+                    fk_module = fk_sys.Cr_Fk_Sys( key["module"], fk_joint_list, master_guide, 
                                                  key['guide_scale'], delete_end=0)
                     fk_ctrls = fk_module.get_ctrls()
 
-                    ik_joint_list = jnts.joint(master_guide, system="ik")
+                    ik_joint_list = jnts.cr_jnts_from_hi(master_guide, system="ik")
                     ik_module = ik_sys.create_ik_sys(key["module"], ik_joint_list, master_guide, 
                                                  key['guide_scale'], module.ik_joints)
                     ik_ctrls = ik_module.get_ctrls()
