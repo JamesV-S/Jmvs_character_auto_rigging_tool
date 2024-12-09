@@ -1,4 +1,4 @@
-running the tool from scriptEditor, run this python code:
+# Work property of https://github.com/WillDyer
 
 '''
 import importlib
