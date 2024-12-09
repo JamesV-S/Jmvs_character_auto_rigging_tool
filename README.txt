@@ -1,9 +1,3 @@
-Auto batch test >> 
-
-Readme: 
-
-have repo cloned to c\\docs\\maya\\scripts
-
 running the tool from scriptEditor, run this python code:
 
 '''
@@ -18,42 +12,3 @@ cmds.select(all=True)
 cmds.delete() 
 
 '''
-
-
-
-TO DO: > Understand why mirrored joints do not wotk with connect_modules.attatch_joints(). > The mirrored data doesn't contain the master_guide or guides to begin with, so need to mirror the guides too for necessary data. I should see the dictionary for the '_r' too!
-
-
-- for context this is being used within a class to create joints on blueprint guides for a modular auto rigger within autodesk maya using python 
-
-
------------------------------
-[-] Issues to solve:
-> making the neck_fk_ctrls follow the spine doesn't work becuase of it's strange hierarchy, so skip it for now. 
-
------------------------------
-To do:
-=> Head/neck module (change number of neck joints
-[either as an option or be able to add guides into the added module]), & head bend system!
-> the quadleg needs to work with spaceSwap
-
-=> Have the back & forth work by having a data locator that reads the state of the ui, 
-detect the state of the module and depending on the button chosen
-
-> after the space-swap and other issues r fixed, move onto the neck system, 
-So i can test creating a rig for testing rotomation > Email Malcom  
-> capture movement. question onto Stephen cpncerning creating a head & arm rig for cg replacments.  
-
-> Get stretch to work on mirrored side!
-
-> Add button to each section on the ui.
-- Switch back & forth between blueprints, rig_joints, systems, polished.
-
-> Add Advanced systems to the rig:
-- Head/neck module (change number of neck joints
-[either as an option or be able to add guides into the added module]), & head bend system!
-- ribbon system (arm twist & what not)
-- twist system (New method)
-- reverse foot
-- Corrective_joints/sliding_joints (be able to load guides for them to position on a rig!)
-
